@@ -949,6 +949,22 @@
     </div>
   </div>
 
+  <!-- LOCKED PAGE — hôte a atteint sa limite -->
+  <div class="page" id="pageLocked">
+    <div class="card" style="text-align:center; padding: 3rem 2rem;">
+      <div style="font-size:3rem; margin-bottom:1rem;">🔒</div>
+      <p class="page-title" style="margin-bottom:0.5rem; color:var(--terracotta)">Check-in indisponible</p>
+      <p class="page-subtitle" style="margin-bottom:2rem;">
+        Votre hôte a atteint la limite de son plan gratuit.<br>
+        Veuillez le contacter directement pour finaliser votre arrivée.
+      </p>
+      <div class="info-banner" style="text-align:left;">
+        <span class="icon">📞</span>
+        <span>Contactez votre hôte par téléphone ou WhatsApp pour confirmer votre check-in.</span>
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <script>
@@ -1267,17 +1283,103 @@ function checkSubmit() {
 // store doc images as base64
 let docImage1 = null, docImage2 = null;
 
-function submitForm() {
+// ── SUPABASE CONFIG ──
+const SUPABASE_URL = 'https://syvpyvkgauyfqghwiqsl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5dnB5dmtnYXV5ZnFnaHdpcXNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTYzMDcsImV4cCI6MjA4ODk5MjMwN30.Iu0s8WeJcFrZUXkYRHbQBUvZMOMdsvgip_wnEVtXRO4';
+
+// ── DÉTECTION DE L'HÔTE VIA URL ──
+const urlParams = new URLSearchParams(window.location.search);
+const hostLinkId = urlParams.get('host') || null;
+
+// Trouver l'hôte via Supabase
+async function findHostByLinkId(linkId) {
+  if (!linkId) return null;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?link_id=eq.${linkId}&select=id,plan,guest_count,name`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    const data = await res.json();
+    return data && data.length > 0 ? data[0] : null;
+  } catch { return null; }
+}
+
+// Vérifier limite
+async function checkHostLimit() {
+  if (!hostLinkId) return { allowed: true };
+  const host = await findHostByLinkId(hostLinkId);
+  if (!host) return { allowed: true };
+  if (host.plan === 'paid') return { allowed: true, host };
+  if ((host.guest_count || 0) >= 10) return { allowed: false, host };
+  return { allowed: true, host };
+}
+
+// Enregistrer guest dans Supabase
+async function saveGuestToSupabase(hostId, guestData) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/guests`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ host_id: hostId, ...guestData })
+    });
+    if (!res.ok) throw new Error('Insert failed');
+    await fetch(`${SUPABASE_URL}/rest/v1/rpc/increment_guest_count`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ host_uuid: hostId })
+    });
+    return true;
+  } catch(e) { console.error('Erreur Supabase:', e); return false; }
+}
+
+async function submitForm() {
+  const limitCheck = await checkHostLimit();
+  if (!limitCheck.allowed) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('pageLocked').classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    return;
+  }
+
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enregistrement...';
+
   const fmt = d => d ? d.toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}) : '—';
-  const nights = startDate && endDate ? Math.round((endDate - startDate) / 86400000) : '—';
+  const nights = startDate && endDate ? Math.round((endDate - startDate) / 86400000) : 0;
   const name = `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`;
+
+  const guestData = {
+    name,
+    email: document.getElementById('email').value,
+    phone: document.getElementById('phone').value,
+    nationality: document.getElementById('nationality').value,
+    birthdate: document.getElementById('birthdate').value,
+    address: document.getElementById('address').value,
+    dates: `${fmt(startDate)} → ${fmt(endDate)}`,
+    arrival_time: document.getElementById('arrivalTime').value,
+    guest_count: document.getElementById('guestCount').value,
+    nights,
+    doc_status: docSkipped ? 'pending' : 'provided',
+    status: 'complete',
+    signed: true
+  };
+
+  if (hostLinkId && limitCheck.host) {
+    await saveGuestToSupabase(limitCheck.host.id, guestData);
+  }
+
   document.getElementById('finalSummary').innerHTML = `
     <div class="summary-item"><small>Nom</small><strong>${name}</strong></div>
-    <div class="summary-item"><small>E-mail</small><strong style="font-size:0.85rem">${document.getElementById('email').value}</strong></div>
+    <div class="summary-item"><small>E-mail</small><strong style="font-size:0.85rem">${guestData.email}</strong></div>
     <div class="summary-item"><small>Arrivée</small><strong>${fmt(startDate)}</strong></div>
     <div class="summary-item"><small>Départ</small><strong>${fmt(endDate)}</strong></div>
     <div class="summary-item"><small>Durée</small><strong>${nights} nuit${nights>1?'s':''}</strong></div>
-    <div class="summary-item"><small>Pièce d'identité</small><strong style="color:${docSkipped ? '#C07050' : 'var(--success)'}">${docSkipped ? '⚠ En attente' : '✓ Fournie'}</strong></div>
+    <div class="summary-item"><small>Pièce d'identité</small><strong style="color:${docSkipped?'#C07050':'var(--success)'}">${docSkipped?'⚠ En attente':'✓ Fournie'}</strong></div>
   `;
   currentStep = 5;
   document.querySelectorAll('.page').forEach((p,i) => p.classList.toggle('active', i+1 === 5));
