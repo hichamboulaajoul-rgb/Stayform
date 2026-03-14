@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stayform — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0D0D0D;
+  --surface: #161616;
+  --surface2: #1E1E1E;
+  --border: #2A2A2A;
+  --border2: #333;
+  --accent: #E8A87C;
+  --accent2: #C07050;
+  --accent-glow: rgba(232,168,124,0.15);
+  --text: #F0EDE8;
+  --text2: #A09890;
+  --text3: #5A5450;
+  --success: #5A9A6A;
+  --warning: #E8A030;
+  --danger: #C05050;
+  --free-color: #5A9A6A;
+  --paid-color: #E8A87C;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── NOISE TEXTURE ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
+}
+
+/* ══════════════════════════════
+   AUTH SCREEN
+══════════════════════════════ */
+#authScreen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+}
+
+.auth-glow {
+  position: fixed;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(192,112,80,0.12) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-logo {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+.auth-logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  font-size: 1.6rem;
+  box-shadow: 0 8px 32px rgba(192,112,80,0.3);
+}
+.auth-logo h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.auth-logo p {
+  font-size: 0.82rem;
+  color: var(--text3);
+  margin-top: 0.3rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.auth-tabs {
+  display: flex;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border);
+}
+.auth-tab {
+  flex: 1;
+  padding: 0.6rem;
+  text-align: center;
+  border-radius: 9px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text3);
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  font-family: 'DM Sans', sans-serif;
+}
+.auth-tab.active {
+  background: var(--surface2);
+  color: var(--text);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.auth-form { display: flex; flex-direction: column; gap: 1rem; }
+
+.field-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.field-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  font-weight: 500;
+}
+.field-input {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+.field-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(232,168,124,0.1);
+}
+.field-input::placeholder { color: var(--text3); }
+
+.btn-auth {
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  color: #1A0E0A;
+  border: none;
+  border-radius: 10px;
+  padding: 0.9rem;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 20px rgba(192,112,80,0.3);
+}
+.btn-auth:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(192,112,80,0.4); }
+.btn-auth:active { transform: translateY(0); }
+
+.auth-divider {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text3);
+  margin: 0.5rem 0;
+  position: relative;
+}
+.auth-divider::before, .auth-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%; width: 38%;
+  height: 1px;
+  background: var(--border);
+}
+.auth-divider::before { left: 0; }
+.auth-divider::after { right: 0; }
+
+.auth-error {
+  background: rgba(192,80,80,0.1);
+  border: 1px solid rgba(192,80,80,0.3);
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  font-size: 0.82rem;
+  color: #E08080;
+  display: none;
+}
+
+/* ══════════════════════════════
+   DASHBOARD
+══════════════════════════════ */
+#dashScreen { display: none; min-height: 100vh; }
+
+/* SIDEBAR */
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 240px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 50;
+  transition: transform 0.3s;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.5rem 0.5rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+.sidebar-logo-mark {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.sidebar-logo h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.nav-section {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text3);
+  font-weight: 600;
+  padding: 0 0.5rem;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.87rem;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--accent-glow); color: var(--accent); }
+.nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0.5rem;
+}
+.user-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1A0E0A;
+  flex-shrink: 0;
+  font-family: 'Syne', sans-serif;
+}
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 0.82rem; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-plan { font-size: 0.68rem; color: var(--text3); }
+.logout-btn {
+  background: none; border: none;
+  color: var(--text3); cursor: pointer;
+  font-size: 1rem; padding: 0.2rem;
+  transition: color 0.15s;
+}
+.logout-btn:hover { color: var(--danger); }
+
+/* MAIN CONTENT */
+.main-content {
+  margin-left: 240px;
+  flex: 1;
+  padding: 2rem 2.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* TOP BAR */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+.topbar-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--text); }
+.topbar-sub { font-size: 0.82rem; color: var(--text3); margin-top: 2px; }
+
+/* PLAN BANNER */
+.plan-banner {
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.plan-banner.free {
+  background: linear-gradient(135deg, rgba(90,154,106,0.1), rgba(90,154,106,0.05));
+  border: 1px solid rgba(90,154,106,0.25);
+}
+.plan-banner.paid {
+  background: linear-gradient(135deg, rgba(232,168,124,0.12), rgba(192,112,80,0.06));
+  border: 1px solid rgba(232,168,124,0.25);
+}
+.plan-banner-content { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.plan-info h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; }
+.plan-info p { font-size: 0.82rem; color: var(--text2); }
+.plan-badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.plan-badge.free { background: rgba(90,154,106,0.2); color: #7ACA8A; }
+.plan-badge.paid { background: rgba(232,168,124,0.2); color: var(--accent); }
+
+/* COUNTER */
+.counter-ring {
+  position: relative;
+  width: 80px; height: 80px;
+  flex-shrink: 0;
+}
+.counter-ring svg { transform: rotate(-90deg); }
+.counter-ring .ring-bg { fill: none; stroke: var(--border2); stroke-width: 4; }
+.counter-ring .ring-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.counter-ring .ring-text {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.counter-ring .ring-num { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; line-height: 1; }
+.counter-ring .ring-label { font-size: 0.55rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1px; }
+
+/* UPGRADE BUTTON */
+.btn-upgrade {
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  color: #1A0E0A;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1.4rem;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all 0.2s;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(192,112,80,0.25);
+}
+.btn-upgrade:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(192,112,80,0.35); }
+
+/* STATS GRID */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.2rem 1.4rem;
+  transition: border-color 0.2s;
+}
+.stat-card:hover { border-color: var(--border2); }
+.stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 0.5rem; }
+.stat-value { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--text); line-height: 1; }
+.stat-sub { font-size: 0.75rem; color: var(--text3); margin-top: 0.4rem; }
+.stat-trend { font-size: 0.72rem; margin-top: 0.3rem; }
+.stat-trend.up { color: var(--success); }
+
+/* LINK SECTION */
+.section-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+.section-title { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text); }
+.section-sub { font-size: 0.78rem; color: var(--text3); margin-top: 2px; }
+
+.link-box {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+}
+.link-url {
+  flex: 1;
+  font-size: 0.82rem;
+  color: var(--accent);
+  font-family: 'DM Sans', monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.btn-copy {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 7px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+  color: var(--text2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+.btn-copy.copied { border-color: var(--success); color: var(--success); }
+
+/* GUESTS TABLE */
+.guests-table { width: 100%; border-collapse: collapse; }
+.guests-table th {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text3);
+  font-weight: 600;
+  padding: 0 1rem 0.7rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.guests-table td {
+  padding: 0.9rem 1rem;
+  font-size: 0.85rem;
+  color: var(--text2);
+  border-bottom: 1px solid var(--border);
+}
+.guests-table tr:last-child td { border-bottom: none; }
+.guests-table tr:hover td { background: var(--surface2); }
+.guest-name { font-weight: 500; color: var(--text); }
+.guest-dates { font-size: 0.78rem; }
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+.status-badge.complete { background: rgba(90,154,106,0.15); color: #7ACA8A; }
+.status-badge.pending { background: rgba(232,160,48,0.15); color: var(--warning); }
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text3);
+  font-size: 0.85rem;
+}
+.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+
+/* UPGRADE MODAL */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 460px;
+  width: 100%;
+  position: relative;
+  animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.9) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-close {
+  position: absolute; top: 1rem; right: 1rem;
+  background: var(--surface2); border: none;
+  width: 30px; height: 30px; border-radius: 50%;
+  color: var(--text3); cursor: pointer; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.modal-close:hover { color: var(--text); background: var(--border); }
+.modal-icon { font-size: 2.5rem; margin-bottom: 1rem; text-align: center; }
+.modal-title { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--text); text-align: center; margin-bottom: 0.5rem; }
+.modal-sub { font-size: 0.85rem; color: var(--text2); text-align: center; margin-bottom: 1.5rem; line-height: 1.6; }
+
+.price-tag {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 1.2rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.price-amount { font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 800; color: var(--accent); }
+.price-currency { font-size: 1rem; color: var(--text3); margin-left: 4px; }
+.price-desc { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; }
+
+.feature-list { list-style: none; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.feature-list li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; color: var(--text2); }
+.feature-list li::before { content: '✓'; color: var(--success); font-weight: 700; flex-shrink: 0; }
+
+.payment-methods { display: flex; gap: 0.7rem; margin-bottom: 1rem; }
+.pay-method {
+  flex: 1;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 0.8rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 0.8rem;
+  color: var(--text2);
+}
+.pay-method:hover, .pay-method.selected { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+.pay-method .pm-icon { font-size: 1.4rem; margin-bottom: 0.3rem; }
+
+.btn-pay {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  color: #1A0E0A;
+  border: none;
+  border-radius: 10px;
+  padding: 0.95rem;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(192,112,80,0.3);
+}
+.btn-pay:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(192,112,80,0.4); }
+
+.pay-secure { text-align: center; font-size: 0.72rem; color: var(--text3); margin-top: 0.7rem; }
+
+/* LIMIT WARNING */
+.limit-banner {
+  background: linear-gradient(135deg, rgba(192,80,80,0.12), rgba(192,80,80,0.06));
+  border: 1px solid rgba(192,80,80,0.25);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.limit-banner p { font-size: 0.85rem; color: #E08080; }
+.limit-banner strong { color: #F09090; }
+
+/* MOBILE */
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 1rem; left: 1rem;
+  z-index: 100;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 40px; height: 40px;
+  align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; padding: 1.5rem 1rem 1rem 1rem; padding-top: 4rem; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .mobile-menu-btn { display: flex; }
+  .plan-banner-content { flex-direction: column; align-items: flex-start; }
+}
+
+/* ANIMATIONS */
+.fade-in { animation: fadeIn 0.4s ease both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     AUTH SCREEN
+══════════════════════════════ -->
+<div id="authScreen">
+  <div class="auth-glow"></div>
+  <div class="auth-card fade-in">
+    <div class="auth-logo">
+      <div class="auth-logo-mark">🏡</div>
+      <h1>Stayform</h1>
+      <p>Votre accueil, zéro papier</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Connexion</button>
+      <button class="auth-tab" onclick="switchTab('register')">Créer un compte</button>
+    </div>
+
+    <div id="authError" class="auth-error"></div>
+
+    <!-- LOGIN -->
+    <div id="loginForm" class="auth-form">
+      <div class="field-group">
+        <label class="field-label">Adresse e-mail</label>
+        <input class="field-input" type="email" id="loginEmail" placeholder="vous@email.com" autocomplete="email">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Mot de passe</label>
+        <input class="field-input" type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn-auth" onclick="handleLogin()">Se connecter →</button>
+
+    </div>
+
+    <!-- REGISTER -->
+    <div id="registerForm" class="auth-form" style="display:none">
+      <div class="field-group">
+        <label class="field-label">Nom complet</label>
+        <input class="field-input" type="text" id="regName" placeholder="Mohammed Alami">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Adresse e-mail</label>
+        <input class="field-input" type="email" id="regEmail" placeholder="vous@email.com">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Mot de passe</label>
+        <input class="field-input" type="password" id="regPassword" placeholder="Minimum 8 caractères">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Ville / Région</label>
+        <input class="field-input" type="text" id="regCity" placeholder="Marrakech, Casablanca...">
+      </div>
+      <button class="btn-auth" onclick="handleRegister()">Créer mon compte gratuitement →</button>
+      <p style="font-size:0.72rem;color:var(--text3);text-align:center;margin-top:0.3rem">
+        ✓ 10 check-ins gratuits · Aucune carte bancaire requise
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     DASHBOARD
+══════════════════════════════ -->
+<div id="dashScreen">
+  <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-mark">🏡</div>
+        <h2>Stayform</h2>
+      </div>
+
+      <div class="nav-section">Menu</div>
+      <div class="nav-item active" onclick="showSection('overview')">
+        <span class="icon">📊</span> Vue d'ensemble
+      </div>
+      <div class="nav-item" onclick="showSection('guests')">
+        <span class="icon">👥</span> Mes guests
+      </div>
+      <div class="nav-item" onclick="showSection('link')">
+        <span class="icon">🔗</span> Mon lien
+      </div>
+      <div class="nav-item" onclick="showSection('settings')">
+        <span class="icon">⚙️</span> Paramètres
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-pill">
+          <div class="user-avatar" id="sidebarAvatar">?</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarName">—</div>
+            <div class="user-plan" id="sidebarPlan">Plan gratuit</div>
+          </div>
+          <button class="logout-btn" onclick="handleLogout()" title="Déconnexion">⏻</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content" id="mainContent">
+
+      <!-- OVERVIEW SECTION -->
+      <div id="section-overview">
+        <div class="topbar fade-in">
+          <div>
+            <div class="topbar-title" id="welcomeMsg">Bonjour 👋</div>
+            <div class="topbar-sub">Voici votre tableau de bord Stayform</div>
+          </div>
+          <button class="btn-upgrade" id="topUpgradeBtn" onclick="openUpgradeModal()" style="display:none">
+            ⚡ Passer en illimité — 150 DH
+          </button>
+        </div>
+
+        <!-- LIMIT WARNING -->
+        <div class="limit-banner" id="limitBanner" style="display:none">
+          <p>🚨 <strong>Limite atteinte !</strong> Vous avez utilisé vos 10 check-ins gratuits. Passez en illimité pour continuer.</p>
+          <button class="btn-upgrade" onclick="openUpgradeModal()">Débloquer →</button>
+        </div>
+
+        <!-- PLAN BANNER -->
+        <div class="plan-banner free fade-in delay-1" id="planBanner">
+          <div class="plan-banner-content">
+            <div style="display:flex;align-items:center;gap:1.2rem;">
+              <div class="counter-ring" id="counterRing">
+                <svg width="80" height="80" viewBox="0 0 80 80">
+                  <circle class="ring-bg" cx="40" cy="40" r="33"/>
+                  <circle class="ring-fill" id="ringFill" cx="40" cy="40" r="33"
+                    stroke="#5A9A6A"
+                    stroke-dasharray="207.3"
+                    stroke-dashoffset="207.3"/>
+                </svg>
+                <div class="ring-text">
+                  <span class="ring-num" id="ringNum">0</span>
+                  <span class="ring-label">/ 10</span>
+                </div>
+              </div>
+              <div class="plan-info">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;">
+                  <h3 id="planTitle">Plan Gratuit</h3>
+                  <span class="plan-badge free" id="planBadge">Gratuit</span>
+                </div>
+                <p id="planDesc">Il vous reste <strong id="remaining" style="color:#7ACA8A">10</strong> check-ins gratuits</p>
+              </div>
+            </div>
+            <button class="btn-upgrade" id="bannerUpgradeBtn" onclick="openUpgradeModal()">
+              ⚡ Illimité pour 150 DH
+            </button>
+          </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-grid">
+          <div class="stat-card fade-in delay-2">
+            <div class="stat-label">Total check-ins</div>
+            <div class="stat-value" id="statTotal">0</div>
+            <div class="stat-sub">Depuis la création</div>
+          </div>
+          <div class="stat-card fade-in delay-3">
+            <div class="stat-label">Ce mois</div>
+            <div class="stat-value" id="statMonth">0</div>
+            <div class="stat-trend up" id="statTrend">↑ 0 ce mois</div>
+          </div>
+          <div class="stat-card fade-in delay-4">
+            <div class="stat-label">Contrats signés</div>
+            <div class="stat-value" id="statSigned">0</div>
+            <div class="stat-sub">PDF générés</div>
+          </div>
+        </div>
+
+        <!-- RECENT GUESTS -->
+        <div class="section-card fade-in delay-4">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Derniers check-ins</div>
+              <div class="section-sub">Historique de vos guests récents</div>
+            </div>
+          </div>
+          <div id="recentGuestsWrap"></div>
+        </div>
+      </div>
+
+      <!-- GUESTS SECTION -->
+      <div id="section-guests" style="display:none">
+        <div class="topbar fade-in">
+          <div>
+            <div class="topbar-title">Mes guests</div>
+            <div class="topbar-sub">Tous les dossiers de check-in</div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div id="allGuestsWrap"></div>
+        </div>
+      </div>
+
+      <!-- LINK SECTION -->
+      <div id="section-link" style="display:none">
+        <div class="topbar fade-in">
+          <div>
+            <div class="topbar-title">Liens de check-in</div>
+            <div class="topbar-sub">Chaque lien est valable 3 heures · usage unique</div>
+          </div>
+          <button class="btn-upgrade" onclick="generateNewLink()" style="white-space:nowrap">
+            ⚡ Nouveau lien
+          </button>
+        </div>
+
+        <!-- Lien actif -->
+        <div class="section-card fade-in" id="activeLinkCard">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+            <div>
+              <div class="section-title">Lien actif</div>
+              <div class="section-sub" id="linkExpiry">Aucun lien généré</div>
+            </div>
+            <div id="linkTimerBadge" style="display:none;background:rgba(90,154,106,0.15);color:#7ACA8A;padding:0.3rem 0.8rem;border-radius:20px;font-size:0.75rem;font-weight:600;font-family:'Syne',sans-serif;">
+              ⏱ <span id="linkCountdown">3:00:00</span>
+            </div>
+          </div>
+
+          <div id="activeLinkBox" style="display:none">
+            <div class="link-box" style="margin-bottom:1rem">
+              <span class="link-url" id="myLink">—</span>
+              <button class="btn-copy" id="copyBtn" onclick="copyLink()">📋 Copier</button>
+            </div>
+            <div style="display:flex;gap:0.7rem;flex-wrap:wrap;">
+              <button onclick="shareWhatsApp()" style="flex:1;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);border-radius:8px;padding:0.7rem;color:#25D166;font-size:0.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;">
+                📱 WhatsApp
+              </button>
+              <button onclick="copyLink()" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.7rem;color:var(--text2);font-size:0.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;">
+                🔗 Copier
+              </button>
+            </div>
+          </div>
+
+          <div id="noLinkBox" style="text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">
+            <div style="font-size:2rem;margin-bottom:0.8rem">🔗</div>
+            Cliquez sur <strong style="color:var(--accent)">"Nouveau lien"</strong> pour générer un lien temporaire de 3h pour votre prochain guest.
+          </div>
+        </div>
+
+        <!-- Historique liens -->
+        <div class="section-card fade-in delay-1">
+          <div class="section-title" style="margin-bottom:0.8rem">Historique des liens</div>
+          <div id="linkHistory" style="font-size:0.82rem;color:var(--text3);">Aucun lien généré pour l'instant.</div>
+        </div>
+
+        <!-- Comment ça marche -->
+        <div class="section-card fade-in delay-2">
+          <div class="section-title" style="margin-bottom:0.8rem">Comment ça marche</div>
+          <div style="display:flex;flex-direction:column;gap:0.8rem;">
+            <div style="display:flex;align-items:flex-start;gap:0.8rem;">
+              <div style="width:28px;height:28px;background:var(--accent-glow);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:var(--accent);flex-shrink:0;font-family:'Syne',sans-serif">1</div>
+              <div><div style="font-size:0.85rem;font-weight:500;margin-bottom:2px">Générez un lien unique</div><div style="font-size:0.78rem;color:var(--text3)">Valable 3 heures, usage unique par guest</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:0.8rem;">
+              <div style="width:28px;height:28px;background:var(--accent-glow);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:var(--accent);flex-shrink:0;font-family:'Syne',sans-serif">2</div>
+              <div><div style="font-size:0.85rem;font-weight:500;margin-bottom:2px">Envoyez-le à votre guest</div><div style="font-size:0.78rem;color:var(--text3)">Via WhatsApp ou SMS juste avant son arrivée</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:0.8rem;">
+              <div style="width:28px;height:28px;background:var(--accent-glow);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:var(--accent);flex-shrink:0;font-family:'Syne',sans-serif">3</div>
+              <div><div style="font-size:0.85rem;font-weight:500;margin-bottom:2px">Après 3h ou utilisation → lien expiré</div><div style="font-size:0.78rem;color:var(--text3)">Générez un nouveau lien pour le prochain guest</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS SECTION -->
+      <div id="section-settings" style="display:none">
+        <div class="topbar fade-in">
+          <div>
+            <div class="topbar-title">Paramètres</div>
+            <div class="topbar-sub">Gérez votre compte</div>
+          </div>
+        </div>
+        <div class="section-card fade-in">
+          <div class="section-title" style="margin-bottom:1.2rem">Mon compte</div>
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="field-group">
+              <label class="field-label">Nom</label>
+              <input class="field-input" id="settingName" placeholder="Votre nom">
+            </div>
+            <div class="field-group">
+              <label class="field-label">E-mail</label>
+              <input class="field-input" id="settingEmail" placeholder="votre@email.com" disabled style="opacity:0.5">
+            </div>
+            <button onclick="saveSettings()" style="background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);border-radius:8px;padding:0.7rem 1.2rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;width:fit-content;">
+              Sauvegarder
+            </button>
+          </div>
+        </div>
+        <div class="section-card fade-in delay-1">
+          <div class="section-title" style="margin-bottom:0.5rem">Danger</div>
+          <button onclick="handleLogout()" style="background:rgba(192,80,80,0.1);border:1px solid rgba(192,80,80,0.3);color:#E08080;border-radius:8px;padding:0.7rem 1.2rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;">
+            Se déconnecter
+          </button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div class="modal-overlay" id="upgradeModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeUpgradeModal()">✕</button>
+    <div class="modal-icon">⚡</div>
+    <div class="modal-title">Passez en Illimité</div>
+    <div class="modal-sub">Débloquez tous vos check-ins pour un paiement unique. Aucun abonnement, aucune surprise.</div>
+
+    <div class="price-tag">
+      <div>
+        <span class="price-amount">150</span>
+        <span class="price-currency">DH</span>
+      </div>
+      <div class="price-desc">Paiement unique · Accès illimité à vie</div>
+      <div style="margin-top:0.5rem;display:inline-block;background:rgba(232,160,48,0.15);color:#E8A030;padding:0.2rem 0.7rem;border-radius:20px;font-size:0.7rem;font-weight:600">⚡ MODE TEST ACTIF</div>
+    </div>
+
+    <ul class="feature-list">
+      <li>Check-ins illimités pour tous vos logements</li>
+      <li>Génération PDF illimitée</li>
+      <li>Lien de check-in personnalisé</li>
+      <li>Historique complet des guests</li>
+      <li>Support prioritaire</li>
+    </ul>
+
+    <div style="font-size:0.78rem;color:var(--text3);margin-bottom:0.8rem;">Choisir le mode de paiement :</div>
+    <div class="payment-methods">
+      <div class="pay-method selected" id="pm-online" onclick="selectPayment('online')">
+        <div class="pm-icon">💳</div>
+        Carte / CIH
+      </div>
+      <div class="pay-method" id="pm-transfer" onclick="selectPayment('transfer')">
+        <div class="pm-icon">🏦</div>
+        Virement
+      </div>
+      <div class="pay-method" id="pm-whatsapp" onclick="selectPayment('whatsapp')">
+        <div class="pm-icon">📱</div>
+        WhatsApp
+      </div>
+    </div>
+
+    <div id="pay-online-info" style="background:var(--surface2);border-radius:10px;padding:1rem;margin-bottom:1rem;font-size:0.82rem;color:var(--text2);">
+      Vous serez redirigé vers la page de paiement sécurisé PayDunya / CMI.
+    </div>
+    <div id="pay-transfer-info" style="display:none;background:var(--surface2);border-radius:10px;padding:1rem;margin-bottom:1rem;font-size:0.82rem;color:var(--text2);">
+      <strong style="color:var(--text)">RIB :</strong> 007 780 0001234567890012 · CIH Bank<br>
+      <strong style="color:var(--text)">Référence :</strong> <span id="virRef">—</span><br>
+      Envoyez le reçu à : <span style="color:var(--accent)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fd8d9c84bd8e899c849b928f90d3909c">[email&#160;protected]</a></span>
+    </div>
+    <div id="pay-whatsapp-info" style="display:none;background:var(--surface2);border-radius:10px;padding:1rem;margin-bottom:1rem;font-size:0.82rem;color:var(--text2);">
+      Envoyez un message WhatsApp pour finaliser le paiement. Notre équipe vous répondra sous 1h.
+    </div>
+
+    <button class="btn-pay" id="btnPay" onclick="handlePayment()">
+      Procéder au paiement — 150 DH →
+    </button>
+    <div class="pay-secure">🔒 Paiement 100% sécurisé · Activation immédiate</div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ══════════════════════════════
+// SUPABASE CONFIG
+// ══════════════════════════════
+const SUPABASE_URL = 'https://syvpyvkgauyfqghwiqsl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5dnB5dmtnYXV5ZnFnaHdpcXNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTYzMDcsImV4cCI6MjA4ODk5MjMwN30.Iu0s8WeJcFrZUXkYRHbQBUvZMOMdsvgip_wnEVtXRO4';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const FREE_LIMIT = 10;
+let currentUser = null;
+let currentProfile = null;
+let selectedPayment = 'online';
+
+// ══════════════════════════════
+// AUTH
+// ══════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('loginForm').style.display = tab==='login'?'flex':'none';
+  document.getElementById('registerForm').style.display = tab==='register'?'flex':'none';
+  hideError();
+}
+function showError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg; el.style.display = 'block';
+}
+function hideError() { document.getElementById('authError').style.display = 'none'; }
+
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('loginPassword').value;
+  if (!email || !pass) { showError('Veuillez remplir tous les champs.'); return; }
+  setAuthLoading(true);
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  setAuthLoading(false);
+  if (error) { showError('E-mail ou mot de passe incorrect.'); return; }
+  await loadDashboard(data.user);
+}
+
+async function handleRegister() {
+  const name  = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('regPassword').value;
+  const city  = document.getElementById('regCity').value.trim();
+  if (!name || !email || !pass) { showError('Veuillez remplir les champs obligatoires.'); return; }
+  if (pass.length < 8) { showError('Mot de passe trop court (8 caractères minimum).'); return; }
+  setAuthLoading(true);
+  const { data, error } = await sb.auth.signUp({
+    email, password: pass,
+    options: { data: { name, city } }
+  });
+  setAuthLoading(false);
+  if (error) { showError(error.message); return; }
+  // Profile created automatically via trigger
+  // Wait a bit for trigger then load
+  setTimeout(async () => { await loadDashboard(data.user); }, 800);
+}
+
+async function handleLogout() {
+  await sb.auth.signOut();
+  currentUser = null; currentProfile = null;
+  document.getElementById('dashScreen').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+}
+
+function setAuthLoading(on) {
+  document.querySelectorAll('.btn-auth').forEach(b => {
+    b.disabled = on;
+    if (on) b.style.opacity = '0.6';
+    else b.style.opacity = '1';
+  });
+}
+
+// ══════════════════════════════
+// DASHBOARD
+// ══════════════════════════════
+async function loadDashboard(user) {
+  if (!user) {
+    const { data } = await sb.auth.getUser();
+    if (!data?.user) return;
+    user = data.user;
+  }
+  currentUser = user;
+
+  // Fetch profile
+  const { data: profile, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if (error || !profile) {
+    // Profile might not exist yet (new user, trigger delay) — retry once
+    await new Promise(r => setTimeout(r, 1200));
+    const { data: p2 } = await sb.from('profiles').select('*').eq('id', user.id).single();
+    if (!p2) { showError('Erreur chargement profil. Veuillez réessayer.'); return; }
+    currentProfile = p2;
+  } else {
+    currentProfile = profile;
+  }
+
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('dashScreen').style.display = 'block';
+
+  // Sidebar
+  document.getElementById('sidebarName').textContent = currentProfile.name;
+  document.getElementById('sidebarAvatar').textContent = currentProfile.name.charAt(0).toUpperCase();
+  document.getElementById('sidebarPlan').textContent = currentProfile.plan === 'paid' ? '⚡ Plan Illimité' : `Plan Gratuit · ${currentProfile.guest_count}/10`;
+  document.getElementById('welcomeMsg').textContent = `Bonjour, ${currentProfile.name.split(' ')[0]} 👋`;
+
+  updatePlanUI();
+  await updateStats();
+  await renderGuests('recent');
+}
+
+function updatePlanUI() {
+  const isPaid = currentProfile.plan === 'paid';
+  const count = currentProfile.guest_count || 0;
+  const remaining = Math.max(0, FREE_LIMIT - count);
+
+  document.getElementById('limitBanner').style.display = (!isPaid && count >= FREE_LIMIT) ? 'flex' : 'none';
+  document.getElementById('topUpgradeBtn').style.display = isPaid ? 'none' : 'flex';
+  document.getElementById('bannerUpgradeBtn').style.display = isPaid ? 'none' : 'block';
+
+  const banner = document.getElementById('planBanner');
+  banner.className = 'plan-banner ' + (isPaid ? 'paid' : 'free') + ' fade-in delay-1';
+  document.getElementById('planTitle').textContent = isPaid ? 'Plan Illimité' : 'Plan Gratuit';
+  document.getElementById('planBadge').textContent = isPaid ? 'Illimité ⚡' : 'Gratuit';
+  document.getElementById('planBadge').className = 'plan-badge ' + (isPaid ? 'paid' : 'free');
+
+  if (isPaid) {
+    document.getElementById('planDesc').innerHTML = '✓ Check-ins <strong style="color:var(--accent)">illimités</strong> activés';
+  } else {
+    document.getElementById('planDesc').innerHTML = `Il vous reste <strong style="color:${remaining<=2?'#E08080':'#7ACA8A'}">${remaining}</strong> check-in${remaining!==1?'s':''} gratuit${remaining!==1?'s':''}`;
+  }
+
+  // Ring
+  const pct = isPaid ? 1 : Math.min(count / FREE_LIMIT, 1);
+  const circumference = 207.3;
+  const ring = document.getElementById('ringFill');
+  ring.style.strokeDashoffset = circumference * (1 - pct);
+  ring.style.stroke = isPaid ? 'var(--accent)' : (pct>=1?'#C05050':pct>=0.7?'var(--warning)':'#5A9A6A');
+  document.getElementById('ringNum').textContent = isPaid ? '∞' : count;
+  document.querySelector('#counterRing .ring-label').textContent = isPaid ? 'illimité' : '/ 10';
+
+  // Link — géré par generateNewLink() / restoreLinkUI()
+  restoreLinkUI();
+
+  // Virement ref
+  const refEl = document.getElementById('virRef');
+  if (refEl) refEl.textContent = 'SF-' + (currentProfile.link_id||'XXXXX').toUpperCase();
+
+  // Settings
+  const sn = document.getElementById('settingName');
+  const se = document.getElementById('settingEmail');
+  if (sn) sn.value = currentProfile.name;
+  if (se) se.value = currentProfile.email || currentUser.email;
+}
+
+async function updateStats() {
+  const { data: guests } = await sb.from('guests').select('id, signed, created_at').eq('host_id', currentUser.id);
+  const list = guests || [];
+  document.getElementById('statTotal').textContent = list.length;
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const thisMonth = list.filter(g => g.created_at >= monthStart).length;
+  document.getElementById('statMonth').textContent = thisMonth;
+  document.getElementById('statTrend').textContent = `↑ ${thisMonth} ce mois`;
+  document.getElementById('statSigned').textContent = list.filter(g => g.signed).length;
+}
+
+async function renderGuests(mode) {
+  const query = sb.from('guests').select('*').eq('host_id', currentUser.id).order('created_at', { ascending: false });
+  if (mode === 'recent') query.limit(5);
+  const { data: guests } = await query;
+  const list = guests || [];
+  const wrap = document.getElementById(mode === 'recent' ? 'recentGuestsWrap' : 'allGuestsWrap');
+  if (!wrap) return;
+  if (!list.length) {
+    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div>Aucun guest pour l'instant.<br>Partagez votre lien pour commencer !</div>`;
+    return;
+  }
+  wrap.innerHTML = `<table class="guests-table">
+    <thead><tr><th>Guest</th><th>Dates</th><th>Statut</th></tr></thead>
+    <tbody>${list.map(g => `
+      <tr>
+        <td><div class="guest-name">${g.name}</div><div style="font-size:0.72rem;color:var(--text3)">${g.email||''}</div></td>
+        <td class="guest-dates">${g.dates||'—'}</td>
+        <td><span class="status-badge ${g.status}">${g.signed?'✓ Signé':'⏳ En attente'}</span></td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+function showSection(id) {
+  ['overview','guests','link','settings'].forEach(s => {
+    document.getElementById('section-'+s).style.display = s===id?'block':'none';
+  });
+  document.querySelectorAll('.nav-item').forEach((el,i) => {
+    el.classList.toggle('active', ['overview','guests','link','settings'][i]===id);
+  });
+  if (id==='guests') renderGuests('all');
+  if (window.innerWidth < 768) document.getElementById('sidebar').classList.remove('open');
+}
+
+// ══════════════════════════════
+// PAYDUNYA CONFIG
+// ══════════════════════════════
+const PAYDUNYA = {
+  MODE: 'test', // 'test' ou 'live'
+  // ⚠️ Remplacez par vos vraies clés PayDunya
+  TEST: {
+    MASTER_KEY:  'PAYDUNYA_TEST_MASTER_KEY',
+    PRIVATE_KEY: 'PAYDUNYA_TEST_PRIVATE_KEY',
+    TOKEN:       'PAYDUNYA_TEST_TOKEN',
+    PUBLIC_KEY:  'PAYDUNYA_TEST_PUBLIC_KEY',
+  },
+  LIVE: {
+    MASTER_KEY:  'PAYDUNYA_LIVE_MASTER_KEY',
+    PRIVATE_KEY: 'PAYDUNYA_LIVE_PRIVATE_KEY',
+    TOKEN:       'PAYDUNYA_LIVE_TOKEN',
+    PUBLIC_KEY:  'PAYDUNYA_LIVE_PUBLIC_KEY',
+  },
+  get keys() { return this.MODE === 'test' ? this.TEST : this.LIVE; },
+  BASE_URL: 'https://app.paydunya.com',
+  get API_URL() { return this.MODE === 'test' ? 'https://app.paydunya.com/sandbox-api/v1' : 'https://app.paydunya.com/api/v1'; }
+};
+
+// ══════════════════════════════
+// UPGRADE & PAYMENT
+// ══════════════════════════════
+function openUpgradeModal() { document.getElementById('upgradeModal').classList.add('open'); }
+function closeUpgradeModal() { document.getElementById('upgradeModal').classList.remove('open'); }
+
+function selectPayment(type) {
+  selectedPayment = type;
+  ['online','transfer','whatsapp'].forEach(t => {
+    document.getElementById('pm-'+t).classList.toggle('selected', t===type);
+    document.getElementById('pay-'+t+'-info').style.display = t===type?'block':'none';
+  });
+}
+
+async function handlePayment() {
+  if (selectedPayment === 'online') {
+    await initPaydunyaPayment();
+  } else if (selectedPayment === 'transfer') {
+    closeUpgradeModal();
+    showToast('📋 Envoyez le reçu à pay@stayform.ma après le virement.', '#E8A87C');
+  } else if (selectedPayment === 'whatsapp') {
+    const msg = encodeURIComponent(`Bonjour, je souhaite passer en plan illimité Stayform.\nCompte : ${currentUser.email}\nRéférence : SF-${(currentProfile.link_id||'').toUpperCase()}`);
+    window.open(`https://wa.me/212600000000?text=${msg}`, '_blank');
+    closeUpgradeModal();
+  }
+}
+
+async function initPaydunyaPayment() {
+  const btn = document.getElementById('btnPay');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Redirection...'; }
+
+  // Si clés pas encore configurées → simuler en mode démo
+  if (PAYDUNYA.keys.MASTER_KEY.startsWith('PAYDUNYA_')) {
+    closeUpgradeModal();
+    showPaymentSimulator();
+    return;
+  }
+
+  try {
+    // 1. Créer la facture PayDunya
+    const invoiceRes = await fetch(`${PAYDUNYA.API_URL}/checkout-invoice/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'PAYDUNYA-MASTER-KEY':  PAYDUNYA.keys.MASTER_KEY,
+        'PAYDUNYA-PRIVATE-KEY': PAYDUNYA.keys.PRIVATE_KEY,
+        'PAYDUNYA-TOKEN':       PAYDUNYA.keys.TOKEN,
+      },
+      body: JSON.stringify({
+        invoice: {
+          total_amount: 150,
+          description: 'Stayform — Plan Illimité (paiement unique)',
+        },
+        store: {
+          name: 'Stayform',
+          tagline: 'Votre accueil, zéro papier',
+          postal_address: 'Maroc',
+          logo_url: 'https://hichamboulaajoul-rgb.github.io/Stayform/logo.png',
+        },
+        actions: {
+          cancel_url:  `https://hichamboulaajoul-rgb.github.io/Stayform/?payment=cancelled`,
+          return_url:  `https://hichamboulaajoul-rgb.github.io/Stayform/?payment=success&host=${currentProfile.link_id}`,
+          callback_url:`https://hichamboulaajoul-rgb.github.io/Stayform/webhook`,
+        },
+        custom_data: {
+          host_id:   currentUser.id,
+          host_email: currentUser.email,
+          link_id:   currentProfile.link_id,
+        }
+      })
+    });
+
+    const invoice = await invoiceRes.json();
+
+    if (invoice.response_code === '00') {
+      // 2. Sauvegarder le token en attente dans Supabase
+      await sb.from('profiles').update({
+        pending_payment_token: invoice.token
+      }).eq('id', currentUser.id);
+
+      // 3. Rediriger vers la page de paiement PayDunya
+      window.location.href = invoice.response_text;
+    } else {
+      throw new Error(invoice.response_text || 'Erreur PayDunya');
+    }
+  } catch(e) {
+    console.error('PayDunya error:', e);
+    showToast('❌ Erreur paiement. Réessayez.', '#C05050');
+    if (btn) { btn.disabled = false; btn.textContent = 'Procéder au paiement — 150 DH →'; }
+  }
+}
+
+// ── Simulateur de paiement (mode TEST sans clés) ──
+function showPaymentSimulator() {
+  const overlay = document.createElement('div');
+  overlay.id = 'paySimOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:flex;align-items:center;justify-content:center;padding:2rem;backdrop-filter:blur(4px)';
+  overlay.innerHTML = `
+    <div style="background:#1A1A1A;border:1px solid #333;border-radius:20px;padding:2rem;max-width:400px;width:100%;text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:1rem">💳</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:1.3rem;color:#F0EDE8;margin-bottom:0.5rem">Simulateur PayDunya</h2>
+      <p style="font-size:0.82rem;color:#A09890;margin-bottom:1.5rem">Mode TEST — aucun vrai paiement effectué</p>
+      <div style="background:#111;border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;text-align:left">
+        <div style="font-size:0.72rem;color:#5A5450;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">Montant</div>
+        <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:#E8A87C">150 <span style="font-size:1rem;color:#A09890">MAD</span></div>
+        <div style="font-size:0.78rem;color:#5A9A6A;margin-top:0.5rem">✓ Accès illimité à vie</div>
+      </div>
+      <div style="display:flex;gap:0.7rem">
+        <button onclick="simulatePayment('success')" style="flex:1;background:linear-gradient(135deg,#C07050,#E8A87C);color:#1A0E0A;border:none;border-radius:10px;padding:0.85rem;font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer">
+          ✓ Paiement réussi
+        </button>
+        <button onclick="simulatePayment('fail')" style="flex:1;background:#1E1E1E;color:#A09890;border:1px solid #333;border-radius:10px;padding:0.85rem;font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer">
+          ✕ Échec
+        </button>
+      </div>
+      <p style="font-size:0.68rem;color:#5A5450;margin-top:1rem">Ajoutez vos clés PayDunya pour activer les vrais paiements</p>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function simulatePayment(result) {
+  const overlay = document.getElementById('paySimOverlay');
+  if (overlay) overlay.remove();
+  if (result === 'success') {
+    await activatePremium();
+    showToast('🎉 Paiement simulé réussi ! Plan illimité activé.', '#E8A87C');
+  } else {
+    showToast('❌ Paiement échoué (simulé).', '#C05050');
+  }
+}
+
+// ── Vérifier paiement au retour de PayDunya ──
+async function checkPaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const payment = params.get('payment');
+  const hostParam = params.get('host');
+  if (!payment) return;
+
+  // Nettoyer l'URL
+  window.history.replaceState({}, '', '/');
+
+  if (payment === 'success') {
+    // Vérifier via Supabase que le paiement est bien enregistré
+    const { data: profile } = await sb.from('profiles').select('plan').eq('id', currentUser?.id).single();
+    if (profile?.plan === 'paid') {
+      showToast('🎉 Paiement confirmé ! Plan illimité activé.', '#E8A87C');
+    } else {
+      // Le webhook n'a pas encore activé — activer manuellement
+      await activatePremium();
+    }
+  } else if (payment === 'cancelled') {
+    showToast('Paiement annulé.', '#A09890');
+  }
+}
+
+async function activatePremium() {
+  const { error } = await sb.from('profiles').update({ plan: 'paid' }).eq('id', currentUser.id);
+  if (error) { alert('Erreur activation. Veuillez réessayer.'); return; }
+  currentProfile.plan = 'paid';
+  closeUpgradeModal();
+  document.getElementById('sidebarPlan').textContent = '⚡ Plan Illimité';
+  updatePlanUI();
+  showToast('⚡ Plan illimité activé !', '#E8A87C');
+}
+
+// ══════════════════════════════
+// UTILITIES
+// ══════════════════════════════
+// ══════════════════════════════
+// LIENS TEMPORAIRES 3H
+// ══════════════════════════════
+let countdownInterval = null;
+
+function generateLinkToken() {
+  const expiry = Date.now() + 3 * 60 * 60 * 1000; // +3h
+  // Token court : linkId (8 chars) + expiry en base36 + uid (4 chars)
+  // Ex: ab3f9x2k-lv3k8g-a1b2  (~22 chars au lieu de 100+)
+  const expiryB36 = expiry.toString(36); // ~8 chars
+  const uid4 = currentUser.id.replace(/-/g,'').slice(0,4);
+  const token = currentProfile.link_id + '-' + expiryB36 + '-' + uid4;
+  return { token, expiry };
+}
+
+function generateNewLink() {
+  const { token, expiry } = generateLinkToken();
+  const url = `https://hichamboulaajoul-rgb.github.io/Stayform/checkin.html?t=${token}`;
+
+  // Save to localStorage (with host context)
+  const linkData = { url, expiry, token, createdAt: Date.now() };
+  const key = `sf_links_${currentUser.id}`;
+  const history = JSON.parse(localStorage.getItem(key) || '[]');
+  history.unshift(linkData);
+  localStorage.setItem(key, JSON.stringify(history.slice(0, 10))); // garder 10 derniers
+
+  // Update UI
+  document.getElementById('myLink').textContent = url;
+  document.getElementById('activeLinkBox').style.display = 'block';
+  document.getElementById('noLinkBox').style.display = 'none';
+  document.getElementById('linkTimerBadge').style.display = 'inline-flex';
+
+  startCountdown(expiry);
+  renderLinkHistory();
+  showToast('🔗 Nouveau lien généré — valable 3 heures', '#E8A87C');
+}
+
+function restoreLinkUI() {
+  const key = `sf_links_${currentUser.id}`;
+  const history = JSON.parse(localStorage.getItem(key) || '[]');
+  if (!history.length) {
+    document.getElementById('activeLinkBox').style.display = 'none';
+    document.getElementById('noLinkBox').style.display = 'block';
+    document.getElementById('linkTimerBadge').style.display = 'none';
+    document.getElementById('linkExpiry').textContent = 'Aucun lien généré';
+    return;
+  }
+  const last = history[0];
+  const now = Date.now();
+  if (now >= last.expiry) {
+    // Expiré
+    document.getElementById('activeLinkBox').style.display = 'none';
+    document.getElementById('noLinkBox').style.display = 'block';
+    document.getElementById('linkTimerBadge').style.display = 'none';
+    document.getElementById('linkExpiry').textContent = '⚠ Dernier lien expiré — générez-en un nouveau';
+    document.getElementById('linkExpiry').style.color = '#E08080';
+  } else {
+    // Encore valide
+    document.getElementById('myLink').textContent = last.url;
+    document.getElementById('activeLinkBox').style.display = 'block';
+    document.getElementById('noLinkBox').style.display = 'none';
+    document.getElementById('linkTimerBadge').style.display = 'inline-flex';
+    startCountdown(last.expiry);
+  }
+  renderLinkHistory();
+}
+
+function startCountdown(expiry) {
+  if (countdownInterval) clearInterval(countdownInterval);
+  function tick() {
+    const remaining = expiry - Date.now();
+    if (remaining <= 0) {
+      clearInterval(countdownInterval);
+      document.getElementById('linkCountdown').textContent = 'Expiré';
+      document.getElementById('linkTimerBadge').style.background = 'rgba(192,80,80,0.15)';
+      document.getElementById('linkTimerBadge').style.color = '#E08080';
+      document.getElementById('linkExpiry').textContent = '⚠ Lien expiré — générez-en un nouveau';
+      document.getElementById('linkExpiry').style.color = '#E08080';
+      document.getElementById('activeLinkBox').style.display = 'none';
+      document.getElementById('noLinkBox').style.display = 'block';
+      return;
+    }
+    const h = Math.floor(remaining / 3600000);
+    const m = Math.floor((remaining % 3600000) / 60000);
+    const s = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('linkCountdown').textContent =
+      `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    const expiryDate = new Date(expiry);
+    document.getElementById('linkExpiry').textContent =
+      `Expire à ${expiryDate.getHours()}h${String(expiryDate.getMinutes()).padStart(2,'0')}`;
+    document.getElementById('linkExpiry').style.color = '';
+  }
+  tick();
+  countdownInterval = setInterval(tick, 1000);
+}
+
+function renderLinkHistory() {
+  const key = `sf_links_${currentUser.id}`;
+  const history = JSON.parse(localStorage.getItem(key) || '[]');
+  const wrap = document.getElementById('linkHistory');
+  if (!history.length) { wrap.textContent = "Aucun lien genere"; return; }
+  const now = Date.now();
+  wrap.innerHTML = history.slice(0, 5).map(l => {
+    const expired = now >= l.expiry;
+    const d = new Date(l.createdAt);
+    const label = `${d.getDate()}/${d.getMonth()+1} à ${d.getHours()}h${String(d.getMinutes()).padStart(2,'0')}`;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid var(--border);gap:0.5rem;">
+      <div style="font-size:0.78rem;color:var(--text3);">${label}</div>
+      <span style="font-size:0.7rem;padding:0.2rem 0.6rem;border-radius:20px;font-weight:600;background:${expired?'rgba(192,80,80,0.1)':'rgba(90,154,106,0.1)'};color:${expired?'#E08080':'#7ACA8A'}">
+        ${expired?'Expiré':'Actif'}
+      </span>
+    </div>`;
+  }).join('');
+}
+
+function copyLink() {
+  const url = document.getElementById('myLink').textContent;
+  if (!url || url === '—') return;
+  navigator.clipboard.writeText(url).catch(() => {});
+  const btn = document.getElementById('copyBtn');
+  btn.textContent = '✓ Copié !'; btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = '📋 Copier'; btn.classList.remove('copied'); }, 2000);
+}
+
+function shareWhatsApp() {
+  const url = document.getElementById('myLink').textContent;
+  if (!url || url === '\u2014') { showToast("Generez un nouveau lien !", '#A09890'); return; }
+  const msg = encodeURIComponent('Check-in en ligne : ' + url + ' (lien valable 3h)');
+  window.open(`https://wa.me/?text=${msg}`, '_blank');
+}
+
+async function saveSettings() {
+  const name = document.getElementById('settingName').value.trim();
+  if (!name) return;
+  const { error } = await sb.from('profiles').update({ name }).eq('id', currentUser.id);
+  if (error) { alert('Erreur sauvegarde.'); return; }
+  currentProfile.name = name;
+  document.getElementById('sidebarName').textContent = name;
+  document.getElementById('sidebarAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('welcomeMsg').textContent = `Bonjour, ${name.split(' ')[0]} 👋`;
+  showToast('✓ Sauvegardé !', '#5A9A6A');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function showToast(msg, color = '#5A9A6A') {
+  const dot = document.createElement('div');
+  dot.style.cssText = `position:fixed;top:1rem;right:1rem;background:${color};color:${color==='#E8A87C'?'#1A0E0A':'white'};padding:0.7rem 1.1rem;border-radius:10px;font-size:0.85rem;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.3);font-family:'DM Sans',sans-serif;font-weight:500`;
+  dot.textContent = msg;
+  document.body.appendChild(dot);
+  setTimeout(() => dot.remove(), 3000);
+}
+
+// ══════════════════════════════
+// REALTIME — nouveaux guests
+// ══════════════════════════════
+function subscribeToGuests() {
+  if (!currentUser) return;
+  sb.channel('guests-channel')
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'guests',
+      filter: `host_id=eq.${currentUser.id}`
+    }, async (payload) => {
+      // Rafraîchir le profil pour le compteur
+      const { data: fresh } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+      if (fresh) {
+        currentProfile = fresh;
+        updatePlanUI();
+        document.getElementById('sidebarPlan').textContent = fresh.plan === 'paid' ? '⚡ Plan Illimité' : `Plan Gratuit · ${fresh.guest_count}/10`;
+      }
+      await updateStats();
+      await renderGuests('recent');
+      showToast(`🔔 Nouveau check-in : ${payload.new.name}`);
+    })
+    .subscribe();
+}
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  // Vérifier retour PayDunya
+  await checkPaymentReturn();
+
+  // Vérifier session existante
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    await loadDashboard(session.user);
+    subscribeToGuests();
+  }
+
+  // Écouter les changements d'auth
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      await loadDashboard(session.user);
+      subscribeToGuests();
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null; currentProfile = null;
+    }
+  });
+});
+</script>
+</body>
+</html>
