@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stayform — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface2: #F7F7F7;
+  --border: #EBEBEB;
+  --border2: #DDDDDD;
+  --accent: #FF385C;
+  --accent2: #E31C5F;
+  --accent-glow: rgba(255,56,92,0.08);
+  --text: #222222;
+  --text2: #717171;
+  --text3: #B0B0B0;
+  --success: #008A05;
+  --warning: #C13515;
+  --danger: #C13515;
+  --free-color: #008A05;
+  --paid-color: #FF385C;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'Nunito Sans', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════
+   AUTH MODAL
+══════════════════════════════ */
+.auth-glow { display: none; }
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+}
+
+.auth-logo { text-align: center; margin-bottom: 2rem; }
+.auth-logo-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin-bottom: 0.8rem;
+  font-size: 1.4rem;
+  color: white;
+}
+.auth-logo h1 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.6rem; font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+.auth-logo p { font-size: 0.82rem; color: var(--text3); margin-top: 0.2rem; }
+
+.auth-tabs {
+  display: flex;
+  border-bottom: 1.5px solid var(--border);
+  margin-bottom: 1.5rem;
+  gap: 0;
+}
+.auth-tab {
+  flex: 1; padding: 0.7rem 0;
+  text-align: center;
+  font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; color: var(--text3);
+  border: none; background: none;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -1.5px;
+  transition: all 0.2s;
+  font-family: 'Nunito Sans', sans-serif;
+}
+.auth-tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+.auth-form { display: flex; flex-direction: column; gap: 1rem; }
+
+.field-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.field-label {
+  font-size: 0.78rem; font-weight: 700;
+  color: var(--text); letter-spacing: 0;
+}
+.field-input {
+  background: #fff;
+  border: 1.5px solid var(--border2);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.95rem; color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+.field-input:focus {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px rgba(34,34,34,0.08);
+}
+.field-input::placeholder { color: var(--text3); }
+
+.btn-auth {
+  background: var(--accent);
+  color: white; border: none;
+  border-radius: 8px; padding: 0.9rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+  margin-top: 0.3rem;
+}
+.btn-auth:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-auth:active { transform: translateY(0); }
+
+.auth-divider {
+  text-align: center; font-size: 0.75rem;
+  color: var(--text3); margin: 0.3rem 0; position: relative;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; position: absolute; top: 50%;
+  width: 40%; height: 1px; background: var(--border);
+}
+.auth-divider::before { left: 0; }
+.auth-divider::after { right: 0; }
+
+.auth-error {
+  background: #FFF2F2; border: 1px solid #FFCDD2;
+  border-radius: 8px; padding: 0.7rem 1rem;
+  font-size: 0.82rem; color: #C13515; display: none;
+}
+
+/* ══════════════════════════════
+   DASHBOARD
+══════════════════════════════ */
+#dashScreen { display: none; min-height: 100vh; background: #F7F7F7; }
+
+.layout { display: flex; min-height: 100vh; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px;
+  background: #fff;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 1.5rem 0.75rem;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 50; transition: transform 0.3s;
+}
+
+.sidebar-logo {
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.3rem 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+.sidebar-logo-mark {
+  width: 34px; height: 34px;
+  background: var(--accent); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; color: white; flex-shrink: 0;
+}
+.sidebar-logo h2 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.15rem; font-weight: 800;
+  color: var(--accent); letter-spacing: -0.01em;
+}
+
+.nav-section {
+  font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text3);
+  font-weight: 700; padding: 0 0.75rem;
+  margin-bottom: 0.4rem; margin-top: 1rem;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.65rem 0.75rem; border-radius: 8px;
+  font-size: 0.88rem; font-weight: 500;
+  color: var(--text2); cursor: pointer;
+  transition: all 0.15s; margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active {
+  background: #FFF0F2; color: var(--accent);
+  font-weight: 600;
+}
+.nav-item .icon { font-size: 1.05rem; width: 22px; text-align: center; }
+
+.sidebar-footer {
+  margin-top: auto; padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.user-pill {
+  display: flex; align-items: center;
+  gap: 0.7rem; padding: 0.5rem 0.75rem;
+}
+.user-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; font-weight: 700; color: white;
+  flex-shrink: 0; font-family: 'Nunito', sans-serif;
+}
+.user-info { flex: 1; min-width: 0; }
+.user-name {
+  font-size: 0.84rem; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.user-plan { font-size: 0.68rem; color: var(--text3); }
+.logout-btn {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; font-size: 1rem; padding: 0.2rem;
+  transition: color 0.15s;
+}
+.logout-btn:hover { color: var(--danger); }
+
+/* MAIN */
+.main-content {
+  margin-left: 240px; flex: 1;
+  padding: 2rem 2.5rem; background: #F7F7F7;
+}
+
+.topbar {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 2rem;
+}
+.topbar-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.6rem; font-weight: 800; color: var(--text);
+}
+.topbar-sub { font-size: 0.82rem; color: var(--text3); margin-top: 2px; }
+
+/* PLAN BANNER */
+.plan-banner {
+  border-radius: 12px; padding: 1.4rem 1.5rem;
+  margin-bottom: 2rem; background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.plan-banner.free { border-left: 4px solid var(--success); }
+.plan-banner.paid { border-left: 4px solid var(--accent); }
+.plan-banner-content { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.plan-info h3 { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text); }
+.plan-info p { font-size: 0.83rem; color: var(--text2); }
+.plan-badge {
+  padding: 0.25rem 0.7rem; border-radius: 20px;
+  font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.plan-badge.free { background: #F0FFF4; color: var(--success); }
+.plan-badge.paid { background: #FFF0F2; color: var(--accent); }
+
+/* COUNTER RING */
+.counter-ring { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
+.counter-ring svg { transform: rotate(-90deg); }
+.counter-ring .ring-bg { fill: none; stroke: var(--border); stroke-width: 5; }
+.counter-ring .ring-fill { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.counter-ring .ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.counter-ring .ring-num { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; line-height: 1; color: var(--text); }
+.counter-ring .ring-label { font-size: 0.5rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1px; }
+
+/* BUTTONS */
+.btn-upgrade {
+  background: var(--accent); color: white; border: none;
+  border-radius: 8px; padding: 0.65rem 1.3rem;
+  font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+  font-weight: 700; cursor: pointer; transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-upgrade:hover { background: var(--accent2); transform: translateY(-1px); }
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.stat-card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.2rem 1.4rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s;
+}
+.stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 0.5rem; font-weight: 600; }
+.stat-value { font-family: 'Nunito', sans-serif; font-size: 2rem; font-weight: 800; color: var(--text); line-height: 1; }
+.stat-sub { font-size: 0.72rem; color: var(--text3); margin-top: 0.4rem; }
+.stat-trend { font-size: 0.72rem; margin-top: 0.3rem; }
+.stat-trend.up { color: var(--success); }
+
+/* SECTION CARDS */
+.section-card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
+.section-title { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); }
+.section-sub { font-size: 0.78rem; color: var(--text3); margin-top: 2px; }
+
+.link-box {
+  display: flex; align-items: center; gap: 0.7rem;
+  background: #F7F7F7; border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.8rem 1rem;
+}
+.link-url {
+  flex: 1; font-size: 0.82rem; color: var(--accent);
+  font-family: monospace; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.btn-copy {
+  background: #fff; border: 1.5px solid var(--border2);
+  border-radius: 6px; padding: 0.4rem 0.8rem;
+  font-size: 0.75rem; color: var(--text2); cursor: pointer;
+  white-space: nowrap; transition: all 0.15s;
+  font-family: 'Nunito Sans', sans-serif; font-weight: 600;
+}
+.btn-copy:hover { border-color: var(--text); color: var(--text); }
+.btn-copy.copied { border-color: var(--success); color: var(--success); }
+
+/* GUESTS TABLE */
+.guests-table { width: 100%; border-collapse: collapse; }
+.guests-table th {
+  font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text3); font-weight: 700;
+  padding: 0 1rem 0.8rem; text-align: left;
+  border-bottom: 1.5px solid var(--border);
+}
+.guests-table td {
+  padding: 1rem 1rem; font-size: 0.87rem;
+  color: var(--text2); border-bottom: 1px solid var(--border);
+}
+.guests-table tr:last-child td { border-bottom: none; }
+.guests-table tr:hover td { background: #FAFAFA; }
+.guest-name { font-weight: 600; color: var(--text); }
+.guest-dates { font-size: 0.78rem; }
+.status-badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.3rem 0.7rem; border-radius: 20px;
+  font-size: 0.7rem; font-weight: 700;
+}
+.status-badge.complete { background: #F0FFF4; color: #008A05; }
+.status-badge.pending { background: #FFF8E1; color: #C67600; }
+
+.empty-state { text-align: center; padding: 3rem; color: var(--text3); font-size: 0.85rem; }
+.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+
+/* MODALS */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(2px); z-index: 300;
+  display: none; align-items: center; justify-content: center; padding: 2rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 16px; padding: 2rem;
+  max-width: 460px; width: 100%; position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  animation: modalIn 0.25s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(16px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-close {
+  position: absolute; top: 1rem; right: 1rem;
+  background: #F7F7F7; border: none; width: 30px; height: 30px;
+  border-radius: 50%; color: var(--text2); cursor: pointer;
+  font-size: 0.9rem; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.modal-close:hover { background: var(--border); color: var(--text); }
+.modal-icon { font-size: 2.5rem; margin-bottom: 1rem; text-align: center; }
+.modal-title { font-family: 'Nunito', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--text); text-align: center; margin-bottom: 0.5rem; }
+.modal-sub { font-size: 0.85rem; color: var(--text2); text-align: center; margin-bottom: 1.5rem; line-height: 1.6; }
+
+.price-tag { background: #F7F7F7; border-radius: 10px; padding: 1.2rem; text-align: center; margin-bottom: 1.5rem; }
+.price-amount { font-family: 'Nunito', sans-serif; font-size: 2.5rem; font-weight: 800; color: var(--text); }
+.price-currency { font-size: 1rem; color: var(--text3); margin-left: 4px; }
+.price-desc { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; }
+
+.feature-list { list-style: none; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.feature-list li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; color: var(--text2); }
+.feature-list li::before { content: '✓'; color: var(--success); font-weight: 700; flex-shrink: 0; }
+
+.payment-methods { display: flex; gap: 0.7rem; margin-bottom: 1rem; }
+.pay-method {
+  flex: 1; background: #F7F7F7; border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 0.8rem; text-align: center;
+  cursor: pointer; transition: all 0.15s; font-size: 0.8rem; color: var(--text2);
+}
+.pay-method:hover, .pay-method.selected { border-color: var(--text); color: var(--text); background: #fff; }
+.pay-method .pm-icon { font-size: 1.4rem; margin-bottom: 0.3rem; }
+
+.btn-pay {
+  width: 100%; background: var(--accent); color: white; border: none;
+  border-radius: 8px; padding: 0.95rem;
+  font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-pay:hover { background: var(--accent2); }
+
+.pay-secure { text-align: center; font-size: 0.72rem; color: var(--text3); margin-top: 0.7rem; }
+
+/* LIMIT BANNER */
+.limit-banner {
+  background: #FFF8E1; border: 1px solid #FFE082;
+  border-radius: 10px; padding: 1rem 1.2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+}
+.limit-banner p { font-size: 0.85rem; color: #C67600; }
+.limit-banner strong { color: #C67600; }
+
+/* MOBILE */
+.mobile-menu-btn {
+  display: none; position: fixed; top: 1rem; left: 1rem;
+  z-index: 100; background: #fff; border: 1px solid var(--border);
+  border-radius: 8px; width: 40px; height: 40px;
+  align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); box-shadow: 4px 0 20px rgba(0,0,0,0.1); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; padding: 1.5rem 1rem 1rem; padding-top: 4rem; background: #F7F7F7; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .mobile-menu-btn { display: flex; }
+  .plan-banner-content { flex-direction: column; align-items: flex-start; }
+}
+
+/* ANIMATIONS */
+.fade-in { animation: fadeIn 0.35s ease both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
+</style>
+</head>
+<body>
+
+<script>
+// ═══════════════════════════════════════════════════
+// FONCTIONS GLOBALES — définies avant Supabase
+// Toutes les fonctions appelées via onclick= sont ici
+// ═══════════════════════════════════════════════════
+
+// ── AUTH MODAL ──
+function openAuthModal(tab) {
+  var modal = document.getElementById('authModal');
+  if (modal) modal.style.display = 'flex';
+  switchTab(tab || 'login');
+}
+function closeAuthModal() {
+  var modal = document.getElementById('authModal');
+  if (modal) modal.style.display = 'none';
+}
+function switchTab(tab) {
+  var tabs = document.querySelectorAll('.auth-tab');
+  tabs.forEach(function(t, i) {
+    t.classList.toggle('active', (i===0 && tab==='login') || (i===1 && tab==='register'));
+  });
+  var lf = document.getElementById('loginForm');
+  var rf = document.getElementById('registerForm');
+  var ff = document.getElementById('forgotForm');
+  var rs = document.getElementById('resetSentForm');
+  if (lf) lf.style.display = tab==='login' ? 'flex' : 'none';
+  if (rf) rf.style.display = tab==='register' ? 'flex' : 'none';
+  if (ff) ff.style.display = 'none';
+  if (rs) rs.style.display = 'none';
+  hideError();
+}
+function hideError() {
+  var el = document.getElementById('authError');
+  if (el) el.style.display = 'none';
+}
+function showError(msg) {
+  var el = document.getElementById('authError');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+function showForgotPassword() {
+  var lf = document.getElementById('loginForm');
+  var ff = document.getElementById('forgotForm');
+  var rs = document.getElementById('resetSentForm');
+  if (lf) lf.style.display = 'none';
+  if (ff) ff.style.display = 'flex';
+  if (rs) rs.style.display = 'none';
+}
+
+// ── MOT DE PASSE VISIBLE ──
+function togglePassword(inputId, btnId) {
+  var input = document.getElementById(inputId);
+  if (!input) return;
+  var isText = input.type === 'text';
+  input.type = isText ? 'password' : 'text';
+  var icon = document.getElementById(btnId + 'Icon');
+  if (icon) {
+    icon.outerHTML = isText
+      ? '<svg id="'+btnId+'Icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+      : '<svg id="'+btnId+'Icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+  }
+}
+
+// ── GOOGLE / FACEBOOK ──
+function handleGoogleLogin() {
+  if (typeof sb !== 'undefined') {
+    sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: 'https://hichamboulaajoul-rgb.github.io/Stayform/' }});
+  } else { showError('Chargement en cours, réessayez dans 1 seconde.'); }
+}
+function handleFacebookLogin() {
+  if (typeof sb !== 'undefined') {
+    sb.auth.signInWithOAuth({ provider: 'facebook', options: { redirectTo: 'https://hichamboulaajoul-rgb.github.io/Stayform/' }});
+  } else { showError('Chargement en cours, réessayez dans 1 seconde.'); }
+}
+
+// ── LOGIN / REGISTER / FORGOT ──
+async function handleLogin() {
+  var email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  var pass = document.getElementById('loginPassword').value;
+  if (!email || !pass) { showError('Veuillez remplir tous les champs.'); return; }
+  var btns = document.querySelectorAll('.btn-auth');
+  btns.forEach(function(b){ b.disabled = true; b.style.opacity = '0.7'; });
+  var result = await sb.auth.signInWithPassword({ email: email, password: pass });
+  btns.forEach(function(b){ b.disabled = false; b.style.opacity = '1'; });
+  if (result.error) { showError('E-mail ou mot de passe incorrect.'); return; }
+  closeAuthModal();
+  document.getElementById('landingScreen').style.display = 'none';
+  await loadDashboard(result.data.user);
+}
+async function handleRegister() {
+  var name = document.getElementById('regName').value.trim();
+  var email = document.getElementById('regEmail').value.trim().toLowerCase();
+  var pass = document.getElementById('regPassword').value;
+  var city = document.getElementById('regCity').value.trim();
+  if (!name || !email || !pass) { showError('Veuillez remplir les champs obligatoires.'); return; }
+  if (pass.length < 8) { showError('Mot de passe trop court (8 caractères minimum).'); return; }
+  var btns = document.querySelectorAll('.btn-auth');
+  btns.forEach(function(b){ b.disabled = true; b.style.opacity = '0.7'; });
+  var result = await sb.auth.signUp({ email: email, password: pass, options: { data: { name: name, city: city }}});
+  btns.forEach(function(b){ b.disabled = false; b.style.opacity = '1'; });
+  if (result.error) { showError(result.error.message); return; }
+  setTimeout(async function() {
+    closeAuthModal();
+    document.getElementById('landingScreen').style.display = 'none';
+    await loadDashboard(result.data.user);
+  }, 800);
+}
+async function handleForgotPassword() {
+  var email = document.getElementById('forgotEmail').value.trim();
+  if (!email) { showError('Veuillez entrer votre adresse e-mail.'); return; }
+  var result = await sb.auth.resetPasswordForEmail(email, { redirectTo: 'https://hichamboulaajoul-rgb.github.io/Stayform/' });
+  if (result.error) { showError('Erreur : ' + result.error.message); return; }
+  document.getElementById('forgotForm').style.display = 'none';
+  document.getElementById('resetSentForm').style.display = 'block';
+}
+
+// ── DASHBOARD NAVIGATION ──
+function showSection(id) {
+  ['overview','guests','contrats','settings'].forEach(function(s) {
+    var el = document.getElementById('section-' + s);
+    if (el) el.style.display = s === id ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(function(el, i) {
+    el.classList.toggle('active', ['overview','guests','contrats','settings'][i] === id);
+  });
+  if (id === 'guests' && typeof renderGuests === 'function') renderGuests('all');
+  if (window.innerWidth < 768) {
+    var sb2 = document.getElementById('sidebar');
+    if (sb2) sb2.classList.remove('open');
+  }
+}
+function toggleSidebar() {
+  var s = document.getElementById('sidebar');
+  if (s) s.classList.toggle('open');
+}
+function handleLogout() {
+  if (typeof sb !== 'undefined') sb.auth.signOut();
+  if (typeof currentUser !== 'undefined') { currentUser = null; }
+  var dash = document.getElementById('dashScreen');
+  var land = document.getElementById('landingScreen');
+  if (dash) dash.style.display = 'none';
+  if (land) land.style.display = 'flex';
+}
+
+// ── PAYMENT ──
+function openUpgradeModal() {
+  var m = document.getElementById('upgradeModal');
+  if (m) m.classList.add('open');
+}
+function closeUpgradeModal() {
+  var m = document.getElementById('upgradeModal');
+  if (m) m.classList.remove('open');
+}
+function selectPayment(type) {
+  ['online','transfer','whatsapp'].forEach(function(t) {
+    var pm = document.getElementById('pm-' + t);
+    var info = document.getElementById('pay-' + t + '-info');
+    if (pm) pm.classList.toggle('selected', t === type);
+    if (info) info.style.display = t === type ? 'block' : 'none';
+  });
+}
+function handlePayment() {
+  if (typeof activatePremium === 'function') activatePremium();
+}
+function simulatePayment(result) {
+  var overlay = document.getElementById('paySimOverlay');
+  if (overlay) overlay.remove();
+  if (result === 'success' && typeof activatePremium === 'function') {
+    activatePremium();
+    showToast('Paiement simulé réussi !', '#FF385C');
+  } else {
+    showToast('Paiement échoué (simulé).', '#C13515');
+  }
+}
+
+// ── LINKS / CONTRATS ──
+function _generateNewLink() {
+  if (typeof _generateNewLink === 'function') _generateNewLink();
+}
+function copyLink() {
+  var url = document.getElementById('myLink');
+  if (!url || url.textContent === '—') return;
+  navigator.clipboard.writeText(url.textContent).catch(function(){});
+  var btn = document.getElementById('copyBtn');
+  if (btn) { btn.textContent = '✓ Copié !'; btn.classList.add('copied'); }
+  setTimeout(function() {
+    if (btn) { btn.textContent = '📋 Copier'; btn.classList.remove('copied'); }
+  }, 2000);
+}
+function shareWhatsApp() {
+  var url = document.getElementById('myLink');
+  if (!url || url.textContent === '—') { showToast("Générez un lien d'abord !", '#C13515'); return; }
+  var msg = encodeURIComponent('Check-in en ligne : ' + url.textContent + ' (lien valable 3h)');
+  window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
+// ── SETTINGS ──
+function saveSettings() {
+  if (typeof _saveSettings === 'function') _saveSettings();
+}
+
+// ── TOAST ──
+function showToast(msg, color) {
+  var dot = document.createElement('div');
+  dot.style.cssText = 'position:fixed;top:1rem;right:1rem;background:' + (color||'#008A05') + ';color:white;padding:0.7rem 1.1rem;border-radius:10px;font-size:0.85rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.15);font-family:"Nunito Sans",sans-serif;font-weight:500';
+  dot.textContent = msg;
+  document.body.appendChild(dot);
+  setTimeout(function(){ if(dot.parentNode) dot.remove(); }, 3000);
+}
+</script>
+
+<!-- ══════════════════════════════
+     LANDING PAGE
+══════════════════════════════ -->
+<div id="landingScreen" style="display:flex;min-height:100vh;flex-direction:column;">
+
+  <!-- NAV -->
+  <nav style="display:flex;align-items:center;justify-content:space-between;padding:1.2rem 2rem;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:50;">
+    <div style="display:flex;align-items:center;gap:0.7rem;">
+      <div style="width:34px;height:34px;background:linear-gradient(135deg,var(--accent2),var(--accent));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;">🏡</div>
+      <span style="font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);">Stayform</span>
+    </div>
+    <button onclick="openAuthModal('login')" style="background:#222;color:#fff;border:none;border-radius:20px;padding:0.55rem 1.2rem;font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;">
+      Connexion
+    </button>
+  </nav>
+
+  <!-- HERO -->
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1.5rem;text-align:center;position:relative;overflow:hidden;">
+    <div style="position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(192,112,80,0.1) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;"></div>
+    <div style="font-size:3rem;margin-bottom:1.5rem;">🏡</div>
+    <h1 style="font-family:'Nunito',sans-serif;font-size:2.4rem;font-weight:800;color:var(--text);margin-bottom:1rem;line-height:1.2;max-width:500px;">
+      Votre accueil,<br><span style="color:var(--accent);">zéro papier</span>
+    </h1>
+    <p style="color:var(--text2);font-size:1rem;max-width:420px;line-height:1.7;margin-bottom:2.5rem;">
+      Envoyez un lien à vos guests Airbnb. Ils signent le contrat, uploadent leur pièce d'identité et vous recevez un dossier PDF complet.
+    </p>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;">
+      <button onclick="openAuthModal('register')" style="background:#FF385C;color:#fff;border:none;border-radius:8px;padding:1rem 2.2rem;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(255,56,92,0.3);">
+        Commencer gratuitement
+      </button>
+      <button onclick="openAuthModal('login')" style="background:transparent;color:#717171;border:1px solid #DDDDDD;border-radius:8px;padding:1rem 2rem;font-family:'Nunito Sans',sans-serif;font-size:0.95rem;cursor:pointer;">
+        J'ai déjà un compte
+      </button>
+    </div>
+
+    <!-- FEATURES -->
+    <div style="display:flex;gap:1rem;margin-top:3rem;flex-wrap:wrap;justify-content:center;max-width:600px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;text-align:left;flex:1;min-width:160px;">
+        <div style="font-size:1.4rem;margin-bottom:0.5rem;">📋</div>
+        <div style="font-size:0.85rem;font-weight:500;color:var(--text);margin-bottom:0.2rem;">Contrat signé</div>
+        <div style="font-size:0.75rem;color:var(--text3);">Signature électronique incluse</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;text-align:left;flex:1;min-width:160px;">
+        <div style="font-size:1.4rem;margin-bottom:0.5rem;">📄</div>
+        <div style="font-size:0.85rem;font-weight:500;color:var(--text);margin-bottom:0.2rem;">Dossier PDF</div>
+        <div style="font-size:0.75rem;color:var(--text3);">Prêt pour les autorités</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;text-align:left;flex:1;min-width:160px;">
+        <div style="font-size:1.4rem;margin-bottom:0.5rem;">🔑</div>
+        <div style="font-size:0.85rem;font-weight:500;color:var(--text);margin-bottom:0.2rem;">Code serrure</div>
+        <div style="font-size:0.75rem;color:var(--text3);">Généré automatiquement</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     AUTH MODAL
+══════════════════════════════ -->
+<div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;align-items:center;justify-content:center;padding:1.5rem;backdrop-filter:blur(3px);">
+  <div class="auth-card fade-in" style="position:relative;max-height:92vh;overflow-y:auto;">
+
+    <!-- Close -->
+    <button onclick="closeAuthModal()" style="position:absolute;top:1rem;right:1rem;background:#F7F7F7;border:none;width:30px;height:30px;border-radius:50%;color:#717171;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;z-index:1;">✕</button>
+
+    <!-- Logo -->
+    <div class="auth-logo">
+      <div class="auth-logo-mark">🏡</div>
+      <h1>Stayform</h1>
+      <p>Votre accueil, zéro papier</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Connexion</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Créer un compte</button>
+    </div>
+
+    <div id="authError" class="auth-error"></div>
+
+    <!-- ── LOGIN ── -->
+    <div id="loginForm" class="auth-form">
+
+      <!-- Social buttons -->
+      <button onclick="handleGoogleLogin()" style="display:flex;align-items:center;justify-content:center;gap:0.7rem;width:100%;background:#fff;border:1.5px solid #DDDDDD;border-radius:8px;padding:0.82rem;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:600;color:#222;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continuer avec Google
+      </button>
+
+      <button onclick="handleFacebookLogin()" style="display:flex;align-items:center;justify-content:center;gap:0.7rem;width:100%;background:#1877F2;border:none;border-radius:8px;padding:0.82rem;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:600;color:#fff;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#166FE5'" onmouseout="this.style.background='#1877F2'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        Continuer avec Facebook
+      </button>
+
+      <div class="auth-divider">ou</div>
+
+      <div class="field-group">
+        <label class="field-label">Adresse e-mail</label>
+        <input class="field-input" type="email" id="loginEmail" placeholder="vous@email.com" autocomplete="email">
+      </div>
+
+      <div class="field-group">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+          <label class="field-label" style="margin:0">Mot de passe</label>
+          <button type="button" onclick="showForgotPassword()" style="background:none;border:none;color:#FF385C;font-size:0.78rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;font-weight:600;padding:0;">Mot de passe oublié ?</button>
+        </div>
+        <div style="position:relative;">
+          <input class="field-input" type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" style="padding-right:3rem;">
+          <button type="button" onclick="togglePassword('loginPassword', 'eyeLogin')" style="position:absolute;right:0.8rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#B0B0B0;font-size:1.1rem;padding:0;display:flex;align-items:center;" id="eyeLogin">
+            <svg id="eyeLoginIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn-auth" onclick="handleLogin()">Se connecter</button>
+    </div>
+
+    <!-- ── REGISTER ── -->
+    <div id="registerForm" class="auth-form" style="display:none">
+
+      <!-- Social buttons -->
+      <button onclick="handleGoogleLogin()" style="display:flex;align-items:center;justify-content:center;gap:0.7rem;width:100%;background:#fff;border:1.5px solid #DDDDDD;border-radius:8px;padding:0.82rem;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:600;color:#222;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continuer avec Google
+      </button>
+
+      <button onclick="handleFacebookLogin()" style="display:flex;align-items:center;justify-content:center;gap:0.7rem;width:100%;background:#1877F2;border:none;border-radius:8px;padding:0.82rem;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:600;color:#fff;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#166FE5'" onmouseout="this.style.background='#1877F2'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        Continuer avec Facebook
+      </button>
+
+      <div class="auth-divider">ou</div>
+
+      <div class="field-group">
+        <label class="field-label">Nom complet</label>
+        <input class="field-input" type="text" id="regName" placeholder="Mohammed Alami">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Adresse e-mail</label>
+        <input class="field-input" type="email" id="regEmail" placeholder="vous@email.com">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Mot de passe</label>
+        <div style="position:relative;">
+          <input class="field-input" type="password" id="regPassword" placeholder="Minimum 8 caractères" style="padding-right:3rem;">
+          <button type="button" onclick="togglePassword('regPassword', 'eyeReg')" style="position:absolute;right:0.8rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#B0B0B0;font-size:1.1rem;padding:0;display:flex;align-items:center;" id="eyeReg">
+            <svg id="eyeRegIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Ville / Région</label>
+        <input class="field-input" type="text" id="regCity" placeholder="Marrakech, Casablanca...">
+      </div>
+      <button class="btn-auth" onclick="handleRegister()">Créer mon compte gratuitement</button>
+      <p style="font-size:0.72rem;color:var(--text3);text-align:center;margin-top:0.3rem;">
+        Essai gratuit · Aucune carte bancaire requise
+      </p>
+    </div>
+
+    <!-- ── MOT DE PASSE OUBLIÉ ── -->
+    <div id="forgotForm" class="auth-form" style="display:none">
+      <div style="text-align:center;margin-bottom:1.2rem;">
+        <div style="font-size:2rem;margin-bottom:0.5rem;">🔒</div>
+        <h3 style="font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:700;color:#222;margin-bottom:0.3rem;">Réinitialiser le mot de passe</h3>
+        <p style="font-size:0.82rem;color:#717171;">Entrez votre e-mail, nous vous enverrons un lien de réinitialisation.</p>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Adresse e-mail</label>
+        <input class="field-input" type="email" id="forgotEmail" placeholder="vous@email.com">
+      </div>
+      <button class="btn-auth" onclick="handleForgotPassword()">Envoyer le lien</button>
+      <button type="button" onclick="switchTab('login')" style="background:none;border:none;color:#717171;font-size:0.85rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;margin-top:0.3rem;text-align:center;width:100%;">← Retour à la connexion</button>
+    </div>
+
+    <!-- ── RESET EMAIL SENT ── -->
+    <div id="resetSentForm" style="display:none;text-align:center;padding:1rem 0;">
+      <div style="font-size:3rem;margin-bottom:1rem;">📬</div>
+      <h3 style="font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:700;color:#222;margin-bottom:0.5rem;">E-mail envoyé !</h3>
+      <p style="font-size:0.85rem;color:#717171;line-height:1.6;margin-bottom:1.2rem;">Vérifiez votre boîte mail et cliquez sur le lien pour réinitialiser votre mot de passe.</p>
+      <button type="button" onclick="switchTab('login')" style="background:none;border:1px solid #DDDDDD;color:#222;border-radius:8px;padding:0.65rem 1.5rem;font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">Retour à la connexion</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     DASHBOARD
+══════════════════════════════ -->
+<div id="dashScreen" style="display:none">
+  <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-mark">🏡</div>
+        <h2>Stayform</h2>
+      </div>
+
+      <div class="nav-section">Menu</div>
+      <div class="nav-item active" onclick="showSection('overview')">
+        <span class="icon">📊</span> Vue d'ensemble
+      </div>
+      <div class="nav-item" onclick="showSection('guests')">
+        <span class="icon">👥</span> Mes guests
+      </div>
+      <div class="nav-item" onclick="showSection('contrats')">
+        <span class="icon">🔗</span> Mes contrats
+      </div>
+      <div class="nav-item" onclick="showSection('settings')">
+        <span class="icon">⚙️</span> Paramètres
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-pill">
+          <div class="user-avatar" id="sidebarAvatar">?</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarName">—</div>
+            <div class="user-plan" id="sidebarPlan"></div>
+          </div>
+          <button class="logout-btn" onclick="handleLogout()" title="Déconnexion">⏻</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content" id="mainContent">
+
+      <!-- OVERVIEW SECTION -->
+      <div id="section-overview">
+        <div class="topbar fade-in">
+          <div>
+            <div class="topbar-title" id="welcomeMsg">Bonjour 👋</div>
+            <div class="topbar-sub">Voici votre tableau de bord Stayform</div>
+          </div>
+
+        </div>
+
+        <!-- LIMIT WARNING -->
+        <div class="limit-banner" id="limitBanner" style="display:none">
+          <p>🎉 Vous avez généré <strong>10 contrats</strong> ! Contactez-nous pour continuer à utiliser Stayform.</p>
+          <a href="/cdn-cgi/l/email-protection#21424e4f554042556152554058474e534c0f4c40" style="background:var(--accent);color:#1A0E0A;border:none;border-radius:8px;padding:0.5rem 1rem;font-size:0.82rem;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap;font-family:'Nunito',sans-serif;">Nous contacter →</a>
+        </div>
+
+        <!-- PLAN BANNER -->
+        <div class="plan-banner free fade-in delay-1" id="planBanner">
+          <div class="plan-banner-content">
+            <div style="display:flex;align-items:center;gap:1.2rem;">
+              <div class="counter-ring" id="counterRing">
+                <svg width="80" height="80" viewBox="0 0 80 80">
+                  <circle class="ring-bg" cx="40" cy="40" r="33"/>
+                  <circle class="ring-fill" id="ringFill" cx="40" cy="40" r="33"
+                    stroke="#5A9A6A"
+                    stroke-dasharray="207.3"
+                    stroke-dashoffset="207.3"/>
+                </svg>
+                <div class="ring-text">
+                  <span class="ring-num" id="ringNum">0</span>
+                  <span class="ring-label" id="ringLabel">/ 10</span>
+                </div>
+              </div>
+              <div class="plan-info">
+                <h3 id="planTitle" style="margin-bottom:0.3rem;">Vos contrats</h3>
+                <p id="planDesc">Vous avez généré <strong id="contractsDone" style="color:#7ACA8A">0</strong> contrat(s) sur 10</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-grid">
+          <div class="stat-card fade-in delay-2">
+            <div class="stat-label">Total check-ins</div>
+            <div class="stat-value" id="statTotal">0</div>
+            <div class="stat-sub">Depuis la création</div>
+          </div>
+          <div class="stat-card fade-in delay-3">
+            <div class="stat-label">Ce mois</div>
+            <div class="stat-value" id="statMonth">0</div>
+            <div class="stat-trend up" id="statTrend">↑ 0 ce mois</div>
+          </div>
+          <div class="stat-card fade-in delay-4">
+            <div class="stat-label">Contrats signés</div>
+            <div class="stat-value" id="statSigned">0</div>
+            <div class="stat-sub">PDF générés</div>
+          </div>
+        </div>
+
+        <!-- RECENT GUESTS -->
+        <div class="section-card fade-in delay-4">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Derniers check-ins</div>
+              <div class="section-sub">Historique de vos guests récents</div>
+            </div>
+          </div>
+          <div id="recentGuestsWrap"></div>
+        </div>
+      </div>
+
+      <!-- GUESTS SECTION -->
+      <div id="section-guests" style="display:none">
+        <div class="topbar fade-in">
+          <div>
+            <div class="topbar-title">Mes guests</div>
+            <div class="topbar-sub">Tous les dossiers de check-in</div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div id="allGuestsWrap"></div>
+        </div>
+      </div>
+
+      <!-- LINK SECTION -->
+      <div id="section-contrats" style="display:none">
+        <div class="topbar fade-in">
+          <div>
+            <div class="topbar-title">Mes contrats</div>
+            <div class="topbar-sub">Chaque lien est valable 3 heures · usage unique</div>
+          </div>
+          <button class="btn-upgrade" onclick="generateNewLink()" style="white-space:nowrap">
+            ⚡ Nouveau lien
+          </button>
+        </div>
+
+        <!-- Lien actif -->
+        <div class="section-card fade-in" id="activeLinkCard">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+            <div>
+              <div class="section-title">Lien actif</div>
+              <div class="section-sub" id="linkExpiry">Aucun lien généré</div>
+            </div>
+            <div id="linkTimerBadge" style="display:none;background:rgba(90,154,106,0.15);color:#7ACA8A;padding:0.3rem 0.8rem;border-radius:20px;font-size:0.75rem;font-weight:600;font-family:'Nunito',sans-serif;">
+              ⏱ <span id="linkCountdown">3:00:00</span>
+            </div>
+          </div>
+
+          <div id="activeLinkBox" style="display:none">
+            <div class="link-box" style="margin-bottom:1rem">
+              <span class="link-url" id="myLink">—</span>
+              <button class="btn-copy" id="copyBtn" onclick="copyLink()">📋 Copier</button>
+            </div>
+            <div style="display:flex;gap:0.7rem;flex-wrap:wrap;">
+              <button onclick="shareWhatsApp()" style="flex:1;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);border-radius:8px;padding:0.7rem;color:#25D166;font-size:0.82rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;">
+                📱 WhatsApp
+              </button>
+              <button onclick="copyLink()" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.7rem;color:var(--text2);font-size:0.82rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;">
+                🔗 Copier
+              </button>
+            </div>
+          </div>
+
+          <div id="noLinkBox" style="text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">
+            <div style="font-size:2rem;margin-bottom:0.8rem">🔗</div>
+            Cliquez sur <strong style="color:var(--accent)">"Nouveau lien"</strong> pour générer un lien temporaire de 3h pour votre prochain guest.
+          </div>
+        </div>
+
+        <!-- Historique liens -->
+        <div class="section-card fade-in delay-1">
+          <div class="section-title" style="margin-bottom:0.8rem">Historique des liens</div>
+          <div id="linkHistory" style="font-size:0.82rem;color:var(--text3);">Aucun lien généré pour l'instant.</div>
+        </div>
+
+        <!-- Comment ça marche -->
+        <div class="section-card fade-in delay-2">
+          <div class="section-title" style="margin-bottom:0.8rem">Comment ça marche</div>
+          <div style="display:flex;flex-direction:column;gap:0.8rem;">
+            <div style="display:flex;align-items:flex-start;gap:0.8rem;">
+              <div style="width:28px;height:28px;background:var(--accent-glow);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:var(--accent);flex-shrink:0;font-family:'Nunito',sans-serif">1</div>
+              <div><div style="font-size:0.85rem;font-weight:500;margin-bottom:2px">Générez un lien unique</div><div style="font-size:0.78rem;color:var(--text3)">Valable 3 heures, usage unique par guest</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:0.8rem;">
+              <div style="width:28px;height:28px;background:var(--accent-glow);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:var(--accent);flex-shrink:0;font-family:'Nunito',sans-serif">2</div>
+              <div><div style="font-size:0.85rem;font-weight:500;margin-bottom:2px">Envoyez-le à votre guest</div><div style="font-size:0.78rem;color:var(--text3)">Via WhatsApp ou SMS juste avant son arrivée</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:0.8rem;">
+              <div style="width:28px;height:28px;background:var(--accent-glow);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:var(--accent);flex-shrink:0;font-family:'Nunito',sans-serif">3</div>
+              <div><div style="font-size:0.85rem;font-weight:500;margin-bottom:2px">Après 3h ou utilisation → lien expiré</div><div style="font-size:0.78rem;color:var(--text3)">Générez un nouveau lien pour le prochain guest</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS SECTION -->
+      <div id="section-settings" style="display:none">
+        <div class="topbar fade-in">
+          <div>
+            <div class="topbar-title">Paramètres</div>
+            <div class="topbar-sub">Gérez votre compte</div>
+          </div>
+        </div>
+        <div class="section-card fade-in">
+          <div class="section-title" style="margin-bottom:1.2rem">Mon compte</div>
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="field-group">
+              <label class="field-label">Nom</label>
+              <input class="field-input" id="settingName" placeholder="Votre nom">
+            </div>
+            <div class="field-group">
+              <label class="field-label">E-mail</label>
+              <input class="field-input" id="settingEmail" placeholder="votre@email.com" disabled style="opacity:0.5">
+            </div>
+            <button onclick="saveSettings()" style="background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);border-radius:8px;padding:0.7rem 1.2rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;font-size:0.85rem;font-weight:500;width:fit-content;">
+              Sauvegarder
+            </button>
+          </div>
+        </div>
+        <div class="section-card fade-in delay-1">
+          <div class="section-title" style="margin-bottom:0.5rem">Danger</div>
+          <button onclick="handleLogout()" style="background:rgba(192,80,80,0.1);border:1px solid rgba(192,80,80,0.3);color:#E08080;border-radius:8px;padding:0.7rem 1.2rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;font-size:0.85rem;">
+            Se déconnecter
+          </button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div class="modal-overlay" id="upgradeModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeUpgradeModal()">✕</button>
+    <div class="modal-icon">⚡</div>
+    <div class="modal-title">Passez en Illimité</div>
+    <div class="modal-sub">Débloquez tous vos check-ins pour un paiement unique. Aucun abonnement, aucune surprise.</div>
+
+    <div class="price-tag">
+      <div>
+        <span class="price-amount">150</span>
+        <span class="price-currency">DH</span>
+      </div>
+      <div class="price-desc">Paiement unique · Accès illimité à vie</div>
+      <div style="margin-top:0.5rem;display:inline-block;background:rgba(232,160,48,0.15);color:#E8A030;padding:0.2rem 0.7rem;border-radius:20px;font-size:0.7rem;font-weight:600">⚡ MODE TEST ACTIF</div>
+    </div>
+
+    <ul class="feature-list">
+      <li>Check-ins illimités pour tous vos logements</li>
+      <li>Génération PDF illimitée</li>
+      <li>Lien de check-in personnalisé</li>
+      <li>Historique complet des guests</li>
+      <li>Support prioritaire</li>
+    </ul>
+
+    <div style="font-size:0.78rem;color:var(--text3);margin-bottom:0.8rem;">Choisir le mode de paiement :</div>
+    <div class="payment-methods">
+      <div class="pay-method selected" id="pm-online" onclick="selectPayment('online')">
+        <div class="pm-icon">💳</div>
+        Carte / CIH
+      </div>
+      <div class="pay-method" id="pm-transfer" onclick="selectPayment('transfer')">
+        <div class="pm-icon">🏦</div>
+        Virement
+      </div>
+      <div class="pay-method" id="pm-whatsapp" onclick="selectPayment('whatsapp')">
+        <div class="pm-icon">📱</div>
+        WhatsApp
+      </div>
+    </div>
+
+    <div id="pay-online-info" style="background:var(--surface2);border-radius:10px;padding:1rem;margin-bottom:1rem;font-size:0.82rem;color:var(--text2);">
+      Vous serez redirigé vers la page de paiement sécurisé PayDunya / CMI.
+    </div>
+    <div id="pay-transfer-info" style="display:none;background:var(--surface2);border-radius:10px;padding:1rem;margin-bottom:1rem;font-size:0.82rem;color:var(--text2);">
+      <strong style="color:var(--text)">RIB :</strong> 007 780 0001234567890012 · CIH Bank<br>
+      <strong style="color:var(--text)">Référence :</strong> <span id="virRef">—</span><br>
+      Envoyez le reçu à : <span style="color:var(--accent)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fd8d9c84bd8e899c849b928f90d3909c">[email&#160;protected]</a></span>
+    </div>
+    <div id="pay-whatsapp-info" style="display:none;background:var(--surface2);border-radius:10px;padding:1rem;margin-bottom:1rem;font-size:0.82rem;color:var(--text2);">
+      Envoyez un message WhatsApp pour finaliser le paiement. Notre équipe vous répondra sous 1h.
+    </div>
+
+    <button class="btn-pay" id="btnPay" onclick="handlePayment()">
+      Procéder au paiement — 150 DH →
+    </button>
+    <div class="pay-secure">🔒 Paiement 100% sécurisé · Activation immédiate</div>
+  </div>
+</div>
+
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ══════════════════════════════
+// SUPABASE CONFIG
+// ══════════════════════════════
+const SUPABASE_URL = 'https://syvpyvkgauyfqghwiqsl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5dnB5dmtnYXV5ZnFnaHdpcXNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTYzMDcsImV4cCI6MjA4ODk5MjMwN30.Iu0s8WeJcFrZUXkYRHbQBUvZMOMdsvgip_wnEVtXRO4';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const FREE_LIMIT = 10;
+let currentUser = null;
+let currentProfile = null;
+let selectedPayment = 'online';
+
+// ══════════════════════════════
+// AUTH
+// ══════════════════════════════
+function openAuthModal(tab) {
+  document.getElementById('authModal').style.display = 'flex';
+  switchTab(tab || 'login');
+}
+function closeAuthModal() {
+  document.getElementById('authModal').style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('authModal');
+  if (modal) modal.addEventListener('click', e => { if (e.target === modal) closeAuthModal(); });
+});
+
+// switchTab défini dans early script
+
+// showForgotPassword défini dans early script
+
+// handleForgotPassword défini dans early script
+
+// togglePassword défini dans early script
+
+// handleGoogleLogin défini dans early script
+
+// handleFacebookLogin défini dans early script
+function showError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg; el.style.display = 'block';
+}
+function hideError() { document.getElementById('authError').style.display = 'none'; }
+
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('loginPassword').value;
+  if (!email || !pass) { showError('Veuillez remplir tous les champs.'); return; }
+  setAuthLoading(true);
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  setAuthLoading(false);
+  if (error) { showError('E-mail ou mot de passe incorrect.'); return; }
+  closeAuthModal();
+  document.getElementById('landingScreen').style.display = 'none';
+  await loadDashboard(data.user);
+}
+
+async function handleRegister() {
+  const name  = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('regPassword').value;
+  const city  = document.getElementById('regCity').value.trim();
+  if (!name || !email || !pass) { showError('Veuillez remplir les champs obligatoires.'); return; }
+  if (pass.length < 8) { showError('Mot de passe trop court (8 caractères minimum).'); return; }
+  setAuthLoading(true);
+  const { data, error } = await sb.auth.signUp({
+    email, password: pass,
+    options: { data: { name, city } }
+  });
+  setAuthLoading(false);
+  if (error) { showError(error.message); return; }
+  // Profile created automatically via trigger
+  // Wait a bit for trigger then load
+  setTimeout(async () => {
+    closeAuthModal();
+    document.getElementById('landingScreen').style.display = 'none';
+    await loadDashboard(data.user);
+  }, 800);
+}
+
+async function handleLogout() {
+  await sb.auth.signOut();
+  currentUser = null; currentProfile = null;
+  document.getElementById('dashScreen').style.display = 'none';
+  document.getElementById('landingScreen').style.display = 'flex';
+}
+
+function setAuthLoading(on) {
+  document.querySelectorAll('.btn-auth').forEach(b => {
+    b.disabled = on;
+    if (on) b.style.opacity = '0.6';
+    else b.style.opacity = '1';
+  });
+}
+
+// ══════════════════════════════
+// DASHBOARD
+// ══════════════════════════════
+async function loadDashboard(user) {
+  if (!user) {
+    const { data } = await sb.auth.getUser();
+    if (!data && data.user) return;
+    user = data.user;
+  }
+  currentUser = user;
+
+  // Fetch profile
+  const { data: profile, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if (error || !profile) {
+    // Profile might not exist yet (new user, trigger delay) — retry once
+    await new Promise(r => setTimeout(r, 1200));
+    const { data: p2 } = await sb.from('profiles').select('*').eq('id', user.id).single();
+    if (!p2) { showError('Erreur chargement profil. Veuillez réessayer.'); return; }
+    currentProfile = p2;
+  } else {
+    currentProfile = profile;
+  }
+
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('dashScreen').style.display = 'block';
+
+  // Sidebar
+  document.getElementById('sidebarName').textContent = currentProfile.name;
+  document.getElementById('sidebarAvatar').textContent = currentProfile.name.charAt(0).toUpperCase();
+  document.getElementById('sidebarPlan').textContent = `${currentProfile.guest_count || 0}/10 contrats`;
+  document.getElementById('welcomeMsg').textContent = `Bonjour, ${currentProfile.name.split(' ')[0]} 👋`;
+
+  updatePlanUI();
+  await updateStats();
+  await renderGuests('recent');
+}
+
+function updatePlanUI() {
+  const isPaid = currentProfile.plan === 'paid';
+  const count = currentProfile.guest_count || 0;
+  const remaining = Math.max(0, FREE_LIMIT - count);
+
+  // Limit banner — shown only at 10+, no payment mention
+  document.getElementById('limitBanner').style.display = (!isPaid && count >= FREE_LIMIT) ? 'flex' : 'none';
+
+  // Simple counter display
+  const contractsDone = document.getElementById('contractsDone');
+  if (contractsDone) contractsDone.textContent = count;
+  if (contractsDone) contractsDone.style.color = count >= FREE_LIMIT ? '#E08080' : '#7ACA8A';
+
+  document.getElementById('planDesc').innerHTML = `Vous avez généré <strong id="contractsDone" style="color:${count>=FREE_LIMIT?'#E08080':'#7ACA8A'}">${count}</strong> contrat(s) sur 10`;
+
+  // Ring
+  const pct = isPaid ? 1 : Math.min(count / FREE_LIMIT, 1);
+  const circumference = 207.3;
+  const ring = document.getElementById('ringFill');
+  ring.style.strokeDashoffset = circumference * (1 - pct);
+  ring.style.stroke = isPaid ? 'var(--accent)' : (pct>=1?'#C05050':pct>=0.7?'var(--warning)':'#5A9A6A');
+  document.getElementById('ringNum').textContent = isPaid ? '∞' : count;
+  document.querySelector('#counterRing .ring-label').textContent = isPaid ? 'illimité' : '/ 10';
+
+  // Link — géré par generateNewLink() / restoreLinkUI()
+  restoreLinkUI();
+
+  // Virement ref
+  const refEl = document.getElementById('virRef');
+  if (refEl) refEl.textContent = 'SF-' + (currentProfile.link_id||'XXXXX').toUpperCase();
+
+  // Settings
+  const sn = document.getElementById('settingName');
+  const se = document.getElementById('settingEmail');
+  if (sn) sn.value = currentProfile.name;
+  if (se) se.value = currentProfile.email || currentUser.email;
+}
+
+async function updateStats() {
+  const { data: guests } = await sb.from('guests').select('id, signed, created_at').eq('host_id', currentUser.id);
+  const list = guests || [];
+  document.getElementById('statTotal').textContent = list.length;
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const thisMonth = list.filter(g => g.created_at >= monthStart).length;
+  document.getElementById('statMonth').textContent = thisMonth;
+  document.getElementById('statTrend').textContent = `↑ ${thisMonth} ce mois`;
+  document.getElementById('statSigned').textContent = list.filter(g => g.signed).length;
+}
+
+async function renderGuests(mode) {
+  const query = sb.from('guests').select('*').eq('host_id', currentUser.id).order('created_at', { ascending: false });
+  if (mode === 'recent') query.limit(5);
+  const { data: guests } = await query;
+  const list = guests || [];
+  const wrap = document.getElementById(mode === 'recent' ? 'recentGuestsWrap' : 'allGuestsWrap');
+  if (!wrap) return;
+  if (!list.length) {
+    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div>Aucun guest pour l'instant.<br>Partagez votre lien pour commencer !</div>`;
+    return;
+  }
+  wrap.innerHTML = `<table class="guests-table">
+    <thead><tr><th>Guest</th><th>Dates</th><th>Statut</th></tr></thead>
+    <tbody>${list.map(g => `
+      <tr>
+        <td><div class="guest-name">${g.name}</div><div style="font-size:0.72rem;color:var(--text3)">${g.email||''}</div></td>
+        <td class="guest-dates">${g.dates||'—'}</td>
+        <td><span class="status-badge ${g.status}">${g.signed?'✓ Signé':'⏳ En attente'}</span></td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+function showSection(id) {
+  ['overview','guests','contrats','settings'].forEach(s => {
+    document.getElementById('section-'+s).style.display = s===id?'block':'none';
+  });
+  document.querySelectorAll('.nav-item').forEach((el,i) => {
+    el.classList.toggle('active', ['overview','guests','contrats','settings'][i]===id);
+  });
+  if (id==='guests') renderGuests('all');
+  if (window.innerWidth < 768) document.getElementById('sidebar').classList.remove('open');
+}
+
+// ══════════════════════════════
+// PAYDUNYA CONFIG
+// ══════════════════════════════
+const PAYDUNYA = {
+  MODE: 'test', // 'test' ou 'live'
+  // ⚠️ Remplacez par vos vraies clés PayDunya
+  TEST: {
+    MASTER_KEY:  'PAYDUNYA_TEST_MASTER_KEY',
+    PRIVATE_KEY: 'PAYDUNYA_TEST_PRIVATE_KEY',
+    TOKEN:       'PAYDUNYA_TEST_TOKEN',
+    PUBLIC_KEY:  'PAYDUNYA_TEST_PUBLIC_KEY',
+  },
+  LIVE: {
+    MASTER_KEY:  'PAYDUNYA_LIVE_MASTER_KEY',
+    PRIVATE_KEY: 'PAYDUNYA_LIVE_PRIVATE_KEY',
+    TOKEN:       'PAYDUNYA_LIVE_TOKEN',
+    PUBLIC_KEY:  'PAYDUNYA_LIVE_PUBLIC_KEY',
+  },
+  get keys() { return this.MODE === 'test' ? this.TEST : this.LIVE; },
+  BASE_URL: 'https://app.paydunya.com',
+  get API_URL() { return this.MODE === 'test' ? 'https://app.paydunya.com/sandbox-api/v1' : 'https://app.paydunya.com/api/v1'; }
+};
+
+// ══════════════════════════════
+// UPGRADE & PAYMENT
+// ══════════════════════════════
+function openUpgradeModal() { document.getElementById('upgradeModal').classList.add('open'); }
+function closeUpgradeModal() { document.getElementById('upgradeModal').classList.remove('open'); }
+
+function selectPayment(type) {
+  selectedPayment = type;
+  ['online','transfer','whatsapp'].forEach(t => {
+    document.getElementById('pm-'+t).classList.toggle('selected', t===type);
+    document.getElementById('pay-'+t+'-info').style.display = t===type?'block':'none';
+  });
+}
+
+async function handlePayment() {
+  if (selectedPayment === 'online') {
+    await initPaydunyaPayment();
+  } else if (selectedPayment === 'transfer') {
+    closeUpgradeModal();
+    showToast('📋 Envoyez le reçu à pay@stayform.ma après le virement.', '#E8A87C');
+  } else if (selectedPayment === 'whatsapp') {
+    const msg = encodeURIComponent(`Bonjour, je souhaite passer en plan illimité Stayform.\nCompte : ${currentUser.email}\nRéférence : SF-${(currentProfile.link_id||'').toUpperCase()}`);
+    window.open(`https://wa.me/212600000000?text=${msg}`, '_blank');
+    closeUpgradeModal();
+  }
+}
+
+async function initPaydunyaPayment() {
+  const btn = document.getElementById('btnPay');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Redirection...'; }
+
+  // Si clés pas encore configurées → simuler en mode démo
+  if (PAYDUNYA.keys.MASTER_KEY.startsWith('PAYDUNYA_')) {
+    closeUpgradeModal();
+    showPaymentSimulator();
+    return;
+  }
+
+  try {
+    // 1. Créer la facture PayDunya
+    const invoiceRes = await fetch(`${PAYDUNYA.API_URL}/checkout-invoice/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'PAYDUNYA-MASTER-KEY':  PAYDUNYA.keys.MASTER_KEY,
+        'PAYDUNYA-PRIVATE-KEY': PAYDUNYA.keys.PRIVATE_KEY,
+        'PAYDUNYA-TOKEN':       PAYDUNYA.keys.TOKEN,
+      },
+      body: JSON.stringify({
+        invoice: {
+          total_amount: 150,
+          description: 'Stayform — Plan Illimité (paiement unique)',
+        },
+        store: {
+          name: 'Stayform',
+          tagline: 'Votre accueil, zéro papier',
+          postal_address: 'Maroc',
+          logo_url: 'https://hichamboulaajoul-rgb.github.io/Stayform/logo.png',
+        },
+        actions: {
+          cancel_url:  `https://hichamboulaajoul-rgb.github.io/Stayform/?payment=cancelled`,
+          return_url:  `https://hichamboulaajoul-rgb.github.io/Stayform/?payment=success&host=${currentProfile.link_id}`,
+          callback_url:`https://hichamboulaajoul-rgb.github.io/Stayform/webhook`,
+        },
+        custom_data: {
+          host_id:   currentUser.id,
+          host_email: currentUser.email,
+          link_id:   currentProfile.link_id,
+        }
+      })
+    });
+
+    const invoice = await invoiceRes.json();
+
+    if (invoice.response_code === '00') {
+      // 2. Sauvegarder le token en attente dans Supabase
+      await sb.from('profiles').update({
+        pending_payment_token: invoice.token
+      }).eq('id', currentUser.id);
+
+      // 3. Rediriger vers la page de paiement PayDunya
+      window.location.href = invoice.response_text;
+    } else {
+      throw new Error(invoice.response_text || 'Erreur PayDunya');
+    }
+  } catch(e) {
+    console.error('PayDunya error:', e);
+    showToast('❌ Erreur paiement. Réessayez.', '#C05050');
+    if (btn) { btn.disabled = false; btn.textContent = 'Procéder au paiement — 150 DH →'; }
+  }
+}
+
+// ── Simulateur de paiement (mode TEST sans clés) ──
+function showPaymentSimulator() {
+  const overlay = document.createElement('div');
+  overlay.id = 'paySimOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:flex;align-items:center;justify-content:center;padding:2rem;backdrop-filter:blur(4px)';
+  overlay.innerHTML = `
+    <div style="background:#1A1A1A;border:1px solid #333;border-radius:20px;padding:2rem;max-width:400px;width:100%;text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:1rem">💳</div>
+      <h2 style="font-family:'Nunito',sans-serif;font-size:1.3rem;color:#F0EDE8;margin-bottom:0.5rem">Simulateur PayDunya</h2>
+      <p style="font-size:0.82rem;color:#A09890;margin-bottom:1.5rem">Mode TEST — aucun vrai paiement effectué</p>
+      <div style="background:#111;border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;text-align:left">
+        <div style="font-size:0.72rem;color:#5A5450;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">Montant</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:2rem;font-weight:800;color:#E8A87C">150 <span style="font-size:1rem;color:#A09890">MAD</span></div>
+        <div style="font-size:0.78rem;color:#5A9A6A;margin-top:0.5rem">✓ Accès illimité à vie</div>
+      </div>
+      <div style="display:flex;gap:0.7rem">
+        <button onclick="simulatePayment('success')" style="flex:1;background:linear-gradient(135deg,#C07050,#E8A87C);color:#1A0E0A;border:none;border-radius:10px;padding:0.85rem;font-family:'Nunito',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer">
+          ✓ Paiement réussi
+        </button>
+        <button onclick="simulatePayment('fail')" style="flex:1;background:#1E1E1E;color:#A09890;border:1px solid #333;border-radius:10px;padding:0.85rem;font-family:'Nunito',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer">
+          ✕ Échec
+        </button>
+      </div>
+      <p style="font-size:0.68rem;color:#5A5450;margin-top:1rem">Ajoutez vos clés PayDunya pour activer les vrais paiements</p>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function simulatePayment(result) {
+  const overlay = document.getElementById('paySimOverlay');
+  if (overlay) overlay.remove();
+  if (result === 'success') {
+    await activatePremium();
+    showToast('🎉 Paiement simulé réussi ! Plan illimité activé.', '#E8A87C');
+  } else {
+    showToast('❌ Paiement échoué (simulé).', '#C05050');
+  }
+}
+
+// ── Vérifier paiement au retour de PayDunya ──
+async function checkPaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const payment = params.get('payment');
+  const hostParam = params.get('host');
+  if (!payment) return;
+
+  // Nettoyer l'URL
+  window.history.replaceState({}, '', '/');
+
+  if (payment === 'success') {
+    // Vérifier via Supabase que le paiement est bien enregistré
+    const { data: profile } = await sb.from('profiles').select('plan').eq('id', currentUser && currentUser.id).single();
+    if (profile && profile.plan === 'paid') {
+      showToast('🎉 Paiement confirmé ! Plan illimité activé.', '#E8A87C');
+    } else {
+      // Le webhook n'a pas encore activé — activer manuellement
+      await activatePremium();
+    }
+  } else if (payment === 'cancelled') {
+    showToast('Paiement annulé.', '#A09890');
+  }
+}
+
+async function activatePremium() {
+  const { error } = await sb.from('profiles').update({ plan: 'paid' }).eq('id', currentUser.id);
+  if (error) { alert('Erreur activation. Veuillez réessayer.'); return; }
+  currentProfile.plan = 'paid';
+  closeUpgradeModal();
+  document.getElementById('sidebarPlan').textContent = '⚡ Plan Illimité';
+  updatePlanUI();
+  showToast('⚡ Plan illimité activé !', '#E8A87C');
+}
+
+// ══════════════════════════════
+// UTILITIES
+// ══════════════════════════════
+// ══════════════════════════════
+// LIENS TEMPORAIRES 3H
+// ══════════════════════════════
+let countdownInterval = null;
+
+function generateLinkToken() {
+  const expiry = Date.now() + 3 * 60 * 60 * 1000; // +3h
+  // Format: linkId.expiryB36
+  // Ex: 038ba5dd.lv3k8g  (~16 chars, propre et lisible)
+  const expiryB36 = expiry.toString(36);
+  const token = currentProfile.link_id + '.' + expiryB36;
+  return { token, expiry };
+}
+
+function _generateNewLink() {
+  const { token, expiry } = generateLinkToken();
+  const url = `https://hichamboulaajoul-rgb.github.io/Stayform/checkin.html?t=${token}`;
+
+  // Save to localStorage (with host context)
+  const linkData = { url, expiry, token, createdAt: Date.now() };
+  const key = `sf_links_${currentUser.id}`;
+  const history = JSON.parse(localStorage.getItem(key) || '[]');
+  history.unshift(linkData);
+  localStorage.setItem(key, JSON.stringify(history.slice(0, 10))); // garder 10 derniers
+
+  // Update UI
+  document.getElementById('myLink').textContent = url;
+  document.getElementById('activeLinkBox').style.display = 'block';
+  document.getElementById('noLinkBox').style.display = 'none';
+  document.getElementById('linkTimerBadge').style.display = 'inline-flex';
+
+  startCountdown(expiry);
+  renderLinkHistory();
+  showToast('🔗 Nouveau lien généré — valable 3 heures', '#E8A87C');
+}
+
+function restoreLinkUI() {
+  const key = `sf_links_${currentUser.id}`;
+  const history = JSON.parse(localStorage.getItem(key) || '[]');
+  if (!history.length) {
+    document.getElementById('activeLinkBox').style.display = 'none';
+    document.getElementById('noLinkBox').style.display = 'block';
+    document.getElementById('linkTimerBadge').style.display = 'none';
+    document.getElementById('linkExpiry').textContent = 'Aucun lien généré';
+    return;
+  }
+  const last = history[0];
+  const now = Date.now();
+  if (now >= last.expiry) {
+    // Expiré
+    document.getElementById('activeLinkBox').style.display = 'none';
+    document.getElementById('noLinkBox').style.display = 'block';
+    document.getElementById('linkTimerBadge').style.display = 'none';
+    document.getElementById('linkExpiry').textContent = '⚠ Dernier lien expiré — générez-en un nouveau';
+    document.getElementById('linkExpiry').style.color = '#E08080';
+  } else {
+    // Encore valide
+    document.getElementById('myLink').textContent = last.url;
+    document.getElementById('activeLinkBox').style.display = 'block';
+    document.getElementById('noLinkBox').style.display = 'none';
+    document.getElementById('linkTimerBadge').style.display = 'inline-flex';
+    startCountdown(last.expiry);
+  }
+  renderLinkHistory();
+}
+
+function startCountdown(expiry) {
+  if (countdownInterval) clearInterval(countdownInterval);
+  function tick() {
+    const remaining = expiry - Date.now();
+    if (remaining <= 0) {
+      clearInterval(countdownInterval);
+      document.getElementById('linkCountdown').textContent = 'Expiré';
+      document.getElementById('linkTimerBadge').style.background = 'rgba(192,80,80,0.15)';
+      document.getElementById('linkTimerBadge').style.color = '#E08080';
+      document.getElementById('linkExpiry').textContent = '⚠ Lien expiré — générez-en un nouveau';
+      document.getElementById('linkExpiry').style.color = '#E08080';
+      document.getElementById('activeLinkBox').style.display = 'none';
+      document.getElementById('noLinkBox').style.display = 'block';
+      return;
+    }
+    const h = Math.floor(remaining / 3600000);
+    const m = Math.floor((remaining % 3600000) / 60000);
+    const s = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('linkCountdown').textContent =
+      `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    const expiryDate = new Date(expiry);
+    document.getElementById('linkExpiry').textContent =
+      `Expire à ${expiryDate.getHours()}h${String(expiryDate.getMinutes()).padStart(2,'0')}`;
+    document.getElementById('linkExpiry').style.color = '';
+  }
+  tick();
+  countdownInterval = setInterval(tick, 1000);
+}
+
+function renderLinkHistory() {
+  const key = `sf_links_${currentUser.id}`;
+  const history = JSON.parse(localStorage.getItem(key) || '[]');
+  const wrap = document.getElementById('linkHistory');
+  if (!history.length) { wrap.textContent = "Aucun lien genere"; return; }
+  const now = Date.now();
+  wrap.innerHTML = history.slice(0, 5).map(l => {
+    const expired = now >= l.expiry;
+    const d = new Date(l.createdAt);
+    const label = `${d.getDate()}/${d.getMonth()+1} à ${d.getHours()}h${String(d.getMinutes()).padStart(2,'0')}`;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid var(--border);gap:0.5rem;">
+      <div style="font-size:0.78rem;color:var(--text3);">${label}</div>
+      <span style="font-size:0.7rem;padding:0.2rem 0.6rem;border-radius:20px;font-weight:600;background:${expired?'rgba(192,80,80,0.1)':'rgba(90,154,106,0.1)'};color:${expired?'#E08080':'#7ACA8A'}">
+        ${expired?'Expiré':'Actif'}
+      </span>
+    </div>`;
+  }).join('');
+}
+
+function copyLink() {
+  const url = document.getElementById('myLink').textContent;
+  if (!url || url === '—') return;
+  navigator.clipboard.writeText(url).catch(() => {});
+  const btn = document.getElementById('copyBtn');
+  btn.textContent = '✓ Copié !'; btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = '📋 Copier'; btn.classList.remove('copied'); }, 2000);
+}
+
+function shareWhatsApp() {
+  const url = document.getElementById('myLink').textContent;
+  if (!url || url === '\u2014') { showToast("Generez un nouveau lien !", '#A09890'); return; }
+  const msg = encodeURIComponent('Check-in en ligne : ' + url + ' (lien valable 3h)');
+  window.open(`https://wa.me/?text=${msg}`, '_blank');
+}
+
+async function _saveSettings() {
+  const name = document.getElementById('settingName').value.trim();
+  if (!name) return;
+  const { error } = await sb.from('profiles').update({ name }).eq('id', currentUser.id);
+  if (error) { alert('Erreur sauvegarde.'); return; }
+  currentProfile.name = name;
+  document.getElementById('sidebarName').textContent = name;
+  document.getElementById('sidebarAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('welcomeMsg').textContent = `Bonjour, ${name.split(' ')[0]} 👋`;
+  showToast('✓ Sauvegardé !', '#5A9A6A');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function showToast(msg, color = '#5A9A6A') {
+  const dot = document.createElement('div');
+  dot.style.cssText = `position:fixed;top:1rem;right:1rem;background:${color};color:${color==='#E8A87C'?'#1A0E0A':'white'};padding:0.7rem 1.1rem;border-radius:10px;font-size:0.85rem;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.3);font-family:'Nunito Sans',sans-serif;font-weight:500`;
+  dot.textContent = msg;
+  document.body.appendChild(dot);
+  setTimeout(() => dot.remove(), 3000);
+}
+
+// ══════════════════════════════
+// REALTIME — nouveaux guests
+// ══════════════════════════════
+function subscribeToGuests() {
+  if (!currentUser) return;
+  sb.channel('guests-channel')
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'guests',
+      filter: `host_id=eq.${currentUser.id}`
+    }, async (payload) => {
+      // Rafraîchir le profil pour le compteur
+      const { data: fresh } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+      if (fresh) {
+        currentProfile = fresh;
+        updatePlanUI();
+        document.getElementById('sidebarPlan').textContent = `${fresh.guest_count || 0}/10 contrats`;
+      }
+      await updateStats();
+      await renderGuests('recent');
+      showToast(`🔔 Nouveau check-in : ${payload.new.name}`);
+    })
+    .subscribe();
+}
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  // Vérifier session existante
+  const { data: { session } } = await sb.auth.getSession();
+  if (session && session.user) {
+    document.getElementById('landingScreen').style.display = 'none';
+    await loadDashboard(session.user);
+    subscribeToGuests();
+  } else {
+    // Afficher landing page par défaut
+    document.getElementById('landingScreen').style.display = 'flex';
+  }
+
+  // Écouter les changements d'auth
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session && session.user) {
+      document.getElementById('landingScreen').style.display = 'none';
+      await loadDashboard(session.user);
+      subscribeToGuests();
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null; currentProfile = null;
+      document.getElementById('
