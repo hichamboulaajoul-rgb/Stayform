@@ -511,62 +511,23 @@ function togglePassword(inputId, btnId) {
 
 // ── GOOGLE / FACEBOOK ──
 function getSb() {
-  // Cherche sb dans le scope global
-  return window._sb || (typeof sb !== 'undefined' ? sb : null);
+  return window._sb || null;
 }
 function handleGoogleLogin() {
   var client = getSb();
-  if (client) {
-    client.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: 'https://hichamboulaajoul-rgb.github.io/Stayform/' }
-    });
-  } else {
-    // Supabase pas encore prêt, on attend et on réessaie
-    var btn = event && event.target;
-    if (btn) { btn.textContent = '⏳ Chargement...'; btn.disabled = true; }
-    var tries = 0;
-    var interval = setInterval(function() {
-      tries++;
-      var c = getSb();
-      if (c) {
-        clearInterval(interval);
-        c.auth.signInWithOAuth({
-          provider: 'google',
-          options: { redirectTo: 'https://hichamboulaajoul-rgb.github.io/Stayform/' }
-        });
-      } else if (tries > 10) {
-        clearInterval(interval);
-        showError('Erreur de chargement. Rechargez la page.');
-        if (btn) { btn.textContent = 'Continuer avec Google'; btn.disabled = false; }
-      }
-    }, 300);
-  }
+  if (!client) { showError('Patientez 2 secondes et réessayez.'); return; }
+  client.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: 'https://hichamboulaajoul-rgb.github.io/Stayform/' }
+  });
 }
 function handleFacebookLogin() {
   var client = getSb();
-  if (client) {
-    client.auth.signInWithOAuth({
-      provider: 'facebook',
-      options: { redirectTo: 'https://hichamboulaajoul-rgb.github.io/Stayform/' }
-    });
-  } else {
-    var tries = 0;
-    var interval = setInterval(function() {
-      tries++;
-      var c = getSb();
-      if (c) {
-        clearInterval(interval);
-        c.auth.signInWithOAuth({
-          provider: 'facebook',
-          options: { redirectTo: 'https://hichamboulaajoul-rgb.github.io/Stayform/' }
-        });
-      } else if (tries > 10) {
-        clearInterval(interval);
-        showError('Erreur de chargement. Rechargez la page.');
-      }
-    }, 300);
-  }
+  if (!client) { showError('Patientez 2 secondes et réessayez.'); return; }
+  client.auth.signInWithOAuth({
+    provider: 'facebook',
+    options: { redirectTo: 'https://hichamboulaajoul-rgb.github.io/Stayform/' }
+  });
 }
 
 // ── LOGIN / REGISTER / FORGOT ──
@@ -1187,7 +1148,7 @@ function showToast(msg, color) {
 </div>
 
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
 <script>
 // ══════════════════════════════
 // SUPABASE CONFIG
