@@ -744,6 +744,7 @@ function selectEmoji(emoji) {
 function importFromAirbnb() {
   if (typeof _importFromAirbnb === 'function') _importFromAirbnb();
   else showToast('Chargement en cours...', '#717171');
+  console.log("IMPORT DATA", data);
 }
 function generatePropertyLink(propId) {
   if (typeof _generatePropertyLink === 'function') _generatePropertyLink(propId);
