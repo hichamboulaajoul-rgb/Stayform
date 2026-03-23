@@ -2307,7 +2307,13 @@ async function _importFromAirbnb() {
   const url = document.getElementById('propAirbnb').value.trim();
   if (!url) { showToast('Collez un lien Airbnb dans le champ', '#C13515'); return; }
   if (!url.includes('airbnb.com/rooms/')) { showToast('Lien Airbnb invalide — ex: airbnb.com/rooms/12345', '#C13515'); return; 
-                                            console.log("IMPORT DATA", data);
+                                           const { data: res, error } = await supabase
+  .from('properties')
+  .insert([payload]);
+
+console.log("RESULT", res);
+console.log("ERROR", error);
+                                           console.log("IMPORT DATA", data);
 }
 
   const btn = document.getElementById('importBtn');
