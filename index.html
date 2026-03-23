@@ -734,12 +734,6 @@ function selectEmoji(emoji) {
 
   if (input) input.value = emoji;
   if (display) display.textContent = emoji;
-
-  document.querySelectorAll('.emoji-opt').forEach(function(el) {
-    el.style.border = el.textContent.trim() === emoji
-      ? '2px solid #FF385C'
-      : '2px solid transparent';
-  });
 }
 function importFromAirbnb() {
   if (typeof _importFromAirbnb === 'function') _importFromAirbnb();
@@ -2313,7 +2307,8 @@ async function _importFromAirbnb() {
 
 console.log("RESULT", res);
 console.log("ERROR", error);
-                                           console.log("IMPORT DATA", data);
+console.log("IMPORT DATA", data);
+                                           await _saveProperty();
 }
 
   const btn = document.getElementById('importBtn');
@@ -2437,37 +2432,22 @@ function _openAddProperty(propId) {
 }
 
 async function _saveProperty() {
-  // Save from step 2 (imported) or step 2 edit fields
-  const name = document.getElementById('propName').value.trim();
-  if (!name) { showToast('Le nom est obligatoire', '#C13515'); return; }
-  const btn = document.getElementById('propSaveBtn');
-  btn.disabled = true; btn.textContent = '⏳ Enregistrement...';
-  const data = {
-    host_id: currentUser.id,
-    name,
-    address: document.getElementById('propAddress').value.trim(),
-    airbnb_url: (_importedPropData && _importedPropData.airbnb_url) || document.getElementById('propAirbnb').value.trim(),
-    checkin_time: document.getElementById('propCheckin').value.trim() || '15:00',
-    checkout_time: document.getElementById('propCheckout').value.trim() || '11:00',
-    wifi_name: document.getElementById('propWifi').value.trim(),
-    wifi_password: document.getElementById('propWifiPass').value.trim(),
-    rules: document.getElementById('propRules').value.trim(),
-    cover_emoji: document.getElementById('propEmoji').value || (_importedPropData && _importedPropData.cover_emoji) || '🏠',
-    description: _importedPropData ? _importedPropData.description : null,
-    guests_max: _importedPropData ? _importedPropData.guests : null,
+  const payload = {
+    name: document.getElementById('propName')?.value || 'Sans nom',
+    emoji: document.getElementById('propEmoji')?.value || '🏡'
   };
-  let error;
-  if (editingPropertyId) {
-    ({ error } = await sb.from('properties').update(data).eq('id', editingPropertyId));
-  } else {
-    ({ error } = await sb.from('properties').insert(data));
+
+  const { error } = await supabase
+    .from('properties')
+    .insert([payload]);
+
+  if (error) {
+    console.error(error);
+    alert("Erreur sauvegarde");
+    return;
   }
-  btn.disabled = false; btn.textContent = '✓ Confirmer et enregistrer';
-  if (error) { showToast('Erreur: ' + error.message, '#C13515'); return; }
-  _importedPropData = null;
-  closePropertyModal();
-  await loadProperties();
-  showToast(editingPropertyId ? '✓ Hébergement modifié !' : '✓ Hébergement ajouté !', '#008A05');
+
+  alert("✅ Hébergement ajouté");
 }
 
 async function savePropertyManual() {
