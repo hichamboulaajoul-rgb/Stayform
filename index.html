@@ -729,10 +729,16 @@ function saveProperty() {
   if (typeof _saveProperty === 'function') _saveProperty();
 }
 function selectEmoji(emoji) {
-  document.getElementById('propEmoji').value = emoji;
-  document.getElementById('propEmojiDisplay').textContent = emoji;
+  var input = document.getElementById('propEmoji');
+  var display = document.getElementById('propEmojiDisplay');
+
+  if (input) input.value = emoji;
+  if (display) display.textContent = emoji;
+
   document.querySelectorAll('.emoji-opt').forEach(function(el) {
-    el.style.border = el.textContent.trim() === emoji ? '2px solid #FF385C' : '2px solid transparent';
+    el.style.border = el.textContent.trim() === emoji
+      ? '2px solid #FF385C'
+      : '2px solid transparent';
   });
 }
 function importFromAirbnb() {
