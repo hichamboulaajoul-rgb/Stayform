@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stayform — Tarifs</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #FAF6F1;
+  --surface: #FFFFFF;
+  --surface2: #F5F0EB;
+  --border: #EAE0D5;
+  --text: #1C120A;
+  --text2: #6B5848;
+  --text3: #B09A88;
+  --riad-green: #2D4A3E;
+  --riad-green2: #4A7C65;
+  --riad-gold: #D4A853;
+  --riad-terracotta: #C07050;
+  --success: #2D7A45;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'Nunito Sans', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+.nav-logo-icon {
+  width: 32px; height: 32px;
+  background: var(--riad-green);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--riad-gold);
+  font-size: 1rem;
+}
+.nav-logo-text {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--riad-green);
+  letter-spacing: -0.02em;
+}
+.nav-links { display: flex; gap: 1.5rem; align-items: center; }
+.nav-link {
+  font-size: 0.88rem;
+  color: var(--text3);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.nav-link:hover { color: var(--riad-green); }
+.nav-link.active { color: var(--riad-green); font-weight: 600; }
+.btn-nav {
+  background: var(--riad-green);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 0.45rem 1.1rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* ── HERO ── */
+.hero {
+  text-align: center;
+  padding: 4rem 1.5rem 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.badge {
+  display: inline-block;
+  background: var(--riad-green);
+  color: var(--riad-gold);
+  border-radius: 20px;
+  padding: 0.3rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 1.2rem;
+}
+.hero h1 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 0.8rem;
+}
+.hero h1 span { color: var(--riad-green); }
+.hero p {
+  font-size: 1rem;
+  color: var(--text2);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+/* ── TOGGLE ── */
+.toggle-wrap {
+  display: inline-flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 3rem;
+}
+.tog {
+  padding: 0.45rem 1.3rem;
+  border-radius: 25px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.tog.active { background: var(--riad-green); color: #fff; }
+.tog.inactive { background: transparent; color: var(--text3); }
+.save-badge {
+  background: #EEF5F1;
+  color: var(--riad-green);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+/* ── PLANS ── */
+.plans-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.2rem;
+  align-items: start;
+}
+.plan-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  position: relative;
+  transition: transform 0.2s;
+}
+.plan-card:hover { transform: translateY(-2px); }
+.plan-card.popular {
+  border: 2px solid var(--riad-green);
+  padding-top: 2.2rem;
+}
+.popular-badge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--riad-green);
+  color: var(--riad-gold);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.25rem 1rem;
+  border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: 0.05em;
+}
+.plan-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.6rem;
+}
+.plan-price {
+  font-family: 'Nunito', sans-serif;
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 0.2rem;
+}
+.plan-price sup {
+  font-size: 1rem;
+  font-weight: 600;
+  vertical-align: super;
+  margin-right: 2px;
+}
+.plan-price sub {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--text3);
+  vertical-align: baseline;
+}
+.plan-desc {
+  font-size: 0.78rem;
+  color: var(--text3);
+  margin-bottom: 1.2rem;
+  min-height: 2.2em;
+  line-height: 1.5;
+}
+.plan-btn {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  margin-bottom: 1.2rem;
+  transition: opacity 0.15s;
+}
+.plan-btn:hover { opacity: 0.88; }
+.plan-btn.primary { background: var(--riad-green); color: #fff; }
+.plan-btn.secondary { background: var(--surface2); color: var(--riad-green); }
+.plan-btn.outline { background: transparent; border: 1.5px solid var(--riad-green); color: var(--riad-green); }
+.features { display: flex; flex-direction: column; gap: 0; }
+.feat {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  font-size: 0.82rem;
+  color: var(--text2);
+  border-bottom: 0.5px solid var(--border);
+}
+.feat:last-child { border-bottom: none; }
+.feat-check { color: var(--riad-green); font-weight: 800; font-size: 0.9rem; flex-shrink: 0; }
+.feat-cross { color: var(--border); font-size: 0.9rem; flex-shrink: 0; }
+
+/* ── COMPARAISON TABLE ── */
+.compare-section {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 3rem 1.5rem;
+}
+.compare-inner { max-width: 800px; margin: 0 auto; }
+.compare-inner h2 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text);
+}
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.compare-table th {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  padding: 0.8rem 1rem;
+  text-align: center;
+  color: var(--text3);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.compare-table th.plan-col { color: var(--riad-green); }
+.compare-table td {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  border-top: 0.5px solid var(--border);
+  color: var(--text2);
+  font-size: 0.82rem;
+}
+.compare-table td:first-child { text-align: left; color: var(--text); }
+.compare-table tr:hover td { background: var(--surface2); }
+.check-icon { color: var(--riad-green); font-weight: 800; }
+.cross-icon { color: var(--border); }
+.category-row td {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  background: var(--surface2);
+  padding: 0.5rem 1rem;
+}
+
+/* ── FAQ ── */
+.faq-section {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+.faq-section h2 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text);
+}
+.faq-grid { display: flex; flex-direction: column; gap: 0.8rem; }
+.faq-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.faq-q {
+  padding: 1rem 1.2rem;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+.faq-q:hover { background: var(--surface2); }
+.faq-arrow { font-size: 0.8rem; color: var(--text3); transition: transform 0.2s; }
+.faq-a {
+  display: none;
+  padding: 0 1.2rem 1rem;
+  font-size: 0.85rem;
+  color: var(--text2);
+  line-height: 1.7;
+  border-top: 0.5px solid var(--border);
+}
+.faq-item.open .faq-a { display: block; }
+.faq-item.open .faq-arrow { transform: rotate(180deg); }
+
+/* ── FOOTER CTA ── */
+.footer-cta {
+  background: var(--riad-green);
+  padding: 4rem 1.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.footer-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    45deg, rgba(212,168,83,0.05) 0, rgba(212,168,83,0.05) 1px,
+    transparent 0, transparent 50%
+  );
+  background-size: 20px 20px;
+}
+.footer-cta h2 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 0.7rem;
+  position: relative;
+}
+.footer-cta p {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 1.8rem;
+  position: relative;
+}
+.footer-cta-btns {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: relative;
+}
+.btn-gold {
+  background: var(--riad-gold);
+  color: var(--riad-dark, #1A1008);
+  border: none;
+  border-radius: 10px;
+  padding: 0.9rem 2rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.btn-white-outline {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 10px;
+  padding: 0.9rem 2rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--text);
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.footer-logo {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+}
+.footer-logo span { color: var(--riad-gold); }
+footer p {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.4);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 720px) {
+  .plans-wrap { grid-template-columns: 1fr 1fr; }
+  .hero h1 { font-size: 1.8rem; }
+  .compare-table { font-size: 0.75rem; }
+  nav { padding: 0.8rem 1rem; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon">🏡</div>
+    <span class="nav-logo-text">stayform</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Accueil</a>
+    <a href="pricing.html" class="nav-link active">Tarifs</a>
+    <a href="index.html" class="nav-link">Se connecter</a>
+    <a href="index.html" class="btn-nav">Commencer</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">Tarifs simples · Sans surprise</div>
+  <h1>Le bon plan<br>pour chaque <span>hôte</span></h1>
+  <p>Commencez gratuitement. Passez en Pro quand vous êtes prêt. Résiliez à tout moment, sans condition.</p>
+  <div style="display:inline-flex;align-items:center;gap:0.6rem;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:0.4rem 1rem;margin-bottom:2.5rem;">
+    <span style="font-size:0.85rem;font-weight:700;color:var(--riad-green);">Facturation annuelle</span>
+    <span style="background:#EEF5F1;color:var(--riad-green);font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:4px;">Paiement unique</span>
+  </div>
+</div>
+
+<!-- PLANS -->
+<div class="plans-wrap">
+
+  <!-- FREE -->
+  <div class="plan-card">
+    <div class="plan-name">Gratuit</div>
+    <div class="plan-price">0<sub> DH</sub></div>
+    <div class="plan-desc">Pour découvrir Stayform<br>Sans carte bancaire requise</div>
+    <button class="plan-btn secondary" onclick="window.location.href='index.html'">
+      Commencer gratuitement
+    </button>
+    <div class="features">
+      <div class="feat"><span class="feat-check">✓</span> <strong>3 contrats total</strong></div>
+      <div class="feat"><span class="feat-check">✓</span> 1 logement</div>
+      <div class="feat"><span class="feat-check">✓</span> Contrat PDF</div>
+      <div class="feat"><span class="feat-check">✓</span> Lien check-in 3h</div>
+      <div class="feat"><span class="feat-check">✓</span> Code serrure auto</div>
+      <div class="feat"><span class="feat-cross">✗</span> Vérification CIN</div>
+      <div class="feat"><span class="feat-cross">✗</span> Notifications email</div>
+      <div class="feat"><span class="feat-cross">✗</span> Support</div>
+    </div>
+  </div>
+
+  <!-- STARTER -->
+  <div class="plan-card">
+    <div class="plan-name">Starter</div>
+    <div class="plan-price">590<sub> DH/an</sub></div>
+    <div class="plan-desc">Hôte occasionnel · 1-2 logements<br><span style="font-size:0.72rem;color:var(--text3);">soit 49 DH/mois</span></div>
+    <button class="plan-btn secondary" onclick="payYouCan('starter', 590)">
+      Payer 590 DH/an →
+    </button>
+    <div class="features">
+      <div class="feat"><span class="feat-check">✓</span> 30 contrats/mois</div>
+      <div class="feat"><span class="feat-check">✓</span> <strong>2 logements</strong></div>
+      <div class="feat"><span class="feat-check">✓</span> PDF premium</div>
+      <div class="feat"><span class="feat-check">✓</span> Lien check-in 3h</div>
+      <div class="feat"><span class="feat-check">✓</span> Code serrure auto</div>
+      <div class="feat"><span class="feat-cross">✗</span> Vérification CIN</div>
+      <div class="feat"><span class="feat-check">✓</span> Notifications email</div>
+      <div class="feat"><span class="feat-cross">✗</span> Support prioritaire</div>
+    </div>
+  </div>
+
+  <!-- PRO -->
+  <div class="plan-card popular">
+    <div class="popular-badge">⭐ LE PLUS POPULAIRE</div>
+    <div class="plan-name">Pro</div>
+    <div class="plan-price">990<sub> DH/an</sub></div>
+    <div class="plan-desc">Hôte actif · 5 logements<br><span style="font-size:0.72rem;color:var(--text3);">soit 82 DH/mois</span></div>
+    <button class="plan-btn primary" onclick="payYouCan('pro', 990)">
+      Payer 990 DH/an →
+    </button>
+    <div class="features">
+      <div class="feat"><span class="feat-check">✓</span> <strong>Contrats illimités</strong></div>
+      <div class="feat"><span class="feat-check">✓</span> <strong>5 logements</strong></div>
+      <div class="feat"><span class="feat-check">✓</span> PDF premium</div>
+      <div class="feat"><span class="feat-check">✓</span> Lien check-in 3h</div>
+      <div class="feat"><span class="feat-check">✓</span> Code serrure auto</div>
+      <div class="feat"><span class="feat-check">✓</span> <strong>Vérification CIN</strong></div>
+      <div class="feat"><span class="feat-check">✓</span> Notifications email</div>
+      <div class="feat"><span class="feat-cross">✗</span> Multi-hôtes</div>
+    </div>
+  </div>
+
+  <!-- BUSINESS -->
+  <div class="plan-card">
+    <div class="plan-name">Business</div>
+    <div class="plan-price">1 990<sub> DH/an</sub></div>
+    <div class="plan-desc">Agences &amp; conciergeries<br><span style="font-size:0.72rem;color:var(--text3);">soit 166 DH/mois</span></div>
+    <button class="plan-btn outline" onclick="payYouCan('business', 1990)">
+      Payer 1 990 DH/an →
+    </button>
+    <div class="features">
+      <div class="feat"><span class="feat-check">✓</span> <strong>Contrats illimités</strong></div>
+      <div class="feat"><span class="feat-check">✓</span> <strong>Logements illimités</strong></div>
+      <div class="feat"><span class="feat-check">✓</span> PDF premium</div>
+      <div class="feat"><span class="feat-check">✓</span> Lien check-in 3h</div>
+      <div class="feat"><span class="feat-check">✓</span> Code serrure auto</div>
+      <div class="feat"><span class="feat-check">✓</span> Vérification CIN</div>
+      <div class="feat"><span class="feat-check">✓</span> Notifications email</div>
+      <div class="feat"><span class="feat-check">✓</span> <strong>Multi-hôtes équipe</strong></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TABLEAU COMPARATIF -->
+<div class="compare-section">
+  <div class="compare-inner">
+    <h2>Comparaison détaillée</h2>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th style="text-align:left;width:35%;">Fonctionnalité</th>
+          <th>Gratuit</th>
+          <th>Starter</th>
+          <th class="plan-col">Pro</th>
+          <th>Business</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="category-row"><td colspan="5">Check-in & Contrat</td></tr>
+        <tr><td>Contrats</td><td>3 total</td><td>30/mois ⚡</td><td style="color:var(--riad-green);font-weight:700;">Illimités</td><td style="color:var(--riad-green);font-weight:700;">Illimités</td></tr>
+        <tr><td>Contrat PDF</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Signature électronique</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Lien check-in 3h</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Code serrure automatique</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+
+        <tr class="category-row"><td colspan="5">Logements</td></tr>
+        <tr><td>Nombre de logements</td><td>1</td><td style="color:var(--riad-green);font-weight:700;">2</td><td style="color:var(--riad-green);font-weight:700;">5</td><td style="color:var(--riad-green);font-weight:700;">Illimités</td></tr>
+        <tr><td>Import depuis Airbnb</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Infos WiFi & règles</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+
+        <tr class="category-row"><td colspan="5">Identité & Sécurité</td></tr>
+        <tr><td>Vérification CIN (caméra)</td><td><span class="cross-icon">✗</span></td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Google Vision OCR</td><td><span class="cross-icon">✗</span></td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Lien à usage unique</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+
+        <tr class="category-row"><td colspan="5">Notifications & Support</td></tr>
+        <tr><td>Email au guest (PDF joint)</td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Notification à l'hôte</td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Multi-hôtes (équipe)</td><td><span class="cross-icon">✗</span></td><td><span class="cross-icon">✗</span></td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Support prioritaire</td><td><span class="cross-icon">✗</span></td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section">
+  <h2>Questions fréquentes</h2>
+  <div class="faq-grid">
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Puis-je annuler à tout moment ? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Oui, sans engagement ni frais. Votre abonnement reste actif jusqu'à la fin de la période payée. Pas de surprise.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Que se passe-t-il après mes 3 check-ins gratuits ? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Vos données et logements sont conservés. Vous ne pouvez plus générer de nouveaux contrats tant que vous n'avez pas passé en Pro. Vos guests ayant déjà signé gardent leur PDF.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Les contrats PDF sont-ils valables légalement ? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Oui. La signature électronique, la photo de la pièce d'identité et les données du guest constituent un dossier de check-in complet conforme aux exigences des autorités marocaines.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Comment se passe le paiement ? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Carte bancaire (CIH, Attijariwafa, CMI...), virement bancaire, ou WhatsApp pour un arrangement. Contactez-nous à billing [at] stayform.ma</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">La vérification CIN fonctionne pour les passeports ? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Oui. Google Vision OCR supporte la CIN marocaine, les passeports et les titres de séjour. Pour les passeports, le guest peut importer une photo depuis sa galerie.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Je gère plus de 5 logements, que faire ? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Le plan Agence à 299 DH/mois vous donne des logements illimités, la gestion multi-hôtes pour votre équipe, et un support dédié. Contactez-nous sur WhatsApp.</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER CTA -->
+<div class="footer-cta">
+  <h2>Prêt à simplifier votre accueil ?</h2>
+  <p>Rejoignez les hôtes qui ont dit adieu au papier</p>
+  <div class="footer-cta-btns">
+    <button class="btn-gold" onclick="window.location.href='index.html'">Commencer gratuitement →</button>
+    <button class="btn-white-outline" onclick="contactAgency()">Parler à l'équipe</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">stay<span>form</span></div>
+  <p>© 2026 Stayform · Votre accueil, zéro papier</p>
+  <p style="color:rgba(255,255,255,0.4);font-size:0.75rem;">billing [at] stayform.ma</p>
+</footer>
+
+<!-- UPGRADE MODAL (simplifié) -->
+<div id="upgradeOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:1.5rem;">
+  <div style="background:#fff;border-radius:16px;padding:2rem;max-width:420px;width:100%;position:relative;">
+    <button onclick="closeUpgrade()" style="position:absolute;top:1rem;right:1rem;background:#F5F0EB;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem;">✕</button>
+    <div style="text-align:center;margin-bottom:1.5rem;">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">🏡</div>
+      <div id="modalPlanTitle" style="font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:800;color:var(--riad-green);">Passer en Pro</div>
+      <div id="modalPriceDisplay" style="font-family:'Nunito',sans-serif;font-size:2rem;font-weight:800;color:var(--text);margin:0.5rem 0;">99 <span style="font-size:1rem;color:var(--text3);">DH/mois</span></div>
+      <div id="modalPriceSub" style="font-size:0.78rem;color:var(--text3);">Facturé mensuellement · Résiliable à tout moment</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.2rem;">
+      <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text2);"><span style="color:var(--riad-green);font-weight:700;">✓</span> Check-ins illimités</div>
+      <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text2);"><span style="color:var(--riad-green);font-weight:700;">✓</span> Vérification CIN automatique</div>
+      <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text2);"><span style="color:var(--riad-green);font-weight:700;">✓</span> 5 logements · PDF premium</div>
+    </div>
+    <div style="display:flex;gap:0.5rem;margin-bottom:0.8rem;">
+      <button id="mTogM" onclick="setModal('monthly',window._selectedPlan)" style="flex:1;background:var(--riad-green);color:#fff;border:none;border-radius:8px;padding:0.5rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.72rem;cursor:pointer;"><span id="mBtnM">Pro · 99 DH/mois</span></button>
+      <button id="mTogA" onclick="setModal('yearly',window._selectedPlan)" style="flex:1;background:var(--surface2);color:var(--riad-green);border:none;border-radius:8px;padding:0.5rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.72rem;cursor:pointer;"><span id="mBtnA">Pro · 799 DH/an −33%</span></button>
+    </div>
+    <button onclick="proceedPayment()" style="width:100%;background:var(--riad-green);color:#fff;border:none;border-radius:10px;padding:0.85rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;">S'abonner maintenant →</button>
+    <div style="text-align:center;margin-top:0.7rem;font-size:0.72rem;color:var(--text3);">🔒 Paiement sécurisé · Activation immédiate</div>
+  </div>
+</div>
+
+<script>
+var period = 'monthly';
+var modalPeriod = 'monthly';
+
+function setPeriod(p) {
+  period = p;
+  document.getElementById('togM').className = p === 'monthly' ? 'tog active' : 'tog inactive';
+  document.getElementById('togA').className = p === 'yearly'  ? 'tog active' : 'tog inactive';
+
+  var plans = {
+    starter: { monthly: { price: '59',   sub: ' DH/mois', desc: 'Hôte occasionnel<br>1-2 logements' },
+               yearly:  { price: '479',  sub: ' DH/an',   desc: 'Soit 40 DH/mois<br><span style="color:var(--success);font-weight:600;">Économisez 229 DH</span>' } },
+    pro:     { monthly: { price: '99',   sub: ' DH/mois', desc: 'Hôte actif<br>Jusqu\'à 5 logements' },
+               yearly:  { price: '799',  sub: ' DH/an',   desc: 'Soit 66 DH/mois<br><span style="color:var(--success);font-weight:600;">Économisez 389 DH</span>' } },
+    biz:     { monthly: { price: '199',  sub: ' DH/mois', desc: 'Agences &amp; conciergeries<br>Tout illimité' },
+               yearly:  { price: '1 590', sub: ' DH/an',  desc: 'Soit 132 DH/mois<br><span style="color:var(--success);font-weight:600;">Économisez 798 DH</span>' } },
+  };
+
+  ['starter','pro','biz'].forEach(function(key) {
+    var data = plans[key][p];
+    var el = document.getElementById(key + 'Price');
+    if (el) el.innerHTML = data.price + '<sub>' + data.sub + '</sub>';
+    var desc = document.getElementById(key + 'Desc');
+    if (desc) desc.innerHTML = data.desc;
+  });
+}
+
+function toggleFaq(el) {
+  el.classList.toggle('open');
+}
+
+function openUpgrade_legacy(plan) {
+  window._selectedPlan = plan || 'pro';
+  var overlay = document.getElementById('upgradeOverlay');
+  overlay.style.display = 'flex';
+  setModal(period, plan || 'pro');
+}
+
+function closeUpgrade() {
+  document.getElementById('upgradeOverlay').style.display = 'none';
+}
+
+function setModal(p, plan) {
+  modalPeriod = p;
+  plan = plan || window._selectedPlan || 'pro';
+  var prices = {
+    starter: { monthly: '59 DH/mois',   yearly: '479 DH/an',   mSub: 'Facturé mensuellement',             ySub: 'Soit 40 DH/mois — économisez 229 DH' },
+    pro:     { monthly: '99 DH/mois',   yearly: '799 DH/an',   mSub: 'Facturé mensuellement',             ySub: 'Soit 66 DH/mois — économisez 389 DH' },
+    biz:     { monthly: '199 DH/mois',  yearly: '1 590 DH/an', mSub: 'Facturé mensuellement',             ySub: 'Soit 132 DH/mois — économisez 798 DH' },
+  };
+  var names = { starter: 'Starter', pro: 'Pro', biz: 'Business' };
+  var info = prices[plan] || prices.pro;
+
+  var mTogM = document.getElementById('mTogM');
+  var mTogA = document.getElementById('mTogA');
+  var disp  = document.getElementById('modalPriceDisplay');
+  var sub   = document.getElementById('modalPriceSub');
+  var title = document.getElementById('modalPlanTitle');
+  var mBtnM = document.getElementById('mBtnM');
+  var mBtnA = document.getElementById('mBtnA');
+
+  if (title) title.textContent = 'Passer en ' + names[plan];
+  if (mBtnM) mBtnM.textContent = names[plan] + ' · ' + info.monthly;
+  if (mBtnA) mBtnA.textContent = names[plan] + ' · ' + info.yearly + ' −33%';
+
+  if (p === 'monthly') {
+    if (mTogM) { mTogM.style.background = 'var(--riad-green)'; mTogM.style.color = '#fff'; }
+    if (mTogA) { mTogA.style.background = 'var(--surface2)';   mTogA.style.color = 'var(--riad-green)'; }
+    if (disp)  disp.innerHTML = info.monthly.replace(' ', ' <span style="font-size:1rem;font-weight:400;color:var(--text3);">') + '</span>';
+    if (sub)   sub.textContent = info.mSub + ' · Résiliable à tout moment';
+  } else {
+    if (mTogA) { mTogA.style.background = 'var(--riad-green)'; mTogA.style.color = '#fff'; }
+    if (mTogM) { mTogM.style.background = 'var(--surface2)';   mTogM.style.color = 'var(--riad-green)'; }
+    if (disp)  disp.innerHTML = info.yearly.replace(' ', ' <span style="font-size:1rem;font-weight:400;color:var(--text3);">') + '</span>';
+    if (sub)   sub.textContent = info.ySub;
+  }
+}
+
+function proceedPayment() {
+  var plan   = window._selectedPlan || 'pro';
+  var prices = { starter: { monthly: 59, yearly: 479 }, pro: { monthly: 99, yearly: 799 }, biz: { monthly: 199, yearly: 1590 } };
+  var amount = prices[plan][modalPeriod];
+  var label  = amount + (modalPeriod === 'yearly' ? ' DH/an' : ' DH/mois');
+  alert('Redirection vers le paiement sécurisé — ' + label + '\n\nIntégration PayDunya/CMI à connecter.');
+}
+
+function contactAgency() {
+  var msg = encodeURIComponent('Bonjour, je suis intéressé par le plan Agence Stayform (299 DH/mois) pour gérer plusieurs logements.');
+  window.open('https://wa.me/212600000000?text=' + msg, '_blank');
+}
+
+// Fermer modal en cliquant sur overlay
+document.getElementById('upgradeOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeUpgrade();
+});
+</script>
+
+</body>
+</html>
