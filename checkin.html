@@ -1,0 +1,3142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check-in · Votre Séjour</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+.lang-selector {
+  display: flex; gap: 0.3rem; margin-left: auto;
+}
+.lang-btn {
+  background: none; border: 1.5px solid var(--warm);
+  border-radius: 6px; padding: 0.25rem 0.5rem;
+  font-size: 0.72rem; font-weight: 600;
+  cursor: pointer; color: var(--mid);
+  transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+}
+.lang-btn.active { background: var(--terracotta); color: white; border-color: var(--terracotta); }
+body.rtl { direction: rtl; font-family: 'Noto Sans Arabic', 'DM Sans', sans-serif; }
+body.rtl .step-label { margin-left: 0; margin-right: 0.5rem; }
+body.rtl .btn-group { flex-direction: row-reverse; }
+body.rtl .form-row { direction: rtl; }
+body.rtl header { flex-direction: row-reverse; }
+body.rtl .progress-bar { flex-direction: row-reverse; }
+body.rtl .lang-selector { margin-left: 0; margin-right: auto; }
+body.rtl .sig-toolbar { flex-direction: row-reverse; }
+body.rtl .checkbox-row { flex-direction: row-reverse; }
+body.rtl .info-banner { flex-direction: row-reverse; }
+body.rtl .date-display { direction: ltr; } /* keep calendar LTR */
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// Fonctions appelées via onclick= disponibles immédiatement
+function setLang(lang) {
+  window._lang = lang || 'fr';
+  localStorage.setItem('sf_lang', lang);
+  // Update buttons
+  document.querySelectorAll('.lang-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.textContent.trim() === lang.toUpperCase());
+  });
+  // RTL
+  if (lang === 'ar') {
+    document.documentElement.setAttribute('dir', 'rtl');
+    document.body.classList.add('rtl');
+    document.body.style.fontFamily = "'Noto Sans Arabic', 'DM Sans', sans-serif";
+  } else {
+    document.documentElement.setAttribute('dir', 'ltr');
+    document.body.classList.remove('rtl');
+    document.body.style.fontFamily = '';
+  }
+  // Call main translation function if loaded
+  if (typeof _mainSetLang === 'function') _mainSetLang(lang);
+  else if (typeof applyTranslations === 'function') applyTranslations();
+}
+function changeMonth(delta) {
+  if (typeof _changeMonth === 'function') _changeMonth(delta);
+}
+function generateLockCode() {
+  if (typeof _generateLockCode === 'function') _generateLockCode();
+}
+function togglePassword(inputId, btnId) {
+  var input = document.getElementById(inputId);
+  if (!input) return;
+  input.type = input.type === 'text' ? 'password' : 'text';
+}
+// Apply saved language on load
+document.addEventListener('DOMContentLoaded', function() {
+  var saved = localStorage.getItem('sf_lang') || 'fr';
+  if (saved !== 'fr') setLang(saved);
+});
+</script>
+<style>
+  :root {
+    --cream: #FAF6F1;
+    --warm: #EAE0D5;
+    --sand: #B09A88;
+    --terracotta: #2D4A3E;
+    --terracotta-light: #EEF5F1;
+    --deep: #1C120A;
+    --mid: #4A7C65;
+    --light-mid: #6B8B78;
+    --success: #2D7A45;
+    --white: #FFFFFF;
+    --shadow: rgba(45,74,62,0.1);
+    --gold: #D4A853;
+    --riad-green: #2D4A3E;
+    --riad-green2: #4A7C65;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--deep);
+    min-height: 100vh;
+    background-image: 
+      radial-gradient(ellipse at 10% 20%, rgba(192,112,80,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(201,184,164,0.15) 0%, transparent 50%);
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 2rem 2.5rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid var(--warm);
+    background: var(--white);
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 20px var(--shadow);
+  }
+  .logo-mark {
+    width: 42px; height: 42px;
+    background: var(--terracotta);
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-mark svg { transform: rotate(45deg); }
+  .header-text h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--deep);
+  }
+  .header-text p {
+    font-size: 0.75rem;
+    color: var(--light-mid);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-bar {
+    padding: 1.5rem 2.5rem;
+    background: var(--white);
+    border-bottom: 1px solid var(--warm);
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .step-item {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    cursor: pointer;
+  }
+  .step-circle {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 2px solid var(--warm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--sand);
+    background: var(--white);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+  }
+  .step-circle.active {
+    border-color: var(--terracotta);
+    background: var(--terracotta);
+    color: white;
+    box-shadow: 0 0 0 4px rgba(192,112,80,0.15);
+  }
+  .step-circle.done {
+    border-color: var(--success);
+    background: var(--success);
+    color: white;
+  }
+  .step-label {
+    font-size: 0.7rem;
+    color: var(--sand);
+    margin-left: 0.5rem;
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .step-label.active { color: var(--terracotta); }
+  .step-label.done { color: var(--success); }
+  .step-line {
+    flex: 1;
+    height: 2px;
+    background: var(--warm);
+    margin: 0 0.5rem;
+    position: relative;
+  }
+  .step-line.done { background: var(--success); }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  .page { display: none; animation: fadeSlide 0.4s ease; }
+  .page.active { display: block; }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem;
+    font-weight: 400;
+    color: var(--deep);
+    margin-bottom: 0.4rem;
+    line-height: 1.2;
+  }
+  .page-subtitle {
+    color: var(--light-mid);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 30px var(--shadow);
+    border: 1px solid var(--warm);
+  }
+
+  /* ── FORM ── */
+  .form-group { margin-bottom: 1.4rem; }
+  label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--mid);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  input[type="text"], input[type="email"], input[type="tel"], select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid var(--warm);
+    border-radius: 10px;
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--deep);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  input:focus, select:focus {
+    border-color: var(--terracotta);
+    box-shadow: 0 0 0 3px rgba(192,112,80,0.1);
+    background: var(--white);
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  /* ── CALENDAR ── */
+  .calendar-wrap {
+    background: var(--cream);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1.5px solid var(--warm);
+  }
+  .cal-header {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+    -webkit-align-items: center;
+    align-items: center;
+    margin-bottom: 1.2rem;
+  }
+  .cal-header h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+  .cal-nav {
+    background: none;
+    border: 1.5px solid var(--warm);
+    width: 36px; height: 36px;
+    min-width: 36px; min-height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    color: var(--mid);
+    font-size: 1.1rem;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .cal-nav:hover { border-color: var(--terracotta); color: var(--terracotta); }
+  .cal-day { touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+  .cal-grid {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .cal-day-name {
+    width: calc(100% / 7);
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    text-align: center;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sand);
+    padding: 0.3rem 0;
+    font-weight: 500;
+  }
+  .cal-day {
+    width: calc(100% / 7);
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    position: relative;
+    cursor: pointer;
+    -webkit-border-radius: 8px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--deep);
+    -webkit-transition: background 0.15s;
+    transition: background 0.15s;
+  }
+  /* Carré via padding-bottom trick — compatible tous iOS */
+  .cal-day::before {
+    content: '';
+    display: block;
+    padding-bottom: 100%;
+  }
+  .cal-day-inner {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    border-radius: 8px;
+  }
+  .cal-day:hover:not(.empty):not(.past) .cal-day-inner { background: var(--warm); }
+  .cal-day.empty { cursor: default; pointer-events: none; }
+  .cal-day.past { color: var(--sand); cursor: default; }
+  .cal-day.selected-start .cal-day-inner,
+  .cal-day.selected-end .cal-day-inner {
+    background: var(--terracotta) !important;
+    color: white;
+    font-weight: 600;
+  }
+  .cal-day.in-range .cal-day-inner {
+    background: rgba(192,112,80,0.15);
+    border-radius: 0;
+  }
+  .cal-day.selected-start .cal-day-inner { border-radius: 8px 0 0 8px; }
+  .cal-day.selected-end .cal-day-inner { border-radius: 0 8px 8px 0; }
+  .cal-day.selected-start.selected-end .cal-day-inner { border-radius: 8px; }
+
+  .date-display {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 1.2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--warm);
+  }
+  .date-box {
+    background: var(--white);
+    border: 1.5px solid var(--warm);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    text-align: center;
+  }
+  .date-box small {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sand);
+    margin-bottom: 2px;
+  }
+  .date-box strong {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--deep);
+    font-weight: 500;
+  }
+  .date-box.filled { border-color: var(--terracotta); }
+  .date-arrow { color: var(--sand); font-size: 1.2rem; text-align: center; }
+  .nights-badge {
+    background: rgba(192,112,80,0.12);
+    color: var(--terracotta);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-top: 0.8rem;
+    display: inline-block;
+  }
+
+  /* ── UPLOAD ── */
+  .upload-zone {
+    border: 2px dashed var(--warm);
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: all 0.2s;
+    background: var(--cream);
+  }
+  .upload-zone.dragover {
+    border-color: var(--terracotta);
+    background: rgba(192,112,80,0.04);
+  }
+  .upload-zone input[type="file"] { display: none; }
+  .upload-icon {
+    width: 52px; height: 52px;
+    background: var(--warm);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.4rem;
+  }
+  .upload-zone h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+    color: var(--deep);
+  }
+  .upload-zone p { font-size: 0.82rem; color: var(--light-mid); margin-bottom: 1rem; }
+  .upload-btn {
+    display: inline-block;
+    padding: 0.55rem 1.3rem;
+    background: var(--terracotta);
+    color: white;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    border: none;
+  }
+  .upload-btn:hover { background: #B06040; }
+  .upload-types {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+  }
+  .upload-types span {
+    background: var(--white);
+    border: 1px solid var(--warm);
+    border-radius: 20px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.72rem;
+    color: var(--mid);
+    font-weight: 500;
+  }
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+  .preview-item {
+    position: relative;
+    aspect-ratio: 4/3;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1.5px solid var(--warm);
+    background: var(--cream);
+  }
+  .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+  .preview-item .doc-icon {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0.3rem; font-size: 1.6rem; color: var(--terracotta);
+  }
+  .preview-item .doc-icon span { font-size: 0.65rem; color: var(--mid); font-family: 'DM Sans'; }
+  .preview-item .remove-btn {
+    position: absolute; top: 4px; right: 4px;
+    width: 20px; height: 20px;
+    background: rgba(44,36,32,0.7);
+    border: none; border-radius: 50%;
+    color: white; font-size: 0.65rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── CONTRACT ── */
+  .contract-scroll {
+    background: var(--cream);
+    border-radius: 10px;
+    border: 1.5px solid var(--warm);
+    padding: 1.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: var(--mid);
+    margin-bottom: 1.5rem;
+  }
+  .contract-scroll h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--deep);
+    margin: 1rem 0 0.4rem;
+    font-weight: 500;
+  }
+  .contract-scroll h4:first-child { margin-top: 0; }
+
+  .signature-area {
+    border: 2px solid var(--warm);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--white);
+    margin-bottom: 1rem;
+  }
+  .sig-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--warm);
+    background: var(--cream);
+  }
+  .sig-toolbar span { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--mid); }
+
+@keyframes scanMove {
+  0%   { top: 22%; opacity: 1; }
+  45%  { top: 72%; opacity: 1; }
+  50%  { top: 72%; opacity: 0; }
+  55%  { top: 22%; opacity: 0; }
+  60%  { top: 22%; opacity: 1; }
+  100% { top: 22%; opacity: 1; }
+}
+  .sig-clear {
+    background: none; border: none;
+    font-size: 0.75rem; color: var(--terracotta);
+    cursor: pointer; padding: 0.2rem 0.5rem;
+    border-radius: 4px; transition: background 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .sig-clear:hover { background: rgba(192,112,80,0.1); }
+  canvas#sigCanvas {
+    display: block;
+    width: 100%;
+    height: 180px;
+    cursor: crosshair;
+    touch-action: none;
+    background: #FFFFFF;
+    border-radius: 0 0 4px 4px;
+  }
+  .sig-placeholder {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--warm);
+    font-size: 0.85rem;
+    pointer-events: none;
+    font-style: italic;
+  }
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.8rem;
+    background: var(--cream);
+    border-radius: 8px;
+    border: 1px solid var(--warm);
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+  }
+  .checkbox-row input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--terracotta);
+    flex-shrink: 0; margin-top: 1px;
+    cursor: pointer;
+  }
+  .checkbox-row span {
+    font-size: 0.82rem;
+    color: var(--mid);
+    line-height: 1.5;
+  }
+
+  /* ── SUMMARY ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .summary-item {
+    background: var(--cream);
+    border-radius: 10px;
+    padding: 1rem;
+    border: 1px solid var(--warm);
+  }
+  .summary-item small {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sand);
+    margin-bottom: 0.3rem;
+  }
+  .summary-item strong {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--deep);
+    font-weight: 500;
+  }
+
+  /* ── SUCCESS ── */
+  .success-icon {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, var(--success), #4CAF72);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    box-shadow: 0 8px 30px rgba(90,138,106,0.3);
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    padding: 0.85rem 2rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary {
+    background: var(--terracotta);
+    color: white;
+    box-shadow: 0 4px 15px rgba(192,112,80,0.3);
+  }
+  .btn-primary:hover {
+    background: #B06040;
+    box-shadow: 0 6px 20px rgba(192,112,80,0.4);
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled {
+    background: var(--sand);
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--mid);
+    border: 1.5px solid var(--warm);
+  }
+  .btn-secondary:hover { border-color: var(--mid); }
+  .btn-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 1rem;
+  }
+
+  .info-banner {
+    background: rgba(192,112,80,0.08);
+    border: 1px solid rgba(192,112,80,0.2);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.82rem;
+    color: var(--mid);
+    line-height: 1.5;
+  }
+  .info-banner .icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--warm);
+    margin: 1.5rem 0;
+  }
+
+  @media (max-width: 500px) {
+    .form-row { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: 1fr; }
+    header { padding: 1.2rem 1rem; }
+    .progress-bar { padding: 1rem; }
+    .step-label { display: none; }
+    main { padding: 1.5rem 1rem 3rem; }
+    .page-title { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M10 3L13 9H17L14 13L15 18L10 15L5 18L6 13L3 9H7L10 3Z" fill="white" stroke="white" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="header-text">
+    <h1 id="hdr-title">Check-in en ligne</h1>
+    <p id="hostNameDisplay">Bienvenue dans votre logement</p>
+  </div>
+  <div class="lang-selector">
+    <button class="lang-btn active" onclick="setLang('fr')">FR</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('ar')">AR</button>
+  </div>
+</header>
+
+<div class="progress-bar">
+  <div class="step-item" onclick="goToStep(1)">
+    <div class="step-circle active" id="sc1">1</div>
+    <span class="step-label active" id="sl1" data-i18n="step1">Séjour</span>
+  </div>
+  <div class="step-line" id="line1"></div>
+  <div class="step-item" onclick="goToStep(2)">
+    <div class="step-circle" id="sc2">2</div>
+    <span class="step-label" id="sl2" data-i18n="step2">Identité</span>
+  </div>
+  <div class="step-line" id="line2"></div>
+  <div class="step-item" onclick="goToStep(3)">
+    <div class="step-circle" id="sc3">3</div>
+    <span class="step-label" id="sl3" data-i18n="step3">Documents</span>
+  </div>
+  <div class="step-line" id="line3"></div>
+  <div class="step-item" onclick="goToStep(4)">
+    <div class="step-circle" id="sc4">4</div>
+    <span class="step-label" id="sl4" data-i18n="step4">Contrat</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- STEP 1: DATES -->
+  <div class="page active" id="page1">
+    <p class="page-title" data-i18n="t_sejour">Votre séjour</p>
+    <p class="page-subtitle" data-i18n="t_sejour_sub">Sélectionnez les dates de votre location sur le calendrier ci-dessous.</p>
+
+    <div class="card">
+      <div class="calendar-wrap">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+          <h3 id="calTitle"></h3>
+          <button class="cal-nav" onclick="changeMonth(1)">›</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="date-display">
+          <div class="date-box" id="boxStart"><small>Arrivée</small><strong id="txtStart">—</strong></div>
+          <div class="date-arrow">→</div>
+          <div class="date-box" id="boxEnd"><small>Départ</small><strong id="txtEnd">—</strong></div>
+        </div>
+        <div id="nightsBadge"></div>
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="form-group">
+        <label data-i18n="lbl_arrival">Heure d'arrivée prévue</label>
+        <select id="arrivalTime">
+          <option value="">Sélectionner</option>
+          <option>Avant 12h00</option>
+          <option>12h00 – 14h00</option>
+          <option>14h00 – 16h00</option>
+          <option>16h00 – 18h00</option>
+          <option>18h00 – 20h00</option>
+          <option>Après 20h00</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="lbl_guests">Nombre de voyageurs</label>
+        <select id="guestCount">
+          <option>1 voyageur</option>
+          <option selected>2 voyageurs</option>
+          <option>3 voyageurs</option>
+          <option>4 voyageurs</option>
+          <option>5 voyageurs</option>
+          <option>6 voyageurs</option>
+        </select>
+      </div>
+
+      <div class="btn-group">
+        <div></div>
+        <button class="btn btn-primary" onclick="nextStep(1)" id="btn1" disabled data-i18n="btn_next">Continuer →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: IDENTITY -->
+  <div class="page" id="page2">
+    <p class="page-title" data-i18n="t_coords">Vos coordonnées</p>
+    <p class="page-subtitle" data-i18n="t_coords_sub">Informations du voyageur principal de la réservation.</p>
+
+    <!-- Message sensibilisation identité -->
+    <div id="identityNotice" style="background:#EEF5F1;border:1px solid rgba(45,74,62,0.2);border-radius:10px;padding:0.8rem 1rem;margin-bottom:1.2rem;display:flex;align-items:flex-start;gap:0.7rem;">
+      <span style="font-size:1.1rem;flex-shrink:0;margin-top:1px;">🪪</span>
+      <div style="font-size:0.82rem;color:#2D4A3E;line-height:1.6;" id="identityNoticeText">
+        <strong>Saisissez vos informations exactement comme sur votre CIN ou passeport.</strong>
+        Ces données seront vérifiées à l'étape suivante par scan de votre document.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="form-row">
+        <div class="form-group">
+          <label data-i18n="lbl_docnum">N° CIN / Passeport <span style="color:var(--terracotta)">*</span></label>
+          <input type="text" id="docNumber" placeholder="AB123456" style="font-weight:600;letter-spacing:0.05em">
+        </div>
+        <div class="form-group">
+          <label data-i18n="lbl_doctype">Type de document</label>
+          <select id="docTypeIdentity">
+            <option value="cin">CIN</option>
+            <option value="passport">Passeport</option>
+            <option value="residence">Titre de séjour</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label data-i18n="lbl_firstname">Prénom <span style="color:var(--terracotta)">*</span></label>
+          <input type="text" id="firstName" placeholder="Marie">
+        </div>
+        <div class="form-group">
+          <label data-i18n="lbl_lastname">Nom de famille <span style="color:var(--terracotta)">*</span></label>
+          <input type="text" id="lastName" placeholder="Dupont">
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-i18n="lbl_email">Adresse e-mail <span style="color:var(--terracotta)">*</span></label>
+        <input type="email" id="email" placeholder="marie.dupont@email.com">
+      </div>
+      <div class="form-group">
+        <label data-i18n="lbl_phone">Téléphone</label>
+        <input type="tel" id="phone" placeholder="+33 6 00 00 00 00">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label data-i18n="lbl_nationality">Nationalité</label>
+          <input type="text" id="nationality" placeholder="Française">
+        </div>
+        <div class="form-group">
+          <label data-i18n="lbl_birthdate">Date de naissance</label>
+          <input type="text" id="birthdate" placeholder="JJ/MM/AAAA">
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-i18n="lbl_address">Adresse de résidence</label>
+        <input type="text" id="address" placeholder="12 rue de la Paix, Paris">
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="prevStep(2)" data-i18n="btn_back">← Retour</button>
+        <button class="btn btn-primary" onclick="nextStep(2)" data-i18n="btn_next">Continuer →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: DOCUMENTS -->
+  <div class="page" id="page3">
+    <p class="page-title">Vérification d'identité</p>
+    <p class="page-subtitle">Scannez le recto de votre CIN avec la caméra. La vérification est automatique.</p>
+
+    <div class="card">
+
+      <!-- Bannière confidentialité -->
+      <div style="background:#EEF5F1;border:1px solid rgba(45,74,62,0.2);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;display:flex;gap:0.8rem;align-items:flex-start;">
+        <span style="font-size:1.2rem;flex-shrink:0;">🛡️</span>
+        <div style="font-size:0.8rem;color:#2D4A3E;line-height:1.7;">
+          <strong>Vos données sont protégées</strong><br>
+          Votre CIN est utilisée <u>uniquement</u> pour vérifier votre identité. Elle apparaît dans votre contrat PDF uniquement — <strong>non stockée</strong> sur nos serveurs.
+        </div>
+      </div>
+
+      <!-- Type de document -->
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label>Type de document</label>
+        <select id="docType" onchange="onDocTypeChange()">
+          <option value="cin">Carte d'identité nationale (CIN)</option>
+          <option value="passport">Passeport</option>
+          <option value="residence">Titre de séjour</option>
+        </select>
+      </div>
+
+      <!-- ── SCANNER CIN ── -->
+      <div id="scannerSection">
+
+        <!-- État : Prêt à scanner -->
+        <div id="scanReady">
+          <div style="border:2px dashed var(--warm);border-radius:14px;padding:2rem;text-align:center;background:var(--cream);">
+            <div style="font-size:2.5rem;margin-bottom:0.8rem;">📷</div>
+            <div style="font-size:0.95rem;font-weight:600;color:var(--deep);margin-bottom:0.4rem;">Scanner votre CIN</div>
+            <div style="font-size:0.8rem;color:var(--light-mid);margin-bottom:1.2rem;line-height:1.6;">Placez le recto de votre carte devant la caméra.<br>La détection est automatique.</div>
+            <button onclick="startCINScanner()" style="background:var(--riad-green);color:#fff;border:none;border-radius:10px;padding:0.75rem 1.8rem;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;width:100%;">
+              📸 Ouvrir la caméra
+            </button>
+            <div style="margin-top:0.8rem;">
+              <button onclick="showGalleryFallback()" style="background:none;border:none;color:var(--sand);font-size:0.78rem;cursor:pointer;text-decoration:underline;">
+                Utiliser une photo depuis la galerie
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- État : Caméra active -->
+        <div id="scanActive" style="display:none;">
+          <div style="position:relative;border-radius:14px;overflow:hidden;background:#000;">
+            <!-- Video stream -->
+            <video id="cinVideo" autoplay playsinline muted style="width:100%;max-height:340px;object-fit:cover;display:block;"></video>
+            <!-- Canvas caché pour capture -->
+            <canvas id="cinCanvas" style="display:none;"></canvas>
+            <!-- Overlay de guidage -->
+            <div style="position:absolute;inset:0;pointer-events:none;">
+              <!-- Cadre de guidage CIN (format 85.6×54mm → ratio ~1.58) -->
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88%;height:60%;border:2px solid rgba(212,168,83,0.9);border-radius:6px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);">
+                <!-- Coins marqueurs -->
+                <div style="position:absolute;top:-3px;left:-3px;width:24px;height:24px;border-top:4px solid #D4A853;border-left:4px solid #D4A853;border-radius:3px 0 0 0;"></div>
+                <div style="position:absolute;top:-3px;right:-3px;width:24px;height:24px;border-top:4px solid #D4A853;border-right:4px solid #D4A853;border-radius:0 3px 0 0;"></div>
+                <div style="position:absolute;bottom:-3px;left:-3px;width:24px;height:24px;border-bottom:4px solid #D4A853;border-left:4px solid #D4A853;border-radius:0 0 0 3px;"></div>
+                <div style="position:absolute;bottom:-3px;right:-3px;width:24px;height:24px;border-bottom:4px solid #D4A853;border-right:4px solid #D4A853;border-radius:0 0 3px 0;"></div>
+                <!-- Texte guide centré -->
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,0.5);font-size:0.7rem;white-space:nowrap;pointer-events:none;">Placez la CIN — numéro visible</div>
+              </div>
+              <!-- Ligne de scan animée -->
+              <div id="scanLine" style="position:absolute;left:7.5%;right:7.5%;top:22%;height:2px;background:rgba(212,168,83,0.7);animation:scanMove 2s ease-in-out infinite;"></div>
+            </div>
+            <!-- Statut scan -->
+            <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);padding:0.8rem;text-align:center;">
+              <div id="scanStatus" style="font-size:0.82rem;color:#fff;font-weight:500;">🔍 Scan en cours...</div>
+            </div>
+          </div>
+          <!-- Bouton arrêter -->
+          <button onclick="stopCINScanner()" style="width:100%;margin-top:0.8rem;background:transparent;border:1px solid var(--border);border-radius:8px;padding:0.6rem;font-size:0.82rem;color:var(--light-mid);cursor:pointer;">
+            ✕ Annuler
+          </button>
+        </div>
+
+        <!-- État : Succès -->
+        <div id="scanSuccess" style="display:none;">
+          <div style="background:#EEF5F1;border:2px solid #2D4A3E;border-radius:14px;padding:1.5rem;text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:0.6rem;">✅</div>
+            <div style="font-size:1rem;font-weight:700;color:#2D4A3E;margin-bottom:0.3rem;">Carte valide — Identité vérifiée</div>
+            <div id="scanSuccessDetails" style="font-size:0.82rem;color:#4A7C65;margin-bottom:1rem;line-height:1.6;"></div>
+            <!-- Aperçu photo capturée -->
+            <img id="cinCaptured" style="max-width:100%;border-radius:8px;border:1px solid var(--border);margin-bottom:0.8rem;display:none;" alt="CIN capturée">
+            <button onclick="resetScanner()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:0.4rem 1rem;font-size:0.78rem;color:var(--light-mid);cursor:pointer;">
+              🔄 Rescanner
+            </button>
+          </div>
+        </div>
+
+        <!-- État : Échec 3 essais → galerie -->
+        <div id="scanFallback" style="display:none;">
+          <div style="background:#FFFBF0;border:1px solid #FFE082;border-radius:12px;padding:1.2rem;margin-bottom:1rem;text-align:center;">
+            <div style="font-size:1.5rem;margin-bottom:0.4rem;">⚠️</div>
+            <div style="font-size:0.85rem;font-weight:600;color:#C67600;margin-bottom:0.3rem;">Scan automatique difficile</div>
+            <div style="font-size:0.78rem;color:#8B6500;">Essayez avec une meilleure lumière, ou importez une photo depuis votre galerie.</div>
+          </div>
+          <!-- Upload galerie fallback -->
+          <div class="upload-zone" id="zone1" style="margin-bottom:0;">
+            <input type="file" id="file1" accept="image/*" onchange="handleFile(this,'preview1',1)">
+            <div id="preview1" style="display:none"></div>
+            <div id="placeholder1">
+              <div class="upload-icon">🖼️</div>
+              <h4>Photo depuis la galerie</h4>
+              <p>Choisissez une photo nette de votre CIN</p>
+              <button class="upload-btn" type="button" onclick="document.getElementById('file1').click()">📁 Choisir une photo</button>
+              <div class="upload-types"><span>JPG</span><span>PNG</span></div>
+            </div>
+          </div>
+          <div id="ocrStatus" style="display:none;margin-top:0.8rem;padding:0.8rem 1rem;border-radius:10px;font-size:0.82rem;"></div>
+          <div style="text-align:center;margin-top:0.5rem;">
+            <button onclick="startCINScanner()" style="background:none;border:none;color:var(--riad-green);font-size:0.78rem;cursor:pointer;text-decoration:underline;">↩ Réessayer avec la caméra</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Selfie optionnel -->
+      <div style="margin-top:1.5rem;">
+        <label style="font-size:0.82rem;color:var(--light-mid);">Selfie <span style="font-style:italic;font-weight:400;">(optionnel)</span></label>
+        <div class="upload-zone" id="zone3" style="margin-top:0.4rem;">
+          <input type="file" id="file3" accept="image/*" capture="user" onchange="handleFile(this,'preview3',3)">
+          <div id="preview3" style="display:none"></div>
+          <div id="placeholder3">
+            <div class="upload-icon">🤳</div>
+            <h4>Photo de vous</h4>
+            <p>Prenez un selfie ou choisissez une photo</p>
+            <button class="upload-btn" type="button" onclick="document.getElementById('file3').click()">📷 Prendre / Choisir</button>
+            <div class="upload-types"><span>JPG</span><span>PNG</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Consentement CIN -->
+      <div class="checkbox-row" onclick=\"toggleCheck('check4', event)\" style="margin-top:1.2rem;background:#EEF5F1;border:1px solid rgba(45,74,62,0.15);border-radius:8px;padding:0.8rem;">
+        <input type="checkbox" id="check4">
+        <span style="font-size:0.82rem;">🛡️ Je consens à l'utilisation de ma pièce d'identité <strong>uniquement</strong> à des fins de vérification d'identité pour cette location. Elle sera incluse dans mon contrat PDF uniquement et <strong>non stockée</strong> sur les serveurs de Stayform.</span>
+      </div>
+
+      <!-- Skip -->
+
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="prevStep(3)">← Retour</button>
+        <button class="btn btn-primary" onclick="nextStepDoc()" id="btn3" disabled>Continuer →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: CONTRACT -->
+  <div class="page" id="page4">
+    <p class="page-title" data-i18n="t_contrat">Contrat de location</p>
+    <p class="page-subtitle" data-i18n="t_contrat_sub">Veuillez lire attentivement et signer le contrat ci-dessous.</p>
+
+    <div class="card">
+      <div class="summary-grid" id="contractSummary"></div>
+
+      <div class="contract-scroll" id="contractText">
+        <h4>CONTRAT DE LOCATION MEUBLÉE TOURISTIQUE</h4>
+        Entre le soussigné, ci-après dénommé « le Bailleur », et le(s) voyageur(s) mentionné(s) dans le présent contrat, ci-après dénommé(s) « le(s) Locataire(s) ».
+
+        <h4>Article 1 — Objet du contrat</h4>
+        Le présent contrat a pour objet la location meublée à titre touristique du logement décrit dans la réservation. Cette location est consentie et acceptée aux conditions stipulées ci-après. La location ne peut en aucun cas bénéficier à des tiers et ne peut faire l'objet d'une sous-location ou cession sans accord écrit préalable du bailleur.
+
+        <h4>Article 2 — Durée de la location</h4>
+        La location commence et se termine aux dates sélectionnées lors de ce check-in. Le locataire devra libérer les lieux au plus tard à 11h00 le jour du départ. Le bailleur se réserve le droit de facturer une nuit supplémentaire en cas de départ tardif non convenu.
+
+        <h4>Article 3 — Prix et conditions de paiement</h4>
+        Le loyer a été réglé via la plateforme Airbnb conformément aux conditions de la réservation. Tous frais de ménage, taxes de séjour et autres charges ont été inclus dans le montant total indiqué sur la réservation.
+
+        <h4>Article 4 — Dépôt de garantie</h4>
+        Un dépôt de garantie peut être demandé par le bailleur. En l'absence de dommages constatés lors de l'état des lieux de sortie, ce dépôt est intégralement restitué dans un délai de 7 jours ouvrés après le départ.
+
+        <h4>Article 5 — Occupation et règles de séjour</h4>
+        Le logement est loué à usage exclusivement touristique et résidentiel temporaire. Il est expressément interdit : d'introduire plus de personnes que le nombre déclaré ; d'organiser des fêtes, soirées ou rassemblements ; de fumer à l'intérieur du logement ; d'introduire des animaux de compagnie sans autorisation préalable ; d'endommager les équipements et le mobilier.
+
+        <h4>Article 6 — Règlement intérieur</h4>
+        Le locataire s'engage à respecter le règlement intérieur du logement remis lors de l'arrivée ou accessible via le livret d'accueil numérique. Le non-respect du règlement peut entraîner une résiliation immédiate du contrat sans remboursement.
+
+        <h4>Article 7 — Responsabilité</h4>
+        Le locataire est responsable de tout dommage causé au logement, à son contenu et aux équipements durant son séjour. Le bailleur ne pourra être tenu responsable des vols, pertes ou dommages affectant les biens personnels du locataire.
+
+        <h4>Article 8 — Protection des données</h4>
+        Les données personnelles collectées dans ce formulaire sont traitées conformément au Règlement Général sur la Protection des Données (RGPD – UE 2016/679). Elles sont utilisées uniquement aux fins de vérification d'identité et de gestion de la location.
+
+        <h4>Article 9 — Litiges</h4>
+        Tout litige relatif au présent contrat sera soumis à la juridiction compétente du lieu du logement loué, après tentative de résolution amiable.
+      </div>
+
+      <div class="checkbox-row" onclick=\"toggleCheck('check1', event)\">
+        <input type="checkbox" id="check1">
+        <span>J'ai lu et j'accepte les conditions générales du contrat de location ci-dessus.</span>
+      </div>
+      <div class="checkbox-row" onclick=\"toggleCheck('check2', event)\">
+        <input type="checkbox" id="check2">
+        <span>Je certifie que les informations fournies sont exactes et que les pièces d'identité téléchargées sont authentiques.</span>
+      </div>
+      <div class="checkbox-row" onclick=\"toggleCheck('check3', event)\">
+        <input type="checkbox" id="check3">
+        <span>J'accepte le traitement de mes données personnelles conformément au RGPD pour la gestion de cette location.</span>
+      </div>
+
+
+      <hr class="section-divider">
+
+      <!-- CODE SERRURE -->
+      <div style="background:linear-gradient(135deg,rgba(192,112,80,0.08),rgba(192,112,80,0.03));border:1.5px solid rgba(192,112,80,0.2);border-radius:14px;padding:1.2rem;margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.8rem;">
+          <div>
+            <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--light-mid);margin-bottom:0.3rem;">🔑 Code d'accès au logement</div>
+            <div id="lockCodeDisplay" style="font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:600;color:var(--terracotta);letter-spacing:0.2em">— — —</div>
+            <div style="font-size:0.72rem;color:var(--sand);margin-top:0.2rem">Serrure numérique · 7 chiffres</div>
+          </div>
+          <button type="button" onclick="generateLockCode()" style="background:var(--terracotta);color:white;border:none;border-radius:10px;padding:0.65rem 1.2rem;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">
+            🎲 Générer
+          </button>
+        </div>
+        <input type="hidden" id="lockCode" value="">
+        <div id="lockCodeInfo" style="display:none;margin-top:0.8rem;padding:0.6rem 0.8rem;background:rgba(90,138,106,0.1);border-radius:8px;font-size:0.78rem;color:var(--success);">
+          ✓ Code généré et inclus dans le contrat PDF
+        </div>
+      </div>
+
+      <label data-i18n="lbl_signature">Signature manuscrite <span style="color:var(--terracotta)">*</span> <span style="font-style:italic;font-weight:400;text-transform:none;letter-spacing:0;color:var(--sand);font-size:0.7rem">(obligatoire)</span></label>
+      <div class="signature-area" id="sigArea">
+        <div class="sig-toolbar">
+          <span>✍ Signez ici</span>
+          <button class="sig-clear" onclick="clearSig()">Effacer</button>
+        </div>
+        <div style="position:relative">
+          <canvas id="sigCanvas"></canvas>
+          <span class="sig-placeholder" id="sigPlaceholder">Signez avec votre doigt ou votre souris</span>
+        </div>
+      </div>
+      <div id="sigError" style="display:none;color:var(--terracotta);font-size:0.78rem;margin-top:0.4rem;padding:0.4rem 0.6rem;background:rgba(192,112,80,0.08);border-radius:6px;">
+        ⚠ La signature est obligatoire pour valider le contrat.
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="prevStep(4)" data-i18n="btn_back">← Retour</button>
+        <button class="btn btn-primary" onclick="submitForm()" id="btnSubmit" disabled data-i18n="btn_submit">✓ Valider le check-in</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="page" id="page5">
+    <div class="card" style="text-align:center; padding: 3rem 2rem;">
+      <div class="success-icon">✓</div>
+      <p class="page-title" style="margin-bottom:0.5rem">Check-in validé !</p>
+      <p class="page-subtitle" style="margin-bottom:2rem">Votre dossier a bien été enregistré. Téléchargez le contrat signé ci-dessous.</p>
+      <div class="summary-grid" id="finalSummary" style="text-align:left; margin-bottom: 1.5rem;"></div>
+      <div class="info-banner" style="text-align:left; margin-bottom: 1.5rem;">
+        <span class="icon">📧</span>
+        <span>Un email de confirmation a été envoyé à votre adresse. L'hôte a également été notifié. Bon séjour !</span>
+      </div>
+      <div style="border-top: 1px solid var(--warm); padding-top: 1.5rem;">
+        <p style="font-size:0.82rem; color:var(--mid); margin-bottom:1rem;">📋 Générez le dossier complet pour vos archives ou les autorités</p>
+        <button class="btn btn-primary" onclick="generatePDF()" id="btnPDF" style="width:100%; font-size:1rem; padding:1rem;">
+          ⬇ Télécharger le contrat PDF
+        </button>
+        <p style="font-size:0.72rem; color:var(--sand); margin-top:0.7rem;">Contient : identité, dates, contrat complet et signature</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOCKED PAGE — hôte a atteint sa limite -->
+  <div class="page" id="pageLocked">
+    <div class="card" style="text-align:center; padding: 3rem 2rem;">
+      <div style="font-size:3rem; margin-bottom:1rem;">🔒</div>
+      <p class="page-title" style="margin-bottom:0.5rem; color:var(--terracotta)">Check-in indisponible</p>
+      <p class="page-subtitle" style="margin-bottom:2rem;">
+        Votre hôte a atteint la limite de son plan gratuit.<br>
+        Veuillez le contacter directement pour finaliser votre arrivée.
+      </p>
+      <div class="info-banner" style="text-align:left;">
+        <span class="icon">📞</span>
+        <span>Contactez votre hôte par téléphone ou WhatsApp pour confirmer votre check-in.</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── CALENDAR ──
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+let startDate = null, endDate = null, selecting = 'start';
+
+const dayNames = ['Lu','Ma','Me','Je','Ve','Sa','Di'];
+const monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+function renderCalendar() {
+  document.getElementById('calTitle').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  dayNames.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-name';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const offset = firstDay === 0 ? 6 : firstDay - 1;
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  for (let i = 0; i < offset; i++) {
+    const el = document.createElement('div'); el.className = 'cal-day empty';
+    grid.appendChild(el);
+  }
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(currentYear, currentMonth, d);
+    date.setHours(0,0,0,0);
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+    el.dataset.ts = date.getTime();
+    // inner wrapper for absolute centering (iOS compatible)
+    const inner = document.createElement('div');
+    inner.className = 'cal-day-inner';
+    inner.textContent = d;
+    el.appendChild(inner);
+    el.style.webkitTapHighlightColor = 'transparent';
+    if (date < today) {
+      el.classList.add('past');
+    } else {
+      if (startDate && date.getTime() === startDate.getTime()) el.classList.add('selected-start');
+      if (endDate && date.getTime() === endDate.getTime()) el.classList.add('selected-end');
+      if (startDate && endDate && date > startDate && date < endDate) el.classList.add('in-range');
+    }
+    grid.appendChild(el);
+  }
+}
+
+// Single delegated handler on the grid — works on iOS Safari
+function initCalendarEvents() {
+  const grid = document.getElementById('calGrid');
+
+  function handleCalTap(e) {
+    // find the tapped .cal-day
+    const target = e.target.closest ? e.target.closest('.cal-day') : e.target;
+    if (!target || !target.dataset.ts) return;
+    if (target.classList.contains('past') || target.classList.contains('empty')) return;
+    e.preventDefault();
+    const ts = parseInt(target.dataset.ts, 10);
+    const date = new Date(ts);
+    selectDay(date);
+  }
+
+  grid.addEventListener('click', handleCalTap);
+  grid.addEventListener('touchend', handleCalTap, { passive: false });
+}
+
+function selectDay(date) {
+  if (selecting === 'start' || (startDate && date <= startDate)) {
+    startDate = date; endDate = null; selecting = 'end';
+  } else {
+    endDate = date; selecting = 'start';
+  }
+  updateDateDisplay();
+  renderCalendar();
+}
+
+function updateDateDisplay() {
+  const fmt = d => d ? d.toLocaleDateString('fr-FR', {day:'2-digit',month:'short',year:'numeric'}) : '—';
+  document.getElementById('txtStart').textContent = fmt(startDate);
+  document.getElementById('txtEnd').textContent = fmt(endDate);
+  document.getElementById('boxStart').classList.toggle('filled', !!startDate);
+  document.getElementById('boxEnd').classList.toggle('filled', !!endDate);
+  if (startDate && endDate) {
+    const nights = Math.round((endDate - startDate) / 86400000);
+    document.getElementById('nightsBadge').innerHTML = `<span class="nights-badge">🌙 ${nights} nuit${nights>1?'s':''}</span>`;
+    document.getElementById('btn1').disabled = false;
+  } else {
+    document.getElementById('nightsBadge').innerHTML = '';
+    document.getElementById('btn1').disabled = !(startDate);
+  }
+}
+
+function _changeMonth(delta) {
+  currentMonth += delta;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  renderCalendar();
+}
+
+renderCalendar();
+initCalendarEvents();
+
+// ── NAVIGATION ──
+let currentStep = 1;
+
+function goToStep(n) {
+  if (n > currentStep) return;
+  currentStep = n;
+  updateUI();
+}
+
+function nextStepWithOCR(from) {
+  // Vérifier le statut OCR avant de continuer
+  const ocrEl = document.getElementById('ocrStatus');
+  if (ocrEl && ocrEl.style.display !== 'none') {
+    const html = ocrEl.innerHTML || '';
+    if (html.includes('Divergence') || html.includes('difficile')) {
+      // Bloquer si mismatch ou unreadable
+      if (html.includes('Divergence')) {
+        ocrEl.style.border = '2px solid #C13515';
+        ocrEl.innerHTML += '<br><strong style="color:#C13515;">⛔ Corrigez vos informations ou reprenez une meilleure photo avant de continuer.</strong>';
+        ocrEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      if (html.includes('difficile')) {
+        ocrEl.style.border = '2px solid #C13515';
+        ocrEl.innerHTML += '<br><strong style="color:#C13515;">⛔ Veuillez fournir une photo lisible de votre document.</strong>';
+        ocrEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+    }
+  }
+  nextStep(from);
+}
+
+function nextStepWithOCR(from) {
+  const ocrEl = document.getElementById('ocrStatus');
+  if (ocrEl && ocrEl.style.display !== 'none') {
+    const html = ocrEl.innerHTML || '';
+    if (html.includes('Divergence')) {
+      ocrEl.style.border = '2px solid #C13515';
+      if (!html.includes('Corrigez')) {
+        ocrEl.innerHTML += '<br><strong style="color:#C13515;">⛔ Corrigez vos informations ou reprenez une meilleure photo avant de continuer.</strong>';
+      }
+      ocrEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (html.includes('difficile') || html.includes('illisible')) {
+      ocrEl.style.border = '2px solid #C13515';
+      if (!html.includes('Veuillez')) {
+        ocrEl.innerHTML += '<br><strong style="color:#C13515;">⛔ Veuillez fournir une photo lisible de votre document.</strong>';
+      }
+      ocrEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+  }
+  nextStep(from);
+}
+
+function nextStep(from) {
+  if (from === 4 && hasSig) captureSignature();
+  if (from === 1 && !startDate) { alert('Veuillez sélectionner votre date d\'arrivée.'); return; }
+  if (from === 1 && !endDate) { alert('Veuillez sélectionner votre date de départ.'); return; }
+  if (from === 2) {
+    const docNum = document.getElementById('docNumber').value.trim();
+    const f = document.getElementById('firstName').value.trim();
+    const l = document.getElementById('lastName').value.trim();
+    const e = document.getElementById('email').value.trim();
+    if (!docNum) { alert('Veuillez saisir votre numéro de CIN ou passeport.'); return; }
+    if (!f || !l || !e) { alert('Veuillez remplir au moins votre prénom, nom et e-mail.'); return; }
+  }
+  if (from === 4) { submitForm(); return; }
+  currentStep = from + 1;
+  if (currentStep === 4) buildContractSummary();
+  updateUI();
+}
+
+function prevStep(from) {
+  if (from === 3) stopCINScanner();
+  currentStep = from - 1;
+  updateUI();
+}
+
+function updateUI() {
+  document.querySelectorAll('.page').forEach((p,i) => {
+    p.classList.toggle('active', i+1 === currentStep);
+  });
+  for (let i = 1; i <= 4; i++) {
+    const sc = document.getElementById('sc'+i);
+    const sl = document.getElementById('sl'+i);
+    sc.className = 'step-circle ' + (i < currentStep ? 'done' : i === currentStep ? 'active' : '');
+    sl.className = 'step-label ' + (i < currentStep ? 'done' : i === currentStep ? 'active' : '');
+    if (i < currentStep) sc.innerHTML = '✓';
+    else sc.textContent = i;
+    if (i < 4) {
+      document.getElementById('line'+i).className = 'step-line ' + (i < currentStep ? 'done' : '');
+    }
+  }
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ── FILE UPLOAD ──
+let filesUploaded = [false, false];
+
+// ══════════════════════════════════════════════════
+// SCANNER CIN — CAMÉRA LIVE + TESSERACT OCR
+// ══════════════════════════════════════════════════
+
+var cinStream = null;
+var cinScanInterval = null;
+var cinScanAttempts = 0;
+var cinScanMaxAttempts = 10;
+var cinVerified = false;
+var cinCapturedBlob = null;
+var cinScanFirstMatch_count = 0;
+var cinScanLastMatch_count = 0;
+
+function onDocTypeChange() {
+  var type = document.getElementById('docType').value;
+  var section = document.getElementById('scannerSection');
+  if (section) {
+    if (type === 'cin') {
+      section.style.display = 'block';
+    } else {
+      // Pour passeport/titre séjour → aller directement à la galerie
+      stopCINScanner();
+      showGalleryFallback();
+    }
+  }
+}
+
+async function startCINScanner() {
+  cinScanAttempts = 0;
+  cinVerified = false;
+  cinScanFirstMatch_count = 0;
+  cinScanLastMatch_count = 0;
+
+  document.getElementById('scanReady').style.display = 'none';
+  document.getElementById('scanFallback').style.display = 'none';
+  document.getElementById('scanSuccess').style.display = 'none';
+  document.getElementById('scanActive').style.display = 'block';
+
+  try {
+    cinStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: 'environment' }, // caméra arrière sur mobile
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    });
+    var video = document.getElementById('cinVideo');
+    video.srcObject = cinStream;
+    await video.play();
+
+    // Countdown 3s avant le premier scan pour laisser le temps d'ajuster
+    var countdown = 3;
+    var countEl = document.getElementById('scanStatus');
+    if (countEl) countEl.textContent = '⏱ Ajustez la carte... ' + countdown + 's';
+    var countTimer = setInterval(function() {
+      countdown--;
+      if (countEl) {
+        if (countdown > 0) {
+          countEl.textContent = '⏱ Ajustez la carte... ' + countdown + 's';
+        } else {
+          countEl.textContent = '🔍 Scan en cours...';
+          clearInterval(countTimer);
+          // Démarrer le scan toutes les 2s
+          cinScanInterval = setInterval(function() {
+            captureAndScan();
+          }, 2000);
+        }
+      }
+    }, 1000);
+
+  } catch(e) {
+    console.warn('Camera error:', e);
+    stopCINScanner();
+    showGalleryFallback();
+    document.getElementById('scanStatus') && (document.getElementById('scanStatus').textContent = '');
+    // Show error message
+    var fb = document.getElementById('scanFallback');
+    if (fb) {
+      fb.querySelector('div > div:last-child').textContent = 'Caméra non disponible. Importez une photo depuis la galerie.';
+    }
+  }
+}
+
+function stopCINScanner() {
+  if (cinScanInterval) { clearInterval(cinScanInterval); cinScanInterval = null; }
+  if (cinStream) {
+    cinStream.getTracks().forEach(function(t) { t.stop(); });
+    cinStream = null;
+  }
+  document.getElementById('scanActive').style.display = 'none';
+}
+
+function showGalleryFallback() {
+  stopCINScanner();
+  document.getElementById('scanReady').style.display = 'none';
+  document.getElementById('scanActive').style.display = 'none';
+  document.getElementById('scanSuccess').style.display = 'none';
+  document.getElementById('scanFallback').style.display = 'block';
+}
+
+async function captureAndScan() {
+  if (cinVerified) return;
+  var video = document.getElementById('cinVideo');
+  var canvas = document.getElementById('cinCanvas');
+  if (!video || !canvas || !video.videoWidth) return;
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  var ctx2 = canvas.getContext('2d');
+  ctx2.drawImage(video, 0, 0);
+
+  var status = document.getElementById('scanStatus');
+  if (status) status.textContent = '🔍 Analyse Google Vision...';
+
+  try {
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    var base64 = dataUrl.split(',')[1];
+    await callVisionOCR(base64, 'image/jpeg', canvas);
+  } catch(e) {
+    console.warn('Scan error:', e);
+    cinScanAttempts++;
+    if (status) status.textContent = '📷 Maintenez la carte stable...';
+    if (cinScanAttempts >= cinScanMaxAttempts) { stopCINScanner(); showGalleryFallback(); }
+  }
+}
+
+async function callVisionOCR(base64, mediaType, canvasEl) {
+  var status = document.getElementById('scanStatus') || document.getElementById('ocrStatus');
+  var docNumField = document.getElementById('docNumber');
+  var docNum = docNumField ? docNumField.value.trim() : '';
+
+  try {
+    var res = await fetch('https://syvpyvkgauyfqghwiqsl.supabase.co/functions/v1/verify-identity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+      body: JSON.stringify({ imageBase64: base64, mediaType: mediaType, docNumber: docNum })
+    });
+
+    var result = await res.json();
+    console.log('Vision result:', result);
+
+    if (!result.readable) {
+      if (status) { status.style.display='block'; status.style.background='#FFF0F0'; status.style.border='1px solid #FFCDD2'; status.style.color='#C13515'; status.textContent = '📷 Document illisible — prenez une photo plus nette et bien éclairée'; }
+      cinScanAttempts++;
+      if (cinScanAttempts >= cinScanMaxAttempts) { stopCINScanner(); showGalleryFallback(); }
+      return;
+    }
+
+    if (result.verified) {
+      cinVerified = true;
+      stopCINScanner();
+
+      // Remplir auto numéro si vide
+      if (result.autoFill && result.detectedNum && docNumField && !docNumField.value.trim()) {
+        docNumField.value = result.detectedNum;
+      }
+
+      // Stocker la photo
+      var sourceCanvas = canvasEl || document.getElementById('cinCanvas');
+      if (sourceCanvas) {
+        var dataUrl2 = sourceCanvas.toDataURL('image/jpeg', 0.9);
+        docImage1 = dataUrl2;
+        filesUploaded[0] = true;
+        sourceCanvas.toBlob(function(blob) {
+          var file = new File([blob], 'cin_scan.jpg', { type: 'image/jpeg' });
+          var dt = new DataTransfer();
+          dt.items.add(file);
+          var f1 = document.getElementById('file1');
+          if (f1) f1.files = dt.files;
+        }, 'image/jpeg', 0.9);
+        var img = document.getElementById('cinCaptured');
+        if (img) { img.src = dataUrl2; img.style.display = 'block'; }
+      } else {
+        // Fallback pour upload galerie — stocker directement depuis base64
+        docImage1 = 'data:' + mediaType + ';base64,' + base64;
+        filesUploaded[0] = true;
+      }
+
+      // Afficher succès
+      var sa = document.getElementById('scanActive');
+      var ss = document.getElementById('scanSuccess');
+      if (sa) sa.style.display = 'none';
+      if (ss) ss.style.display = 'block';
+
+      // Dans la galerie, afficher dans ocrStatus
+      var ocrEl = document.getElementById('ocrStatus');
+      if (ocrEl) { ocrEl.style.display='block'; ocrEl.style.background='#F0FFF4'; ocrEl.style.border='1px solid rgba(0,138,5,0.3)'; ocrEl.style.color='#008A05'; ocrEl.innerHTML = '✅ <strong>Carte valide — Identité vérifiée</strong>'; }
+
+      var details = document.getElementById('scanSuccessDetails');
+      if (details) {
+        var guestName = (document.getElementById('guestName') || {}).value || '';
+        var nameStr = guestName ? '<strong>' + guestName + '</strong><br>' : '';
+        details.innerHTML = nameStr + '🛡️ Identité vérifiée · Document authentique<br><span style="font-size:0.75rem;color:var(--mid);">Numéro enregistré de manière sécurisée</span>';
+      }
+
+      checkStep3();
+
+    } else {
+      cinScanAttempts++;
+      var msg = '⚠️ Document non reconnu — repositionnez votre carte et réessayez';
+      if (status) { status.style.display='block'; status.textContent = msg; }
+      // Dans galerie, afficher dans ocrStatus
+      var ocrEl2 = document.getElementById('ocrStatus');
+      if (ocrEl2 && ocrEl2 !== status) { ocrEl2.style.display='block'; ocrEl2.style.background='#FFFBF0'; ocrEl2.style.border='1px solid #FFE082'; ocrEl2.style.color='#C67600'; ocrEl2.textContent = msg; }
+      if (cinScanAttempts >= cinScanMaxAttempts) { stopCINScanner(); showGalleryFallback(); }
+    }
+
+  } catch(e) {
+    console.warn('Vision API error:', e);
+    cinScanAttempts++;
+    var errEl = document.getElementById('scanStatus') || document.getElementById('ocrStatus');
+    if (errEl) { errEl.style.display='block'; errEl.textContent = '⚠️ Erreur réseau — réessayez'; }
+    if (cinScanAttempts >= cinScanMaxAttempts) { stopCINScanner(); showGalleryFallback(); }
+  }
+}
+function resetScanner() {
+  cinVerified = false;
+  cinScanAttempts = 0;
+  cinScanFirstMatch_count = 0;
+  cinScanLastMatch_count = 0;
+  cinCapturedBlob = null;
+  filesUploaded[0] = false;
+  docImage1 = null;
+  document.getElementById('scanSuccess').style.display = 'none';
+  document.getElementById('scanReady').style.display = 'block';
+  checkStep3();
+}
+
+function checkStep3() {
+  var btn3 = document.getElementById('btn3');
+  if (!btn3) return;
+  var c4 = document.getElementById('check4');
+  var c4ok = c4 ? c4.checked : true;
+  // CIN scan obligatoire + consentement coché
+  btn3.disabled = !(cinVerified && c4ok);
+}
+
+function nextStepDoc() {
+  // Vérifier consentement check4
+  var c4 = document.getElementById('check4');
+  if (c4 && !c4.checked) {
+    c4.closest('.checkbox-row').style.border = '2px solid #C13515';
+    c4.closest('.checkbox-row').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  nextStep(3);
+}
+
+function handleFile(input, previewId, idx) {
+  const file = input.files[0];
+  if (!file) return;
+  filesUploaded[idx - 1] = true;
+
+  const placeholder = document.getElementById('placeholder' + idx);
+  const preview = document.getElementById(previewId);
+
+  placeholder.style.display = 'none';
+  preview.style.display = 'block';
+
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.innerHTML = `
+        <div style="position:relative;display:inline-block;width:100%">
+          <img src="${e.target.result}" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px;border:1.5px solid var(--warm)">
+          <div style="margin-top:0.6rem;display:flex;align-items:center;justify-content:space-between;gap:0.5rem">
+            <span style="font-size:0.8rem;color:var(--mid);word-break:break-all">${file.name}</span>
+            <button class="upload-btn" type="button" style="white-space:nowrap;font-size:0.75rem;padding:0.35rem 0.8rem;background:var(--mid)" onclick="removeFile(${idx})">✕ Supprimer</button>
+          </div>
+        </div>`;
+      // Lancer Google Vision OCR pour le recto (zone 1)
+      if (idx === 1) {
+        var r = new FileReader();
+        r.onload = function(ev) {
+          var b64 = ev.target.result.split(',')[1];
+          var mt = ev.target.result.split(';')[0].replace('data:','');
+          var statusEl = document.getElementById('ocrStatus');
+          if (statusEl) { statusEl.style.display='block'; statusEl.style.background='#F7F7F7'; statusEl.style.border='1px solid #EBEBEB'; statusEl.style.color='#717171'; statusEl.textContent='🔍 Analyse Google Vision en cours...'; }
+          callVisionOCR(b64, mt || 'image/jpeg').then(function() {
+            // callVisionOCR met à jour le UI directement
+            // Si verified → activer btn3
+            checkStep3();
+          });
+        };
+        r.readAsDataURL(file);
+      }
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.innerHTML = `
+      <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--cream);border-radius:8px;border:1.5px solid var(--warm)">
+        <span style="font-size:2rem">📄</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.85rem;font-weight:500;color:var(--deep);word-break:break-all">${file.name}</div>
+          <div style="font-size:0.72rem;color:var(--sand);margin-top:2px">${(file.size/1024).toFixed(0)} KB · PDF</div>
+        </div>
+        <button class="upload-btn" type="button" style="white-space:nowrap;font-size:0.75rem;padding:0.35rem 0.8rem;background:var(--mid)" onclick="removeFile(${idx})">✕</button>
+      </div>`;
+  }
+  checkUploadBtn();
+  if (idx === 1) checkStep3();
+}
+
+function removeFile(idx) {
+  filesUploaded[idx - 1] = false;
+  document.getElementById('preview' + idx).style.display = 'none';
+  document.getElementById('preview' + idx).innerHTML = '';
+  document.getElementById('placeholder' + idx).style.display = 'block';
+  document.getElementById('file' + idx).value = '';
+  checkUploadBtn();
+}
+
+function checkUploadBtn() {
+  // Le bouton se débloque uniquement après scan CIN validé
+  document.getElementById('btn3').disabled = !cinVerified;
+}
+
+// capture selfie data for PDF
+function captureSelfie(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  if (!file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = e => { selfieData = e.target.result; };
+  reader.readAsDataURL(file);
+}
+
+let docSkipped = false;
+
+function toggleSkip() {
+  const banner = document.getElementById('skipBanner');
+  const btn = document.getElementById('toggleSkipBtn');
+  const isVisible = banner.style.display !== 'none';
+  banner.style.display = isVisible ? 'none' : 'block';
+  btn.textContent = isVisible ? 'Je n\'ai pas mon document maintenant' : '← Annuler';
+}
+
+function skipDocuments() {
+  docSkipped = true;
+  currentStep = 4;
+  buildContractSummary();
+  updateUI();
+}
+
+// Drag & drop
+['zone1','zone2','zone3'].forEach((zoneId, i) => {
+  const zone = document.getElementById(zoneId);
+  if (!zone) return;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const input = document.getElementById('file' + (i+1));
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    handleFile(input, 'preview' + (i+1), i+1);
+  });
+});
+
+// ── CONTRACT SUMMARY ──
+function buildContractSummary() {
+  const fmt = d => d ? d.toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}) : '—';
+  const nights = startDate && endDate ? Math.round((endDate - startDate) / 86400000) : '—';
+  const name = `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`;
+  const html = `
+    <div class="summary-item"><small>Locataire</small><strong>${name}</strong></div>
+    <div class="summary-item"><small>Voyageurs</small><strong>${document.getElementById('guestCount').value}</strong></div>
+    <div class="summary-item"><small>Arrivée</small><strong>${fmt(startDate)}</strong></div>
+    <div class="summary-item"><small>Départ</small><strong>${fmt(endDate)}</strong></div>
+    <div class="summary-item"><small>Durée</small><strong>${nights} nuit${nights>1?'s':''}</strong></div>
+    <div class="summary-item"><small>Arrivée prévue</small><strong>${document.getElementById('arrivalTime').value || '—'}</strong></div>
+  `;
+  document.getElementById('contractSummary').innerHTML = html;
+}
+
+// ── SIGNATURE ──
+// Canvas signature — initialisé après chargement du DOM
+var canvas, ctx;
+var drawing = false, hasSig = false;
+var signatureDataURL = null;
+
+function initCanvas() {
+  canvas = document.getElementById('sigCanvas');
+  if (!canvas) return;
+  ctx = canvas.getContext('2d');
+
+  function resizeCanvas() {
+    const ratio = window.devicePixelRatio || 1;
+    const displayW = canvas.offsetWidth;
+    const displayH = canvas.offsetHeight;
+    if (displayW === 0 || displayH === 0) return;
+    canvas.width = displayW * ratio;
+    canvas.height = displayH * ratio;
+    ctx.scale(ratio, ratio);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, displayW, displayH);
+    if (signatureDataURL) {
+      const img = new Image();
+      img.onload = () => ctx.drawImage(img, 0, 0, displayW, displayH);
+      img.src = signatureDataURL;
+    }
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  setTimeout(resizeCanvas, 100);
+
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  canvas.addEventListener('mousedown', e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+  canvas.addEventListener('mousemove', e => {
+    if (!drawing) return;
+    const p = getPos(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    hasSig = true;
+    var ph = document.getElementById('sigPlaceholder');
+    if (ph) ph.style.display = 'none';
+    checkSubmit();
+  });
+  canvas.addEventListener('mouseup', () => { drawing = false; if (hasSig) captureSignature(); });
+  canvas.addEventListener('mouseleave', () => drawing = false);
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, {passive:false});
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (!drawing) return;
+    const p = getPos(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    hasSig = true;
+    var ph = document.getElementById('sigPlaceholder');
+    if (ph) ph.style.display = 'none';
+    checkSubmit();
+  }, {passive:false});
+  canvas.addEventListener('touchend', () => { drawing = false; if (hasSig) captureSignature(); });
+}
+
+document.addEventListener('DOMContentLoaded', initCanvas);
+
+function captureSignature() {
+  try {
+    if (canvas.width > 0 && canvas.height > 0) {
+      // Canvas temporaire fond blanc + signature pour export propre
+      const tmp = document.createElement('canvas');
+      tmp.width = canvas.width;
+      tmp.height = canvas.height;
+      const tctx = tmp.getContext('2d');
+      tctx.fillStyle = '#FFFFFF';
+      tctx.fillRect(0, 0, tmp.width, tmp.height);
+      tctx.drawImage(canvas, 0, 0);
+      signatureDataURL = tmp.toDataURL('image/png');
+    }
+  } catch(e) { console.error('Capture sig error:', e); }
+}
+
+function clearSig() {
+  // Refill white background
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  hasSig = false;
+  signatureDataURL = null;
+  document.getElementById('sigPlaceholder').style.display = '';
+  if (document.getElementById('sigArea')) document.getElementById('sigArea').style.borderColor = 'var(--warm)';
+  if (document.getElementById('sigError')) document.getElementById('sigError').style.display = 'none';
+  checkSubmit();
+}
+
+function toggleCheck(id, event) {
+  if (event && event.target && event.target.type === 'checkbox') return;
+  const cb = document.getElementById(id);
+  if (!cb) return;
+  cb.checked = !cb.checked;
+  if (id === 'check4') checkStep3();
+  else checkSubmit();
+}
+
+function checkSubmit() {
+  const c1 = document.getElementById('check1').checked;
+  const c2 = document.getElementById('check2').checked;
+  const c3 = document.getElementById('check3').checked;
+  const c4El = document.getElementById('check4');
+  const c4 = c4El ? c4El.checked : true;
+  const allChecked = c1 && c2 && c3 && c4;
+  // hasSig peut ne pas être encore initialisé
+  const sig = (typeof hasSig !== 'undefined') ? hasSig : false;
+  const sigArea = document.getElementById('sigArea');
+  const sigError = document.getElementById('sigError');
+  if (sigArea) sigArea.style.borderColor = sig ? 'var(--warm)' : (allChecked && !sig ? 'var(--terracotta)' : 'var(--warm)');
+  if (sigError) sigError.style.display = (allChecked && !sig) ? 'block' : 'none';
+  document.getElementById('btnSubmit').disabled = !(c1 && c2 && c3 && c4 && sig);
+}
+
+// store doc images as base64
+let docImage1 = null, docImage2 = null;
+let selfieData = null;
+
+// ── LOCK CODE GENERATOR ──
+function _generateLockCode() {
+  const code = Math.floor(1000000 + Math.random() * 9000000).toString();
+  const formatted = code.slice(0,3) + ' ' + code.slice(3,5) + ' ' + code.slice(5,7);
+  document.getElementById('lockCode').value = code;
+  document.getElementById('lockCodeDisplay').textContent = formatted;
+  document.getElementById('lockCodeInfo').style.display = 'block';
+  // Flash animation
+  const disp = document.getElementById('lockCodeDisplay');
+  disp.style.transition = 'all 0.3s';
+  disp.style.color = 'var(--success)';
+  setTimeout(() => { disp.style.color = 'var(--terracotta)'; }, 600);
+}
+
+// ── Afficher les infos du logement dans le formulaire ──
+function showPropertyInfoBanner(prop) {
+  if (!prop) return;
+  // Check if banner already exists
+  if (document.getElementById('propInfoBanner')) return;
+  
+  const infos = [];
+  if (prop.checkin_time) infos.push({ icon: '🕐', label: 'Check-in', val: prop.checkin_time });
+  if (prop.checkout_time) infos.push({ icon: '🕚', label: 'Check-out', val: prop.checkout_time });
+  if (prop.wifi_name) infos.push({ icon: '📶', label: 'WiFi', val: prop.wifi_name });
+  if (prop.wifi_password) infos.push({ icon: '🔑', label: 'Mot de passe', val: prop.wifi_password });
+  
+  if (infos.length === 0 && !prop.rules) return;
+  
+  const banner = document.createElement('div');
+  banner.id = 'propInfoBanner';
+  banner.style.cssText = 'background:linear-gradient(135deg,#FFF8F5,#FFF0EC);border:1px solid rgba(192,112,80,0.2);border-radius:14px;padding:1.2rem 1.5rem;margin:1rem 2.5rem 0;';
+  banner.innerHTML = `
+    <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--terracotta);margin-bottom:0.7rem;">
+      ℹ️ Informations de votre logement
+    </div>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+      ${infos.map(i => `
+        <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:0.5rem 0.8rem;font-size:0.82rem;">
+          <span style="opacity:0.7">${i.icon} ${i.label} : </span>
+          <strong style="color:var(--deep)">${i.val}</strong>
+        </div>`).join('')}
+    </div>
+    ${prop.rules ? `
+      <div style="margin-top:0.8rem;font-size:0.78rem;color:var(--mid);line-height:1.6;">
+        <strong>Règles :</strong> ${prop.rules.split('\n').slice(0,3).join(' · ')}
+      </div>` : ''}
+  `;
+  
+  // Insert after header
+  const progressBar = document.querySelector('.progress-bar');
+  if (progressBar) progressBar.parentNode.insertBefore(banner, progressBar.nextSibling);
+}
+
+// ── Afficher les infos du logement dans le formulaire ──
+function showPropertyInfoBanner(prop) {
+  if (!prop || document.getElementById('propInfoBanner')) return;
+  const infos = [];
+  if (prop.checkin_time) infos.push({ icon: '🕐', label: 'Check-in', val: prop.checkin_time });
+  if (prop.checkout_time) infos.push({ icon: '🕚', label: 'Check-out', val: prop.checkout_time });
+  if (prop.wifi_name) infos.push({ icon: '📶', label: 'WiFi', val: prop.wifi_name });
+  if (prop.wifi_password) infos.push({ icon: '🔐', label: 'Mot de passe', val: prop.wifi_password });
+  if (infos.length === 0 && !prop.rules) return;
+  const banner = document.createElement('div');
+  banner.id = 'propInfoBanner';
+  banner.style.cssText = 'background:linear-gradient(135deg,#FFF8F5,#FFF0EC);border:1px solid rgba(192,112,80,0.2);border-radius:14px;padding:1.2rem 1.5rem;margin:1rem 0 0;';
+  banner.innerHTML = `
+    <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--terracotta);margin-bottom:0.7rem;">ℹ️ Informations du logement</div>
+    <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
+      ${infos.map(i => `<div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:0.5rem 0.8rem;font-size:0.82rem;"><span style="opacity:0.7">${i.icon} ${i.label} : </span><strong style="color:var(--deep)">${i.val}</strong></div>`).join('')}
+    </div>
+    ${prop.rules ? `<div style="margin-top:0.7rem;font-size:0.78rem;color:var(--mid);line-height:1.6;"><strong>Règles :</strong> ${prop.rules.split('\n').slice(0,3).join(' · ')}</div>` : ''}
+  `;
+  const main = document.querySelector('.container') || document.querySelector('main') || document.body;
+  const firstPage = document.querySelector('.page.active') || document.querySelector('.page');
+  if (firstPage) firstPage.insertBefore(banner, firstPage.firstChild);
+}
+
+// ── SUPABASE CONFIG ──
+const SUPABASE_URL = 'https://syvpyvkgauyfqghwiqsl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5dnB5dmtnYXV5ZnFnaHdpcXNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTYzMDcsImV4cCI6MjA4ODk5MjMwN30.Iu0s8WeJcFrZUXkYRHbQBUvZMOMdsvgip_wnEVtXRO4';
+
+// ── DÉTECTION TOKEN TEMPORAIRE ──
+const urlParams = new URLSearchParams(window.location.search);
+const rawToken = urlParams.get('t') || null;
+const legacyHost = urlParams.get('host') || null; // rétrocompatibilité
+
+let hostLinkId = legacyHost;
+let tokenValid = false;
+let tokenExpiry = null;
+
+function parseToken(t) {
+  try {
+    // Format: linkId.expiryB36 ou linkId.expiryB36.shortPropId
+    const parts = t.split('.');
+    if (parts.length < 2) return null;
+    const lid = parts[0];
+    const exp = parseInt(parts[1], 36);
+    const pid = parts[2] || null; // shortPropId optionnel
+    if (!lid || isNaN(exp)) return null;
+    return { lid, exp, pid };
+  } catch { return null; }
+}
+
+// Vérifier le token et afficher page expirée si besoin
+function checkTokenOnLoad() {
+  if (legacyHost) {
+    // ancien format ?host= → valide
+    hostLinkId = legacyHost;
+    tokenValid = true;
+    return;
+  }
+  if (!rawToken) {
+    // ── PAS DE TOKEN → PAGE BLOQUÉE ──
+    showExpiredPage('Accès non autorisé. Cette page nécessite un lien de check-in valide généré par votre hôte.');
+    return;
+  }
+  const data = parseToken(rawToken);
+  if (!data || !data.lid || !data.exp) {
+    showExpiredPage('Lien invalide.');
+    return;
+  }
+  if (Date.now() > data.exp) {
+    showExpiredPage('Ce lien a expiré. Demandez un nouveau lien à votre hôte.');
+    return;
+  }
+  hostLinkId = data.lid;
+  tokenExpiry = data.exp;
+  tokenValid = true;
+  if (data.pid) window._propertyId = data.pid;
+  startCheckinCountdown(data.exp);
+}
+
+function showExpiredPage(reason) {
+  // Cacher l'overlay de chargement
+  var overlay = document.getElementById('loadingOverlay');
+  if (overlay) overlay.style.display = 'none';
+  const isUnauthorized = reason.includes('non autorisé') || reason.includes('nécessite');
+  document.body.innerHTML = `
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#F7F3EE;font-family:'DM Sans',sans-serif;padding:2rem;">
+      <div style="text-align:center;max-width:420px;">
+        <div style="width:70px;height:70px;background:${isUnauthorized ? '#FFF0F2' : 'rgba(192,112,80,0.1)'};border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem;">
+          ${isUnauthorized ? '🔒' : '⏰'}
+        </div>
+        <h1 style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:#2C2420;margin-bottom:0.8rem;">
+          ${isUnauthorized ? 'Accès refusé' : 'Lien expiré'}
+        </h1>
+        <p style="color:#6B5448;font-size:0.95rem;line-height:1.7;margin-bottom:1.5rem;">${reason}</p>
+        <div style="background:rgba(192,112,80,0.08);border:1px solid rgba(192,112,80,0.2);border-radius:12px;padding:1.2rem;">
+          <div style="font-size:0.82rem;color:#9E8476;line-height:1.6;">
+            ${isUnauthorized 
+              ? '🏠 Cette page est réservée aux guests ayant reçu un lien de check-in de leur hôte via <strong style="color:#C07050">Stayform</strong>.'
+              : '⏱ Les liens de check-in sont valables <strong style="color:#C07050">3 heures</strong> pour votre sécurité. Contactez votre hôte pour un nouveau lien.'
+            }
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function startCheckinCountdown(expiry) {
+  const badge = document.createElement('div');
+  badge.id = 'tokenTimer';
+  badge.style.cssText = 'position:fixed;bottom:1rem;right:1rem;background:rgba(44,36,32,0.85);color:#F0EDE8;padding:0.4rem 0.8rem;border-radius:20px;font-size:0.72rem;z-index:200;backdrop-filter:blur(4px);font-family:"DM Sans",sans-serif;';
+  document.body.appendChild(badge);
+  function tick() {
+    const rem = expiry - Date.now();
+    if (rem <= 0) { badge.textContent = '⏰ Lien expiré'; badge.style.background = 'rgba(192,80,80,0.9)'; return; }
+    const h = Math.floor(rem/3600000);
+    const m = Math.floor((rem%3600000)/60000);
+    const s = Math.floor((rem%60000)/1000);
+    badge.textContent = `⏱ ${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// Trouver l'hôte via Supabase
+async function findHostByLinkId(linkId) {
+  if (!linkId) return null;
+  try {
+    // Utilise la vue publique sécurisée (pas de données sensibles)
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles_public?link_id=eq.${linkId}&select=id,name,link_id`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    const data = await res.json();
+    return data && data.length > 0 ? data[0] : null;
+  } catch { return null; }
+}
+
+// Vérification du lien — si link_id introuvable = lien déjà utilisé
+async function checkHostLimit() {
+  if (!hostLinkId) return { allowed: false, reason: 'no_token' };
+  const host = await findHostByLinkId(hostLinkId);
+  if (!host) {
+    showExpiredPage('Ce lien a déjà été utilisé. Demandez un nouveau lien à votre hôte.');
+    return { allowed: false, reason: 'used' };
+  }
+
+  // ── Vérifier plan actif via RPC ──
+  try {
+    const planRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/is_plan_active`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_user_id: host.id })
+    });
+    const planActive = await planRes.json();
+    if (!planActive) {
+      showExpiredPage('Ce lien est temporairement indisponible. Veuillez contacter votre hôte.');
+      return { allowed: false, reason: 'plan_expired' };
+    }
+  } catch(e) {
+    console.warn('Plan check failed (non-blocking):', e);
+    // En cas d'erreur → on laisse passer (fail open)
+  }
+
+  return { allowed: true, host };
+}
+
+// ── Vérification au chargement ──
+document.addEventListener('DOMContentLoaded', async function() {
+  checkTokenOnLoad();
+
+  // Si pas de token valide, checkTokenOnLoad a déjà appelé showExpiredPage → stop
+  if (!tokenValid) return;
+
+  // Fallback legacy params (anciens liens)
+  const hn = urlParams.get('hn');
+  const pn = urlParams.get('pn');
+  if (hn) window._hostName = decodeURIComponent(hn);
+  if (pn) window._propertyName = decodeURIComponent(pn);
+
+  // Fetch depuis Supabase via shortPropId (token) ou linkId (host)
+  await fetchPropertyAndHost();
+});
+
+async function fetchPropertyAndHost() {
+  try {
+    const hostEl = document.getElementById('hostNameDisplay');
+
+    // ── 1. Fetch l'hôte via link_id + vérification immédiate ──
+    if (hostLinkId) {
+      const hostRes = await fetch(
+        SUPABASE_URL + '/rest/v1/profiles_public?link_id=eq.' + hostLinkId + '&select=id,name,link_id&limit=1',
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+      );
+      const hosts = await hostRes.json();
+
+      // ── VÉRIFICATION CRITIQUE : link_id toujours valide ? ──
+      if (!hosts || hosts.length === 0) {
+        // link_id introuvable = lien déjà utilisé ou invalidé
+        showExpiredPage('Ce lien a déjà été utilisé ou est invalide. Demandez un nouveau lien à votre hôte.');
+        return;
+      }
+
+      if (hosts && hosts[0]) {
+        window._hostName = hosts[0].name;
+        window._hostId = hosts[0].id;
+        console.log('Host loaded:', hosts[0].name);
+        // Fetch email separately via RPC (not exposed in public view)
+        try {
+          const emailRes = await fetch(
+            SUPABASE_URL + '/rest/v1/rpc/get_host_email',
+            {
+              method: 'POST',
+              headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ host_uuid: hosts[0].id })
+            }
+          );
+          const emailData = await emailRes.json();
+          if (emailData) window._hostEmail = emailData;
+        } catch(e) { console.warn('Host email fetch failed:', e); }
+      }
+    }
+
+    // ── 2. Fetch la propriété via shortPropId ──
+    if (window._propertyId && window._hostId) {
+      // shortPropId = premiers 8 chars de l'UUID sans tirets
+      // On cherche dans les propriétés de cet hôte
+      const propRes = await fetch(
+        SUPABASE_URL + '/rest/v1/properties?host_id=eq.' + window._hostId + '&select=*',
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+      );
+      const props = await propRes.json();
+      if (props && props.length > 0) {
+        // Trouver la propriété dont l'ID correspond au shortPropId
+        const match = props.find(p => p.id.replace(/-/g,'').slice(0,8) === window._propertyId);
+        if (match) {
+          window._propertyData = match;
+          window._propertyName = match.name;
+          console.log('Property loaded:', match.name, match.address);
+        } else if (props.length === 1) {
+          // Si une seule propriété, on la prend
+          window._propertyData = props[0];
+          window._propertyName = props[0].name;
+        }
+      }
+    }
+
+    // ── 3. Fallback: fetch par nom si shortPropId échoue ──
+    if (!window._propertyData && window._propertyName) {
+      const encodedName = encodeURIComponent(window._propertyName);
+      const propRes2 = await fetch(
+        SUPABASE_URL + '/rest/v1/properties?name=eq.' + encodedName + '&select=*&limit=1',
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+      );
+      const props2 = await propRes2.json();
+      if (props2 && props2[0]) window._propertyData = props2[0];
+    }
+
+    // ── 4. Mettre à jour le header ──
+    const pd = window._propertyData;
+    if (hostEl) {
+      if (pd && pd.name) {
+        hostEl.textContent = pd.name + (pd.address ? ' · ' + pd.address : '');
+      } else if (window._hostName) {
+        hostEl.textContent = 'Logement de ' + window._hostName;
+      }
+    }
+
+    // ── 5. Afficher la bannière infos logement ──
+    if (pd) showPropertyInfoBanner(pd);
+
+  } catch(e) {
+    console.warn('fetchPropertyAndHost error:', e);
+  } finally {
+    // ── Cacher l'overlay de chargement ──
+    var overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+}
+
+// Enregistrer guest dans Supabase
+async function saveGuestToSupabase(hostId, guestData) {
+  console.log('Saving guest for host:', hostId, guestData);
+  try {
+    // Essai 1 : RPC insert_guest (SECURITY DEFINER, bypass RLS)
+    const rpcRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/insert_guest`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ p_host_id: hostId, p_data: guestData })
+    });
+    const rpcText = await rpcRes.text();
+    if (rpcRes.ok) {
+      console.log('✅ Guest saved via RPC insert_guest');
+      return true;
+    }
+    console.warn('RPC failed:', rpcRes.status, rpcText);
+
+    // Essai 2 : Insert direct dans la table
+    const directRes = await fetch(`${SUPABASE_URL}/rest/v1/guests`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ host_id: hostId, ...guestData })
+    });
+    const directText = await directRes.text();
+    if (!directRes.ok) {
+      console.error('❌ Direct insert failed:', directRes.status, directText);
+      return false;
+    }
+    console.log('✅ Guest saved via direct insert');
+
+    // Incrémenter le compteur
+    await fetch(`${SUPABASE_URL}/rest/v1/rpc/increment_guest_count`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ host_uuid: hostId })
+    });
+    return true;
+  } catch(e) {
+    console.error('❌ saveGuestToSupabase exception:', e);
+    return false;
+  }
+}
+
+async function sendCheckinEmails(guestData, hostData, pdfBase64) {
+  try {
+    const res = await fetch('https://syvpyvkgauyfqghwiqsl.supabase.co/functions/v1/send-checkin-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      },
+      body: JSON.stringify({
+        guestEmail: guestData.email,
+        guestName: guestData.name,
+        hostEmail: hostData.email || window._hostEmail || null,
+        hostName: window._hostName || hostData.name,
+        propertyName: window._propertyName || guestData.property_name || null,
+        pdfBase64: pdfBase64,
+        dates: guestData.dates,
+        lang: window._lang || 'fr'
+      })
+    });
+    const result = await res.json();
+    console.log('Emails sent:', result);
+    return result.success;
+  } catch(e) {
+    console.error('Email send error:', e);
+    return false;
+  }
+}
+
+// ── Invalider le lien après utilisation ──
+// Génère un nouveau link_id pour l'hôte → l'ancien token ne fonctionne plus
+async function invalidateLink(hostId) {
+  console.log('🔄 Invalidating link for host:', hostId);
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/rotate_link_id', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ p_host_id: hostId })
+    });
+    const txt = await res.text();
+    if (res.ok) {
+      console.log('✅ Lien invalidé avec succès. Nouveau link_id:', txt);
+    } else {
+      console.error('❌ Invalidation échouée. Status:', res.status, 'Response:', txt);
+    }
+    return res.ok;
+  } catch(e) {
+    console.error('❌ Invalidation exception:', e);
+    return false;
+  }
+}
+
+async function submitForm() {
+  const limitCheck = await checkHostLimit();
+  if (!limitCheck.allowed) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('pageLocked').classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    return;
+  }
+
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enregistrement...';
+
+  const fmt = d => d ? d.toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}) : '—';
+  const nights = startDate && endDate ? Math.round((endDate - startDate) / 86400000) : 0;
+  const name = `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`;
+
+  // Capture selfie if uploaded
+  const selfieInput = document.getElementById('file3');
+  if (selfieInput && selfieInput.files && selfieInput.files[0] && !selfieData) {
+    await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = e => { selfieData = e.target.result; resolve(); };
+      reader.readAsDataURL(selfieInput.files[0]);
+    });
+  }
+
+  const lockCode = document.getElementById('lockCode').value || '';
+
+  const guestData = {
+    name,
+    property_name: window._propertyName || null,
+    email: document.getElementById('email').value,
+    phone: document.getElementById('phone').value,
+    nationality: document.getElementById('nationality').value,
+    birthdate: document.getElementById('birthdate').value,
+    address: document.getElementById('address').value,
+    doc_number: document.getElementById('docNumber').value,
+    dates: `${fmt(startDate)} → ${fmt(endDate)}`,
+    arrival_time: document.getElementById('arrivalTime').value,
+    guest_count: document.getElementById('guestCount').value,
+    nights,
+    doc_status: docSkipped ? 'pending' : 'provided',
+    lock_code: lockCode,
+    status: 'complete',
+    signed: true
+  };
+
+  // Sauvegarder dans Supabase si on a un hostLinkId
+  if (hostLinkId) {
+    // Re-fetch host si limitCheck.host est undefined (mode sans limite)
+    let hostToSave = limitCheck.host;
+    if (!hostToSave) {
+      hostToSave = await findHostByLinkId(hostLinkId);
+    }
+    if (hostToSave && hostToSave.id) {
+      const saved = await saveGuestToSupabase(hostToSave.id, guestData);
+      console.log('Guest saved to Supabase:', saved);
+      if (saved) {
+        // ── Invalider le lien immédiatement ──
+        try {
+          await invalidateLink(hostToSave.id);
+        } catch(e) {
+          console.warn('Link invalidation failed:', e);
+        }
+
+        // ── Consommer 1 crédit revendeur si applicable ──
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/rpc/consume_reseller_credit`, {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ p_host_id: hostToSave.id })
+          });
+        } catch(e) {
+          console.warn('Credit consumption failed (non-blocking):', e);
+        }
+
+        // Générer PDF en base64 et envoyer emails
+        try {
+          let pdfB64 = null;
+          try {
+            pdfB64 = await generatePDFBase64();
+          } catch(pdfErr) {
+            console.warn('PDF generation failed:', pdfErr);
+          }
+          await sendCheckinEmails(guestData, hostToSave, pdfB64);
+        } catch(e) {
+          console.warn('Email send failed (non-blocking):', e);
+        }
+      }
+    } else {
+      console.warn('Host not found for linkId:', hostLinkId);
+    }
+  } else {
+    // Pas de hostLinkId — ne devrait jamais arriver car checkTokenOnLoad bloque l'accès
+    console.warn('Soumission sans token — accès bloqué normalement');
+  }
+
+  document.getElementById('finalSummary').innerHTML = `
+    <div class="summary-item"><small>Nom</small><strong>${name}</strong></div>
+    <div class="summary-item"><small>E-mail</small><strong style="font-size:0.85rem">${guestData.email}</strong></div>
+    <div class="summary-item"><small>Arrivée</small><strong>${fmt(startDate)}</strong></div>
+    <div class="summary-item"><small>Départ</small><strong>${fmt(endDate)}</strong></div>
+    <div class="summary-item"><small>Durée</small><strong>${nights} nuit${nights>1?'s':''}</strong></div>
+    <div class="summary-item"><small>Pièce identité</small><strong style="color:${docSkipped?'#C07050':'var(--success)'}">${docSkipped?'⚠ En attente':'✓ Fournie'}</strong></div>
+  `;
+  currentStep = 5;
+  document.querySelectorAll('.page').forEach((p,i) => p.classList.toggle('active', i+1 === 5));
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ── PDF GENERATION ──
+
+// Génère le PDF et retourne le base64 (sans télécharger)
+async function generatePDFBase64() {
+  try {
+    // On utilise la même logique que generatePDF mais on retourne le base64
+    // au lieu de télécharger
+    const { jsPDF } = window.jspdf;
+    if (!jsPDF) return null;
+    
+    // Flag pour intercepter la sauvegarde
+    window._pdfMode = 'base64';
+    window._pdfBase64Result = null;
+    
+    // Appeler generatePDF en mode silencieux
+    await generatePDFSilent();
+    
+    window._pdfMode = null;
+    return window._pdfBase64Result;
+  } catch(e) {
+    console.error('generatePDFBase64 error:', e);
+    window._pdfMode = null;
+    return null;
+  }
+}
+
+// Version silencieuse qui capture le base64 sans télécharger
+async function generatePDFSilent() {
+  const origSave = window.jspdf && window.jspdf.jsPDF && window.jspdf.jsPDF.prototype && window.jspdf.jsPDF.prototype.save;
+  try {
+    // Patch temporaire de doc.save pour capturer le output
+    const { jsPDF } = window.jspdf;
+    const OrigClass = jsPDF;
+    // On crée un doc normal, génère tout, puis extrait le base64
+    window._silentDoc = null;
+    window._pdfSilentMode = true;
+    
+    // Simuler generatePDF sans bouton
+    await _runPDFGeneration(null, true);
+    
+    window._pdfSilentMode = false;
+  } catch(e) {
+    window._pdfSilentMode = false;
+    console.error('generatePDFSilent error:', e);
+  }
+}
+
+async function generatePDF() {
+  const btn = document.getElementById('btnPDF');
+  btn.textContent = '⏳ Génération en cours...';
+  btn.disabled = true;
+  await _runPDFGeneration(btn, false);
+}
+
+async function _runPDFGeneration(btn, silent) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210, H = 297, margin = 15, contentW = W - margin * 2;
+
+  // ── Palette Option H ──
+  const GREEN    = [45, 74, 62];
+  const GREEN2   = [74, 124, 101];
+  const GOLD     = [212, 168, 83];
+  const CREAM    = [250, 246, 241];
+  const BORDER   = [220, 210, 198];
+  const DEEP     = [28, 18, 10];
+  const MID      = [107, 88, 72];
+  const LIGHT    = [176, 154, 136];
+  const WHITE    = [255, 255, 255];
+  const SUCCESS  = [45, 122, 69];
+  const WARN     = [193, 53, 21];
+
+  let y = 0;
+  let pageNum = 1;
+
+  function newPage() {
+    addFooter();
+    doc.addPage();
+    pageNum++;
+    y = 15;
+  }
+
+  function checkY(need) {
+    if (y + need > H - 20) newPage();
+  }
+
+  // ── HEADER bande verte ──
+  function addHeader() {
+    // Bande verte
+    doc.setFillColor(...GREEN);
+    doc.rect(0, 0, W, 28, 'F');
+    // Bande or fine
+    doc.setFillColor(...GOLD);
+    doc.rect(0, 28, W, 1.5, 'F');
+    // Logo texte
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.setTextColor(...WHITE);
+    doc.text('stayform', margin, 16);
+    // Sous-titre
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...GOLD);
+    doc.text('DOSSIER DE CHECK-IN', margin, 23);
+    // Infos bailleur + logement à droite
+    const pd = window._propertyData;
+    const propName = (pd && pd.name) || window._propertyName || '';
+    const hostName = window._hostName || '';
+    doc.setFontSize(7.5);
+    doc.setTextColor(255, 255, 255, 0.8);
+    if (hostName) doc.text(hostName, W - margin, 14, { align: 'right' });
+    if (propName) doc.text(propName.substring(0, 45), W - margin, 20, { align: 'right' });
+    // Date
+    const now = new Date();
+    doc.setFontSize(6.5);
+    doc.setTextColor(...GOLD);
+    doc.text(now.toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}), W - margin, 25, { align: 'right' });
+    y = 38;
+  }
+
+  function addFooter() {
+    const pageH = doc.internal.pageSize.getHeight();
+    doc.setFillColor(...CREAM);
+    doc.rect(0, pageH - 10, W, 10, 'F');
+    doc.setDrawColor(...BORDER);
+    doc.setLineWidth(0.3);
+    doc.line(0, pageH - 10, W, pageH - 10);
+    doc.setFontSize(6.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...LIGHT);
+    const firstName = document.getElementById('firstName').value;
+    const lastName  = document.getElementById('lastName').value;
+    doc.text(`${firstName} ${lastName} — Contrat de location`, margin, pageH - 4);
+    doc.text(`Page ${pageNum}`, W - margin, pageH - 4, { align: 'right' });
+  }
+
+  // ── Section titre ──
+  function sectionTitle(title) {
+    checkY(12);
+    doc.setFillColor(...GREEN);
+    doc.rect(margin, y, contentW, 8, 'F');
+    doc.setFillColor(...GOLD);
+    doc.rect(margin, y + 8, contentW, 0.8, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...WHITE);
+    doc.text(title.toUpperCase(), margin + 4, y + 5.5);
+    y += 12;
+  }
+
+  // ── Ligne info label/valeur ──
+  function infoRow(label, value, opts) {
+    opts = opts || {};
+    checkY(9);
+    const half = opts.full ? contentW : contentW / 2 - 1;
+    const x2   = opts.full ? null : margin + contentW / 2 + 1;
+    // Fond alterné
+    if (opts.shade) {
+      doc.setFillColor(...CREAM);
+      doc.rect(margin, y, contentW, 8, 'F');
+    }
+    doc.setFontSize(6.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...LIGHT);
+    doc.text(label.toUpperCase(), margin + 3, y + 3);
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...DEEP);
+    doc.text((value || '—').substring(0, opts.full ? 80 : 40), margin + 3, y + 7);
+    y += 9;
+  }
+
+  function infoRowDual(l1, v1, l2, v2, shade) {
+    checkY(9);
+    const half = (contentW - 3) / 2;
+    if (shade) { doc.setFillColor(...CREAM); doc.rect(margin, y, contentW, 8, 'F'); }
+    // Col 1
+    doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
+    doc.text(l1.toUpperCase(), margin + 3, y + 3);
+    doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...DEEP);
+    doc.text((v1||'—').substring(0,28), margin + 3, y + 7);
+    // Col 2
+    const x2 = margin + half + 4;
+    doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
+    doc.text(l2.toUpperCase(), x2, y + 3);
+    doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...DEEP);
+    doc.text((v2||'—').substring(0,28), x2, y + 7);
+    y += 9;
+  }
+
+  function divider() {
+    checkY(4);
+    doc.setDrawColor(...BORDER);
+    doc.setLineWidth(0.3);
+    doc.line(margin, y + 2, margin + contentW, y + 2);
+    y += 5;
+  }
+
+  // ══════════════════════════════════════════
+  // Collect data
+  // ══════════════════════════════════════════
+  const fmtDate = d => d ? d.toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'}) : '—';
+  const firstName   = document.getElementById('firstName').value;
+  const lastName    = document.getElementById('lastName').value;
+  const email       = document.getElementById('email').value;
+  const phone       = document.getElementById('phone').value;
+  const nationality = document.getElementById('nationality').value;
+  const birthdate   = document.getElementById('birthdate').value;
+  const address     = document.getElementById('address').value;
+  const docNumber   = document.getElementById('docNumber') ? document.getElementById('docNumber').value : '—';
+  const docTypeId   = document.getElementById('docTypeIdentity');
+  const docTypeLabel = docTypeId ? docTypeId.options[docTypeId.selectedIndex].text : '—';
+  const guestCount  = document.getElementById('guestCount').value;
+  const arrivalTime = document.getElementById('arrivalTime').value;
+  const lockCode    = document.getElementById('lockCode') ? document.getElementById('lockCode').value : '';
+  const lockFmt     = lockCode ? lockCode.slice(0,3)+' '+lockCode.slice(3,5)+' '+lockCode.slice(5,7) : '—';
+  const nights      = startDate && endDate ? Math.round((endDate - startDate) / 86400000) : 0;
+  const pd          = window._propertyData;
+  const bailName    = window._hostName || 'Le bailleur';
+
+  // ══════════════════════════════════════════
+  // PAGE 1 — Logement + Identité + Séjour
+  // ══════════════════════════════════════════
+  addHeader();
+
+  // ── Logement & Bailleur ──
+  if (pd || bailName !== 'Le bailleur') {
+    sectionTitle('Logement & Bailleur');
+    infoRowDual('Bailleur', bailName, 'Logement', (pd && pd.name) || window._propertyName || '—', false);
+    if (pd && pd.address) infoRowDual('Adresse', pd.address, 'Localisation', pd.city || '—', true);
+    if (pd && pd.checkin_time) infoRowDual('Check-in', pd.checkin_time, 'Check-out', pd.checkout_time || '—', false);
+    if (pd && pd.wifi_name) infoRowDual('WiFi', pd.wifi_name, 'Mot de passe', pd.wifi_password || '—', true);
+    if (pd && pd.rules) {
+      checkY(8);
+      doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
+      doc.text('RÈGLES', margin + 3, y + 3);
+      doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(...MID);
+      const rulesLines = doc.splitTextToSize(pd.rules.substring(0, 200), contentW - 6);
+      rulesLines.slice(0, 3).forEach(line => { checkY(5); doc.text(line, margin + 3, y + 7); y += 5; });
+      y += 4;
+    }
+    y += 2;
+  }
+
+  // ── Identité ──
+  sectionTitle('Identité du locataire');
+  infoRowDual('Prénom', firstName, 'Nom de famille', lastName, false);
+  infoRowDual('N° document', docNumber, 'Type', docTypeLabel, true);
+  infoRowDual('Nationalité', nationality, 'Date de naissance', birthdate, false);
+  infoRow('E-mail', email, { full: true, shade: true });
+  infoRowDual('Téléphone', phone, 'Adresse personnelle', address, false);
+  y += 2;
+
+  // ── Séjour ──
+  sectionTitle('Détails du séjour');
+  infoRowDual('Date d\'arrivée', fmtDate(startDate), 'Date de départ', fmtDate(endDate), false);
+  infoRowDual('Durée', nights + ' nuit' + (nights > 1 ? 's' : ''), 'Voyageurs', guestCount, true);
+  infoRow('Heure d\'arrivée prévue', arrivalTime || '—', { full: true, shade: false });
+
+  // ── Code serrure ──
+  if (lockCode) {
+    y += 4;
+    checkY(16);
+    doc.setFillColor(...GOLD);
+    doc.roundedRect(margin, y, contentW, 14, 3, 3, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(...DEEP);
+    doc.text('CODE D\'ACCES AU LOGEMENT', margin + 6, y + 5);
+    doc.setFontSize(18);
+    doc.setTextColor(...DEEP);
+    doc.text(lockFmt, margin + 6, y + 12);
+    doc.setFontSize(7);
+    doc.setTextColor(...MID);
+    doc.text('Serrure numerique 7 chiffres', W - margin - 4, y + 9, { align: 'right' });
+    y += 20;
+  }
+
+  // ══════════════════════════════════════════
+  // PAGE 2 — Documents photo + Contrat
+  // ══════════════════════════════════════════
+  newPage();
+  addHeader();
+
+  // ── Photo CIN ──
+  sectionTitle('Piece d\'identite');
+  if (docImage1) {
+    checkY(70);
+    try {
+      // Calculer dimensions pour centrer et bien cadrer
+      const imgW = contentW;
+      const imgH = 60;
+      doc.setDrawColor(...BORDER);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(margin, y, imgW, imgH, 2, 2, 'S');
+      doc.addImage(docImage1, 'JPEG', margin + 1, y + 1, imgW - 2, imgH - 2, '', 'FAST');
+      y += imgH + 4;
+    } catch(e) {
+      doc.setFontSize(8); doc.setTextColor(...LIGHT);
+      doc.text('Document fourni (erreur affichage)', margin + 3, y + 8);
+      y += 14;
+    }
+  } else {
+    checkY(10);
+    doc.setFillColor(...CREAM);
+    doc.rect(margin, y, contentW, 10, 'F');
+    doc.setFontSize(8); doc.setFont('helvetica','italic'); doc.setTextColor(...LIGHT);
+    doc.text('Aucun document fourni', margin + 4, y + 7);
+    y += 14;
+  }
+
+  // ── Selfie ──
+  if (selfieData) {
+    checkY(55);
+    doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(...MID);
+    doc.text('PHOTO DU VOYAGEUR', margin, y + 5);
+    y += 7;
+    try {
+      const sW = 50, sH = 50;
+      const sX = margin + (contentW - sW) / 2;
+      doc.setDrawColor(...BORDER); doc.setLineWidth(0.5);
+      doc.roundedRect(sX, y, sW, sH, 2, 2, 'S');
+      doc.addImage(selfieData, 'JPEG', sX + 1, y + 1, sW - 2, sH - 2, '', 'FAST');
+      y += sH + 6;
+    } catch(e) { y += 8; }
+  }
+  y += 4;
+
+  // ── Contrat ──
+  sectionTitle('Contrat de location meublee touristique');
+
+  const clauses = [
+    ['OBJET', 'Le present contrat a pour objet la location meublee a titre touristique du logement decrit dans la reservation. Cette location ne peut en aucun cas beneficier a des tiers et ne peut faire l\'objet d\'une sous-location sans accord ecrit du bailleur.'],
+    ['DUREE', `La location s\'etend du ${fmtDate(startDate)} au ${fmtDate(endDate)}, soit ${nights} nuit${nights>1?'s':''}. Le locataire devra liberer les lieux avant ${(pd&&pd.checkout_time)||'11h00'} le jour du depart.`],
+    ['LOYER', 'Le montant du loyer et des charges est convenu entre les parties. En cas de depart anticipe, aucun remboursement ne sera effectue.'],
+    ['DEPOT', 'Un depot de garantie peut etre demande par le bailleur. En l\'absence de dommages constates lors de l\'etat des lieux de sortie, ce depot est restitue dans un delai de 7 jours ouvres.'],
+    ['RESPONSABILITE', 'Le locataire est responsable de tout dommage cause au logement durant son sejour. Il s\'engage a respecter le reglement interieur et les regles de bonne conduite.'],
+    ['JURIDICTION', 'Tout litige sera soumis a la juridiction competente du lieu du logement, apres tentative de resolution amiable.'],
+  ];
+
+  clauses.forEach((clause, i) => {
+    checkY(20);
+    doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...GREEN);
+    doc.text(`${i+1}. ${clause[0]}`, margin + 2, y + 4);
+    doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(...MID);
+    const lines = doc.splitTextToSize(clause[1], contentW - 4);
+    lines.forEach(line => { checkY(5); doc.text(line, margin + 2, y + 9); y += 5; });
+    y += 6;
+  });
+
+  // ══════════════════════════════════════════
+  // PAGE 3 — Signatures
+  // ══════════════════════════════════════════
+  newPage();
+  addHeader();
+
+  // ── Checkboxes consentements ──
+  sectionTitle('Declarations et consentements');
+  const decls = [
+    'J\'ai lu et j\'accepte les conditions generales du contrat de location.',
+    'Je certifie que les informations fournies sont exactes et que les pieces d\'identite sont authentiques.',
+    'J\'accepte le traitement de mes donnees personnelles conformement au RGPD.',
+    'Je consens a l\'utilisation de ma piece d\'identite uniquement a des fins de verification — non stockee sur les serveurs de Stayform.',
+  ];
+  decls.forEach(d => {
+    checkY(7);
+    doc.setFillColor(...SUCCESS);
+    doc.roundedRect(margin + 2, y + 1, 4, 4, 0.5, 0.5, 'F');
+    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...MID);
+    doc.text(d, margin + 9, y + 5, { maxWidth: contentW - 10 });
+    y += 8;
+  });
+
+  y += 6;
+
+  // ── Signatures ──
+  sectionTitle('Signatures');
+  y += 4;
+
+  const halfW = (contentW - 8) / 2;
+
+  // Signature locataire
+  checkY(60);
+  doc.setFillColor(...CREAM);
+  doc.roundedRect(margin, y, halfW, 55, 2, 2, 'F');
+  doc.setDrawColor(...BORDER); doc.setLineWidth(0.3);
+  doc.roundedRect(margin, y, halfW, 55, 2, 2, 'S');
+  doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...GREEN);
+  doc.text('LE LOCATAIRE', margin + 4, y + 6);
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...DEEP);
+  doc.text(`${firstName} ${lastName}`, margin + 4, y + 13);
+  doc.setFontSize(6.5); doc.setTextColor(...LIGHT);
+  doc.text(new Date().toLocaleDateString('fr-FR'), margin + 4, y + 19);
+  // Signature image
+  if (signatureDataURL) {
+    try {
+      doc.addImage(signatureDataURL, 'PNG', margin + 2, y + 22, halfW - 4, 28, '', 'FAST');
+    } catch(e) {}
+  }
+  doc.setFontSize(6.5); doc.setTextColor(...LIGHT);
+  doc.text('Signature manuscrite electronique', margin + 4, y + 52);
+
+  // Signature bailleur
+  const x2 = margin + halfW + 8;
+  doc.setFillColor(...CREAM);
+  doc.roundedRect(x2, y, halfW, 55, 2, 2, 'F');
+  doc.setDrawColor(...BORDER);
+  doc.roundedRect(x2, y, halfW, 55, 2, 2, 'S');
+  doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...GREEN);
+  doc.text('LE BAILLEUR', x2 + 4, y + 6);
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...DEEP);
+  doc.text(bailName, x2 + 4, y + 13);
+  doc.setFontSize(6.5); doc.setTextColor(...LIGHT);
+  doc.text(new Date().toLocaleDateString('fr-FR'), x2 + 4, y + 19);
+  doc.text('_________________________', x2 + 4, y + 45);
+  doc.text('Signature du bailleur', x2 + 4, y + 52);
+
+  y += 64;
+
+  // ── Cachet officiel ──
+  checkY(24);
+  y += 4;
+  doc.setDrawColor(...GOLD); doc.setLineWidth(0.8);
+  doc.roundedRect(margin, y, contentW, 18, 3, 3, 'S');
+  doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...GREEN);
+  doc.text('Stayform — Document genere electroniquement', W/2, y + 7, { align: 'center' });
+  doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
+  doc.text('Ce document a valeur contractuelle. Conservez-le pour vos archives.', W/2, y + 13, { align: 'center' });
+
+  // ── Footer derniere page ──
+  addFooter();
+
+  // ── Save ou capture ──
+  const safeLastName = lastName.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  if (silent) {
+    // Mode silencieux : capturer le base64 sans telecharger
+    const pdfOutput = doc.output('datauristring');
+    window._pdfBase64Result = pdfOutput.split(',')[1];
+    return;
+  }
+  doc.save(`CheckIn_${safeLastName}_${startDate ? startDate.toISOString().slice(0,10) : 'date'}.pdf`);
+  if (btn) {
+    btn.textContent = 'Telecharge !';
+    btn.style.background = 'var(--success)';
+    setTimeout(() => { btn.textContent = 'Telecharger le contrat PDF'; btn.style.background = ''; btn.disabled = false; }, 3000);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// SYSTÈME DE TRADUCTION FR / EN / AR
+// ══════════════════════════════════════════════════════════
+window._lang = 'fr';
+
+const TRANSLATIONS = {
+  fr: {
+    'step1': 'Séjour', 'step2': 'Identité', 'step3': 'Documents', 'step4': 'Contrat',
+    't_sejour': 'Votre séjour',
+    't_sejour_sub': 'Sélectionnez les dates de votre location sur le calendrier ci-dessous.',
+    't_coords': 'Vos coordonnées',
+    't_coords_sub': 'Informations du voyageur principal de la réservation.',
+    't_docs': "Piece d'identite",
+    't_contrat': 'Contrat de location',
+    't_contrat_sub': 'Veuillez lire attentivement et signer le contrat ci-dessous.',
+    'btn_next': 'Continuer →', 'btn_back': '← Retour',
+    'btn_submit': '✓ Valider le check-in', 'btn_pdf': '⬇ Télécharger le contrat PDF',
+    'hdr_title': 'Check-in en ligne',
+    'lbl_docnum': 'N° CIN / Passeport', 'lbl_firstname': 'Prénom', 'lbl_lastname': 'Nom de famille',
+    'lbl_email': 'Adresse e-mail', 'lbl_phone': 'Téléphone',
+    'lbl_nationality': 'Nationalité', 'lbl_birthdate': 'Date de naissance',
+    'lbl_address': 'Adresse de résidence',
+    'lbl_arrival': "Heure d'arrivée prévue", 'lbl_guests': 'Nombre de voyageurs',
+    'lbl_doctype': 'Type de document',
+    'lbl_recto': 'Recto du document', 'lbl_verso': 'Verso du document',
+    'lbl_selfie': 'Selfie du voyageur',
+    'lbl_signature': 'Signature manuscrite',
+    'skip_doc': "Je n'ai pas mon document maintenant",
+    'skip_step': 'Passer cette étape →',
+    'lock_generate': '🎲 Générer',
+    'lock_title': "🔑 Code d'accès au logement",
+    'lock_label': 'Serrure numérique · 7 chiffres',
+    'check1': "J'ai lu et j'accepte les conditions générales du contrat de location ci-dessus.",
+    'check2': "Je certifie que les informations fournies sont exactes et que les pièces d'identité téléchargées sont authentiques.",
+    'check3': "J'accepte le traitement de mes données personnelles conformément au RGPD pour la gestion de cette location.",
+    'success_title': 'Check-in validé !',
+    'success_sub': 'Votre dossier a bien été enregistré. Téléchargez le contrat signé ci-dessous.',
+    'sig_placeholder': 'Signez avec votre doigt ou votre souris',
+    // PDF contract text
+    'contract_title': 'CONTRAT DE LOCATION MEUBLÉE TOURISTIQUE',
+    'contract_intro': 'Entre le soussigné, ci-après dénommé « le Bailleur », et le(s) voyageur(s) mentionné(s) dans le présent contrat, ci-après dénommé(s) « le(s) Locataire(s) ».',
+    'section_identity': 'IDENTITÉ DU LOCATAIRE',
+    'section_sejour': 'DÉTAILS DU SÉJOUR',
+    'section_docs': "PIECE D'IDENTITE",
+    'section_signature': 'SIGNATURE ÉLECTRONIQUE',
+    'pdf_tenant': 'LE LOCATAIRE', 'pdf_landlord': 'LE BAILLEUR',
+  },
+  en: {
+    'step1': 'Stay', 'step2': 'Identity', 'step3': 'Documents', 'step4': 'Contract',
+    't_sejour': 'Your stay',
+    't_sejour_sub': 'Select your rental dates on the calendar below.',
+    't_coords': 'Your details',
+    't_coords_sub': 'Information about the main traveler for this booking.',
+    't_docs': 'ID Document',
+    't_contrat': 'Rental Contract',
+    't_contrat_sub': 'Please read carefully and sign the contract below.',
+    'btn_next': 'Continue →', 'btn_back': '← Back',
+    'btn_submit': '✓ Complete check-in', 'btn_pdf': '⬇ Download PDF contract',
+    'hdr_title': 'Online check-in',
+    'lbl_docnum': 'ID / Passport Number', 'lbl_firstname': 'First name', 'lbl_lastname': 'Last name',
+    'lbl_email': 'Email address', 'lbl_phone': 'Phone',
+    'lbl_nationality': 'Nationality', 'lbl_birthdate': 'Date of birth',
+    'lbl_address': 'Home address',
+    'lbl_arrival': 'Expected arrival time', 'lbl_guests': 'Number of guests',
+    'lbl_doctype': 'Document type',
+    'lbl_recto': 'Front of document', 'lbl_verso': 'Back of document',
+    'lbl_selfie': 'Guest selfie',
+    'lbl_signature': 'Handwritten signature',
+    'skip_doc': "I don't have my document right now",
+    'skip_step': 'Skip this step →',
+    'lock_generate': '🎲 Generate',
+    'lock_title': '🔑 Property access code',
+    'lock_label': 'Digital lock · 7 digits',
+    'check1': 'I have read and accept the general terms of the rental contract above.',
+    'check2': 'I certify that the information provided is accurate and that the uploaded ID documents are authentic.',
+    'check3': 'I accept the processing of my personal data in accordance with GDPR for the management of this rental.',
+    'success_title': 'Check-in complete!',
+    'success_sub': 'Your file has been saved. Download your signed contract below.',
+    'sig_placeholder': 'Sign with your finger or mouse',
+    'contract_title': 'TOURIST FURNISHED RENTAL CONTRACT',
+    'contract_intro': 'Between the undersigned, hereinafter referred to as "the Landlord", and the traveler(s) mentioned in this contract, hereinafter referred to as "the Tenant(s)".',
+    'section_identity': 'TENANT IDENTITY',
+    'section_sejour': 'STAY DETAILS',
+    'section_docs': 'ID DOCUMENT',
+    'section_signature': 'ELECTRONIC SIGNATURE',
+    'pdf_tenant': 'THE TENANT', 'pdf_landlord': 'THE LANDLORD',
+  },
+  ar: {
+    'step1': 'الإقامة', 'step2': 'الهوية', 'step3': 'الوثائق', 'step4': 'العقد',
+    't_sejour': 'إقامتك',
+    't_sejour_sub': 'اختر تواريخ إيجارك على التقويم أدناه.',
+    't_coords': 'بياناتك الشخصية',
+    't_coords_sub': 'معلومات المسافر الرئيسي للحجز.',
+    't_docs': 'وثيقة الهوية',
+    't_contrat': 'عقد الإيجار',
+    't_contrat_sub': 'يرجى القراءة بعناية والتوقيع على العقد أدناه.',
+    'btn_next': 'متابعة ←', 'btn_back': '→ رجوع',
+    'btn_submit': '✓ تأكيد تسجيل الوصول', 'btn_pdf': '⬇ تحميل العقد PDF',
+    'hdr_title': 'تسجيل الوصول الإلكتروني',
+    'lbl_docnum': 'رقم بطاقة الهوية / جواز السفر', 'lbl_firstname': 'الاسم الأول', 'lbl_lastname': 'اسم العائلة',
+    'lbl_email': 'البريد الإلكتروني', 'lbl_phone': 'الهاتف',
+    'lbl_nationality': 'الجنسية', 'lbl_birthdate': 'تاريخ الميلاد',
+    'lbl_address': 'العنوان',
+    'lbl_arrival': 'وقت الوصول المتوقع', 'lbl_guests': 'عدد المسافرين',
+    'lbl_doctype': 'نوع الوثيقة',
+    'lbl_recto': 'الوجه الأمامي للوثيقة', 'lbl_verso': 'الوجه الخلفي للوثيقة',
+    'lbl_selfie': 'صورة المسافر',
+    'lbl_signature': 'التوقيع اليدوي',
+    'skip_doc': 'ليس لدي وثيقتي الآن',
+    'skip_step': '← تخطي هذه الخطوة',
+    'lock_generate': '🎲 توليد',
+    'lock_title': '🔑 رمز الدخول للسكن',
+    'lock_label': 'قفل رقمي · 7 أرقام',
+    'check1': 'لقد قرأت وأوافق على الشروط العامة لعقد الإيجار أعلاه.',
+    'check2': 'أشهد أن المعلومات المقدمة صحيحة وأن وثائق الهوية المرفوعة أصلية.',
+    'check3': 'أوافق على معالجة بياناتي الشخصية وفقاً للوائح حماية البيانات لإدارة هذا الإيجار.',
+    'success_title': 'تم تسجيل الوصول!',
+    'success_sub': 'تم حفظ ملفك بنجاح. قم بتنزيل العقد الموقع أدناه.',
+    'sig_placeholder': 'وقّع بإصبعك أو الماوس',
+    'contract_title': 'عقد إيجار مفروش سياحي',
+    'contract_intro': 'بين الموقع أدناه، المشار إليه فيما بعد بـ "المؤجر"، والمسافر(ين) المذكور(ين) في هذا العقد، المشار إليهم فيما بعد بـ "المستأجر(ين)".',
+    'section_identity': 'هوية المستأجر',
+    'section_sejour': 'تفاصيل الإقامة',
+    'section_docs': 'وثيقة الهوية',
+    'section_signature': 'التوقيع الإلكتروني',
+    'pdf_tenant': 'المستأجر', 'pdf_landlord': 'المؤجر',
+  }
+};
+
+function t(key) {
+  return (TRANSLATIONS[window._lang] && TRANSLATIONS[window._lang][key]) 
+    || TRANSLATIONS['fr'][key] || key;
+}
+
+function _mainSetLang(lang) {
+  window._lang = lang;
+  localStorage.setItem('sf_lang', lang);
+  
+  // RTL pour arabe
+  if (lang === 'ar') {
+    document.documentElement.setAttribute('dir', 'rtl');
+    document.documentElement.setAttribute('lang', 'ar');
+    document.body.classList.add('rtl');
+    document.body.style.fontFamily = "'Noto Sans Arabic', 'DM Sans', sans-serif";
+  } else {
+    document.documentElement.setAttribute('dir', 'ltr');
+    document.documentElement.setAttribute('lang', lang);
+    document.body.classList.remove('rtl');
+    document.body.style.fontFamily = '';
+  }
+  
+  // Update lang buttons
+  document.querySelectorAll('.lang-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.textContent.trim() === lang.toUpperCase());
+  });
+  
+  // Translate all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    var text = t(key);
+    if (text) el.textContent = text;
+  });
+  
+  // Update header title
+  var hdr = document.getElementById('hdr-title');
+  if (hdr) hdr.textContent = t('hdr_title');
+  
+  // Update sig placeholder
+  var sigPh = document.getElementById('sigPlaceholder');
+  if (sigPh) sigPh.textContent = t('sig_placeholder');
+
+  // Update identity notice
+  var noticeEl = document.getElementById('identityNoticeText');
+  if (noticeEl) {
+    var notices = {
+      'fr': '<strong>Saisissez vos informations exactement comme sur votre CIN ou passeport.</strong> Ces données seront vérifiées à l\'étape suivante par scan de votre document.',
+      'en': '<strong>Enter your information exactly as it appears on your ID card or passport.</strong> This information will be verified at the next step by scanning your document.',
+      'ar': '<strong>أدخل معلوماتك بالضبط كما تظهر في بطاقة هويتك أو جواز سفرك.</strong> سيتم التحقق من هذه المعلومات في الخطوة التالية عبر مسح وثيقتك.'
+    };
+    noticeEl.innerHTML = notices[lang] || notices['fr'];
+  }
+  
+  // Update labels dynamically
+  updateLabels();
+  
+  // Update step circles (done checkmarks stay)
+  renderCalendar();
+}
+
+function updateLabels() {
+  var labelMap = {
+    'docNumber': 'lbl_docnum',
+    'firstName': 'lbl_firstname',
+    'lastName': 'lbl_lastname',
+    'email': 'lbl_email',
+    'phone': 'lbl_phone',
+    'nationality': 'lbl_nationality',
+    'birthdate': 'lbl_birthdate',
+    'address': 'lbl_address',
+    'arrivalTime': 'lbl_arrival',
+    'guestCount': 'lbl_guests',
+  };
+  Object.keys(labelMap).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && el.previousElementSibling && el.previousElementSibling.tagName === 'LABEL') {
+      // don't override — use data-i18n on labels instead
+    }
+  });
+}
+
+function applyTranslations() {
+  var lang = window._lang || 'fr';
+  var tr = TRANSLATIONS[lang] || TRANSLATIONS['fr'];
+  if (!tr) return;
+  // Translate all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    if (tr[key]) {
+      // Don't override elements with children (labels with spans)
+      if (el.children.length === 0) el.textContent = tr[key];
+    }
+  });
+  // Update header title
+  var hdr = document.getElementById('hdr-title');
+  if (hdr && tr['hdr_title']) hdr.textContent = tr['hdr_title'];
+  // Update sig placeholder
+  var sigPh = document.getElementById('sigPlaceholder');
+  if (sigPh && tr['sig_placeholder']) sigPh.textContent = tr['sig_placeholder'];
+}
+
+// Override setLang in main script to call applyTranslations
+var _earlySetLang = window.setLang;
+window.setLang = function(lang) {
+  if (_earlySetLang) _earlySetLang(lang);
+  window._lang = lang;
+  applyTranslations();
+};
+
+// Load saved language on startup
+(function() {
+  var saved = localStorage.getItem('sf_lang') || 'fr';
+  window._lang = saved;
+  if (saved !== 'fr') setTimeout(function() { setLang(saved); }, 200);
+})();
+
+</script>
+</body>
+</html>
