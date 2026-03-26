@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stayform Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FAF6F1; --surface: #FFFFFF; --surface2: #F5F0EB;
+  --border: #EAE0D5; --text: #1C120A; --text2: #6B5848; --text3: #B09A88;
+  --success: #2D7A45; --danger: #C13515; --warning: #C67600;
+  --riad-green: #2D4A3E; --riad-gold: #D4A853;
+}
+body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--text); }
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: 240px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem 1rem; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 10; }
+.main-content { margin-left: 240px; flex: 1; padding: 2rem 2.5rem; background: var(--bg); height: 100vh; overflow-y: auto; }
+.sidebar-logo { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.logo-mark { width: 32px; height: 32px; background: var(--riad-green); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--riad-gold); font-size: 1rem; }
+.logo-name { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; color: var(--riad-green); }
+.nav-section { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); font-weight: 700; margin: 1rem 0 0.4rem; padding: 0 0.5rem; }
+.nav-item { display: flex; align-items: center; gap: 0.65rem; padding: 0.65rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.88rem; font-weight: 500; color: var(--text3); transition: background 0.15s, color 0.15s; }
+.nav-item:hover { background: rgba(45,74,62,0.08); color: var(--riad-green); }
+.nav-item.active { background: rgba(45,74,62,0.1); color: var(--riad-green); font-weight: 700; }
+.sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); }
+.user-pill { display: flex; align-items: center; gap: 0.7rem; padding: 0.5rem; }
+.user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--riad-green); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; color: white; flex-shrink: 0; }
+.section { display: none; }
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+.topbar-title { font-family: 'Nunito', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--text); }
+.topbar-sub { font-size: 0.82rem; color: var(--text3); margin-top: 2px; }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.stat-card { background: var(--surface); border-radius: 14px; padding: 1.2rem 1.4rem; border: 1px solid var(--border); }
+.stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 0.5rem; font-weight: 600; }
+.stat-value { font-family: 'Nunito', sans-serif; font-size: 2rem; font-weight: 800; color: var(--text); }
+.stat-sub { font-size: 0.75rem; color: var(--text3); margin-top: 0.3rem; }
+.card { background: var(--surface); border-radius: 14px; padding: 1.2rem 1.4rem; margin-bottom: 1rem; border: 1px solid var(--border); }
+.card-title { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+.card-sub { font-size: 0.78rem; color: var(--text3); }
+.plan-banner { border-radius: 12px; padding: 1.2rem 1.5rem; margin-bottom: 2rem; background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--success); display: flex; align-items: center; gap: 1.2rem; }
+.ring-wrap { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
+.ring-svg { width: 72px; height: 72px; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: var(--border); stroke-width: 6; }
+.ring-fill { fill: none; stroke: var(--success); stroke-width: 6; stroke-dasharray: 207.3; stroke-dashoffset: 207.3; stroke-linecap: round; transition: all 0.6s; }
+.ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-num { font-family: 'Nunito', sans-serif; font-size: 1.1rem; font-weight: 800; line-height: 1; }
+.ring-lbl { font-size: 0.6rem; color: var(--text3); }
+.btn { background: var(--riad-green); color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1.2rem; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; }
+.empty { text-align: center; padding: 3rem 1rem; color: var(--text3); font-size: 0.88rem; }
+.empty-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); font-weight: 600; padding: 0.5rem 0.8rem; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 0.9rem 0.8rem; font-size: 0.85rem; border-bottom: 0.5px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+.badge { background: #EEF7F1; color: var(--success); font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.7rem; border-radius: 20px; }
+.prop-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.2rem 1.4rem; margin-bottom: 1rem; }
+.btn-sm { padding: 0.4rem 0.9rem; font-size: 0.78rem; border-radius: 8px; border: none; cursor: pointer; font-family: 'Nunito', sans-serif; font-weight: 700; }
+.loading { text-align: center; padding: 2rem; color: var(--text3); }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">🏡</div>
+      <span class="logo-name">stayform</span>
+    </div>
+    <div class="nav-section">Menu</div>
+    <div class="nav-item active" onclick="showSection('overview')"><span>📊</span> Vue d'ensemble</div>
+    <div class="nav-item" onclick="showSection('properties')"><span>🏠</span> Mes hébergements</div>
+    <div class="nav-item" onclick="showSection('guests')"><span>👥</span> Mes guests</div>
+    <div class="nav-section">Compte</div>
+    <div class="nav-item" onclick="showSection('settings')"><span>⚙️</span> Paramètres</div>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="av">H</div>
+        <div>
+          <div style="font-size:0.84rem;font-weight:600;color:var(--text);" id="uname">Hicham</div>
+          <div style="font-size:0.68rem;color:var(--text3);" id="uplan">...</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content" id="mc">
+
+    <div id="section-overview" class="section">
+      <div class="topbar">
+        <div><div class="topbar-title" id="welcome">Bonjour 👋</div><div class="topbar-sub">Voici votre tableau de bord</div></div>
+      </div>
+      <div class="plan-banner">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 72 72">
+            <circle class="ring-bg" cx="36" cy="36" r="33"/>
+            <circle class="ring-fill" id="ring" cx="36" cy="36" r="33"/>
+          </svg>
+          <div class="ring-text"><span class="ring-num" id="ringN">0</span><span class="ring-lbl">/ 3</span></div>
+        </div>
+        <div>
+          <div style="font-family:'Nunito',sans-serif;font-weight:700;margin-bottom:0.3rem;">Vos contrats</div>
+          <div id="planD" style="font-size:0.83rem;color:var(--text2);">Chargement...</div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total check-ins</div><div class="stat-value" id="sTotal">—</div><div class="stat-sub">Depuis la création</div></div>
+        <div class="stat-card"><div class="stat-label">Ce mois</div><div class="stat-value" id="sMonth">—</div><div class="stat-sub" id="sTrend">↑ 0 ce mois</div></div>
+        <div class="stat-card"><div class="stat-label">Contrats signés</div><div class="stat-value" id="sSigned">—</div><div class="stat-sub">PDF générés</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Derniers check-ins</div>
+        <div class="card-sub">Historique de vos guests récents</div>
+        <div id="recentG"><div class="loading">Chargement...</div></div>
+      </div>
+    </div>
+
+    <div id="section-properties" class="section">
+      <div class="topbar">
+        <div><div class="topbar-title">Mes hébergements</div><div class="topbar-sub">Gérez vos logements</div></div>
+        <button class="btn">+ Ajouter</button>
+      </div>
+      <div id="propList"><div class="loading">Chargement...</div></div>
+    </div>
+
+    <div id="section-guests" class="section">
+      <div class="topbar">
+        <div><div class="topbar-title">Mes guests</div><div class="topbar-sub">Tous les dossiers</div></div>
+      </div>
+      <div class="card"><div id="allG"><div class="loading">Chargement...</div></div></div>
+    </div>
+
+    <div id="section-settings" class="section">
+      <div class="topbar">
+        <div><div class="topbar-title">Paramètres</div><div class="topbar-sub">Informations du compte</div></div>
+      </div>
+      <div class="card"><div id="settingsD" style="font-size:0.88rem;color:var(--text2);line-height:2;">Chargement...</div></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const URL = 'https://syvpyvkgauyfqghwiqsl.supabase.co';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5dnB5dmtnYXV5ZnFnaHdpcXNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTYzMDcsImV4cCI6MjA4ODk5MjMwN30.Iu0s8WeJcFrZUXkYRHbQBUvZMOMdsvgip_wnEVtXRO4';
+const HOST = 'hicham.boulaajoul@gmail.com';
+const sb = supabase.createClient(URL, KEY);
+
+var profile = null, guests = [], props = [];
+
+function showSection(id) {
+  ['overview','properties','guests','settings'].forEach(function(s) {
+    document.getElementById('section-' + s).style.display = 'none';
+  });
+  document.getElementById('section-' + id).style.display = 'block';
+  document.querySelectorAll('.nav-item').forEach(function(el) {
+    el.classList.remove('active');
+    if (el.getAttribute('onclick') && el.getAttribute('onclick').includes("'" + id + "'")) {
+      el.classList.add('active');
+    }
+  });
+  document.getElementById('mc').scrollTop = 0;
+  if (id === 'guests') renderAllG();
+  if (id === 'properties') renderProps();
+}
+
+function guestRow(g) {
+  var d1 = g.checkin_date ? new Date(g.checkin_date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  var d2 = g.checkout_date ? new Date(g.checkout_date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  return '<tr><td><div style="font-weight:600">' + (g.name||'—') + '</div><div style="font-size:0.75rem;color:var(--text3)">' + (g.email||'') + '</div></td>' +
+    '<td style="font-size:0.82rem;color:var(--text2)">' + d1 + ' → ' + d2 + '</td>' +
+    '<td><span class="badge">✓ Signé</span></td></tr>';
+}
+
+function renderRecentG() {
+  var el = document.getElementById('recentG');
+  if (!guests.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">👥</div>Aucun guest.</div>'; return; }
+  el.innerHTML = '<table><thead><tr><th>Guest</th><th>Dates</th><th>Statut</th></tr></thead><tbody>' + guests.slice(0,5).map(guestRow).join('') + '</tbody></table>';
+}
+
+function renderAllG() {
+  var el = document.getElementById('allG');
+  if (!guests.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">👥</div>Aucun guest.</div>'; return; }
+  el.innerHTML = '<table><thead><tr><th>Guest</th><th>Dates</th><th>Statut</th></tr></thead><tbody>' + guests.map(guestRow).join('') + '</tbody></table>';
+}
+
+function renderProps() {
+  var el = document.getElementById('propList');
+  if (!props.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🏠</div>Aucun hébergement.</div>'; return; }
+  el.innerHTML = props.map(function(p) {
+    return '<div class="prop-card"><div style="display:flex;gap:0.8rem;align-items:center">' +
+      '<div style="font-size:2rem">' + (p.cover_emoji||'🏠') + '</div>' +
+      '<div><div style="font-weight:700">' + (p.name||'—') + '</div><div style="font-size:0.78rem;color:var(--text3)">' + (p.address||'—') + '</div></div>' +
+      '</div><div style="display:flex;gap:0.5rem;margin-top:0.8rem">' +
+      '<button class="btn-sm" style="background:var(--riad-green);color:#fff">🔗 Nouveau lien</button>' +
+      '<button class="btn-sm" style="background:var(--surface2);border:1px solid var(--border)">✏️</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+async function load() {
+  var { data: p } = await sb.from('profiles').select('*').eq('email', HOST).single();
+  if (!p) return;
+  profile = p;
+
+  var count = p.guest_count || 0;
+  document.getElementById('uname').textContent = p.name || 'Hicham';
+  document.getElementById('av').textContent = (p.name||'H').charAt(0).toUpperCase();
+  document.getElementById('uplan').textContent = count + '/3 contrats';
+  document.getElementById('welcome').textContent = 'Bonjour, ' + (p.name||'Hicham').split(' ')[0] + ' 👋';
+  document.getElementById('ringN').textContent = count;
+  document.getElementById('planD').textContent = 'Vous avez généré ' + count + ' contrat(s) sur 3';
+
+  var pct = Math.min(count/3, 1);
+  var ring = document.getElementById('ring');
+  ring.style.strokeDashoffset = 207.3 * (1 - pct);
+  ring.style.stroke = pct >= 1 ? '#C13515' : pct >= 0.67 ? '#C67600' : '#2D7A45';
+
+  var now = new Date();
+  var fom = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  var { data: g } = await sb.from('guests').select('*').eq('host_id', p.id).order('created_at', {ascending: false});
+  guests = g || [];
+  var mCount = guests.filter(function(x){ return x.created_at >= fom; }).length;
+  document.getElementById('sTotal').textContent = guests.length;
+  document.getElementById('sMonth').textContent = mCount;
+  document.getElementById('sTrend').textContent = '↑ ' + mCount + ' ce mois';
+  document.getElementById('sSigned').textContent = guests.length;
+  renderRecentG();
+
+  var { data: pr } = await sb.from('properties').select('*').eq('host_id', p.id).order('created_at', {ascending: true});
+  props = pr || [];
+
+  document.getElementById('settingsD').innerHTML =
+    '<b>Nom :</b> ' + (p.name||'—') + '<br>' +
+    '<b>Email :</b> ' + (p.email||'—') + '<br>' +
+    '<b>Ville :</b> ' + (p.city||'—') + '<br>' +
+    '<b>Plan :</b> ' + (p.plan||'free');
+}
+
+showSection('overview');
+load();
+</script>
+</body>
+</html>
