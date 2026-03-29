@@ -665,7 +665,10 @@ function simulatePayment(result) {
 
 // ── LINKS / CONTRATS ──
 function generateNewLink() {
-  // La vraie fonction est définie dans le script principal
+  if (currentProfile && currentProfile.plan === 'free' && (currentProfile.guest_count || 0) >= FREE_LIMIT) {
+    openUpgradeModal('pro', 'Passez en Pro pour générer plus de liens.');
+    return;
+  }
   if (typeof _generateNewLink === 'function') {
     _generateNewLink();
   } else {
@@ -737,6 +740,10 @@ function toggleEditFields() {
   if (btn) btn.textContent = hidden ? '✕ Fermer la modification' : '✏️ Modifier les informations';
 }
 function openAddProperty(propId) {
+  if (!propId && currentProfile && currentProfile.plan === 'free' && (currentProfile.guest_count || 0) >= FREE_LIMIT) {
+    openUpgradeModal('pro', 'Passez en Pro pour ajouter des hébergements.');
+    return;
+  }
   if (typeof _openAddProperty === 'function') _openAddProperty(propId);
 }
 function closePropertyModal() {
@@ -787,6 +794,10 @@ function openPropertyDetail(propId) {
   else setTimeout(function() { openPropertyDetail(propId); }, 300);
 }
 function generateDetailLink() {
+  if (currentProfile && currentProfile.plan === 'free' && (currentProfile.guest_count || 0) >= FREE_LIMIT) {
+    openUpgradeModal('pro', 'Passez en Pro pour générer plus de liens.');
+    return;
+  }
   if (window._generateDetailLink_fn) window._generateDetailLink_fn();
 }
 function editCurrentProperty() {
