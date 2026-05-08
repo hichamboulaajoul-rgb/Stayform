@@ -2377,7 +2377,7 @@ async function renderGuests(mode) {
   wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div>Chargement...</div>';
   
   let query = client.from('guests')
-    .select('id,name,email,phone,nationality,doc_number,dates,arrival_time,guest_count,nights,doc_status,lock_code,status,signed,created_at')
+    .select('id,name,email,phone,nationality,doc_number,dates,arrival_time,guest_count,nights,doc_status,lock_code,status,signed,created_at,property_name,property_id')
     .eq('host_id', currentUser.id)
     .order('created_at', { ascending: false });
   if (mode === 'recent') query = query.limit(5);
@@ -2385,6 +2385,7 @@ async function renderGuests(mode) {
   const { data: guests, error } = await query;
   if (error) { console.error('renderGuests error:', error); }
   const list = guests || [];
+  _cacheGuests(list);
   
   if (!list.length) {
     wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div>Aucun guest pour le moment.<br>Partagez votre lien pour commencer !</div>';
@@ -2424,9 +2425,278 @@ async function renderGuests(mode) {
           '<div><span style="color:var(--text3)">🔑 </span>' + (g.lock_code ? '<strong style="color:#FF385C;letter-spacing:0.1em">' + g.lock_code + '</strong>' : '—') + '</div>' +
           '<div><span style="color:var(--text3)">📄 </span>' + (g.doc_status === 'pending' ? '⚠ En attente' : '✓ Fournie') + '</div>' +
         '</div>' +
+        '<div style="margin-top:0.9rem;padding-top:0.9rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">' +
+          '<button onclick="showSignatureModal(\'' + (g.id||'') + '\')" style="display:inline-flex;align-items:center;gap:0.4rem;background:#1A2E4A;color:#fff;border:none;border-radius:8px;padding:0.5rem 1rem;font-family:Nunito,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">🗂 Fiche de Police</button>' +
+        '</div>' +
       '</div>';
     }).join('');
   }
+}
+
+// ══════════════════════════════
+// FICHE DE POLICE
+// ══════════════════════════════
+// Stocker les guests en mémoire pour accès par ID
+var _guestsCache = {};
+
+function _cacheGuests(list) {
+  list.forEach(function(g){ _guestsCache[g.id] = g; });
+}
+
+// ══════════════════════════════
+// MODAL SIGNATURE FICHE DE POLICE
+// ══════════════════════════════
+function showSignatureModal(guestId) {
+  var existing = document.getElementById('signatureModal');
+  if (existing) existing.remove();
+
+  var modal = document.createElement('div');
+  modal.id = 'signatureModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+
+  var inner = document.createElement('div');
+  inner.style.cssText = 'background:#fff;border-radius:16px;padding:1.5rem;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,0.2);';
+
+  // Header
+  var header = document.createElement('div');
+  header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;';
+  header.innerHTML = '<div><div style="font-family:Nunito,sans-serif;font-size:1rem;font-weight:800;color:#1A2E4A;">Signature du responsable</div><div style="font-size:0.75rem;color:#aaa;margin-top:2px;">Dessinez votre signature ci-dessous</div></div>';
+  var btnClose = document.createElement('button');
+  btnClose.textContent = '✕';
+  btnClose.style.cssText = 'background:none;border:none;font-size:1.3rem;cursor:pointer;color:#aaa;line-height:1;';
+  btnClose.onclick = function(){ modal.remove(); };
+  header.appendChild(btnClose);
+
+  // Canvas
+  var canvas = document.createElement('canvas');
+  canvas.id = 'sigCanvas';
+  canvas.width = 440;
+  canvas.height = 160;
+  canvas.style.cssText = 'border:1.5px solid #e0d5c8;border-radius:10px;width:100%;height:160px;cursor:crosshair;background:#fafaf9;touch-action:none;display:block;';
+
+  // Buttons
+  var btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;justify-content:space-between;margin-top:0.8rem;gap:0.7rem;';
+
+  var btnClear = document.createElement('button');
+  btnClear.textContent = '🗑 Effacer';
+  btnClear.style.cssText = 'flex:1;background:#f5f0eb;color:#6B5848;border:none;border-radius:8px;padding:0.65rem;font-family:Nunito,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;';
+  btnClear.onclick = clearSignature;
+
+  var btnValidate = document.createElement('button');
+  btnValidate.textContent = '✓ Générer la fiche';
+  btnValidate.style.cssText = 'flex:2;background:#1A2E4A;color:#fff;border:none;border-radius:8px;padding:0.65rem;font-family:Nunito,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;';
+  btnValidate.onclick = function(){ validateSignature(guestId); };
+
+  btnRow.appendChild(btnClear);
+  btnRow.appendChild(btnValidate);
+
+  inner.appendChild(header);
+  inner.appendChild(canvas);
+  inner.appendChild(btnRow);
+  modal.appendChild(inner);
+  document.body.appendChild(modal);
+
+  // Init canvas drawing
+  var ctx = canvas.getContext('2d');
+  var drawing = false;
+
+  function getPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / rect.width;
+    var scaleY = canvas.height / rect.height;
+    if (e.touches) {
+      return { x: (e.touches[0].clientX - rect.left) * scaleX, y: (e.touches[0].clientY - rect.top) * scaleY };
+    }
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    drawing = true;
+    var pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  }
+  function draw(e) {
+    e.preventDefault();
+    if (!drawing) return;
+    var pos = getPos(e);
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#1A2E4A';
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  }
+  function stopDraw() { drawing = false; }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDraw);
+  canvas.addEventListener('mouseleave', stopDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stopDraw);
+
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) modal.remove();
+  });
+}
+
+function clearSignature() {
+  var canvas = document.getElementById('sigCanvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function validateSignature(guestId) {
+  var canvas = document.getElementById('sigCanvas');
+  if (!canvas) return;
+
+  // Vérifier que le canvas n'est pas vide
+  var ctx = canvas.getContext('2d');
+  var pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  var hasDrawing = false;
+  for (var i = 3; i < pixels.length; i += 4) {
+    if (pixels[i] > 0) { hasDrawing = true; break; }
+  }
+  if (!hasDrawing) {
+    showToast('Veuillez dessiner votre signature.', '#C13515');
+    return;
+  }
+
+  var signatureDataUrl = canvas.toDataURL('image/png');
+  document.getElementById('signatureModal').remove();
+  printFichePolice(guestId, signatureDataUrl);
+}
+
+function printFichePolice(guestId, signatureDataUrl) {
+  var g = _guestsCache[guestId];
+  if (!g) { showToast('Données du guest introuvables.', '#C13515'); return; }
+
+  // Extraire arrivée et départ depuis g.dates (format "DD/MM/YYYY - DD/MM/YYYY" ou similaire)
+  var parts = (g.dates || '').split(/\s*[-–]\s*/);
+  var arrival = parts[0] ? parts[0].trim() : '—';
+  var departure = parts[1] ? parts[1].trim() : '—';
+
+  // Trouver la propriété associée (par id ou par nom)
+  var prop = null;
+  if (window.currentProperties && Array.isArray(window.currentProperties)) {
+    prop = window.currentProperties.find(function(p){ return p.id === g.property_id; })
+        || window.currentProperties.find(function(p){ return p.name === g.property_name; });
+  }
+  var propName = (prop && prop.name) || g.property_name || '—';
+  var address = (prop && prop.address) || '—';
+
+  var html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">' +
+    '<title>Fiche de Police — ' + (g.name||'Guest') + '</title>' +
+    '<style>' +
+    '* { box-sizing: border-box; margin: 0; padding: 0; }' +
+    'body { font-family: Arial, sans-serif; background: #fff; color: #111; padding: 30px; max-width: 700px; margin: auto; }' +
+    '.header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1A2E4A; padding-bottom: 16px; margin-bottom: 24px; }' +
+    '.logo { font-size: 1.3rem; font-weight: 900; color: #1A2E4A; }' +
+    '.logo span { color: #D4A853; }' +
+    '.doc-title { text-align: right; }' +
+    '.doc-title h1 { font-size: 1rem; font-weight: 700; color: #1A2E4A; }' +
+    '.doc-title h1 .ar { display: block; font-family: Arial; font-size: 1.05rem; direction: rtl; }' +
+    '.doc-title p { font-size: 0.72rem; color: #888; margin-top: 4px; }' +
+    '.section { margin-bottom: 20px; }' +
+    '.section-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: #888; font-weight: 700; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 4px; display: flex; justify-content: space-between; }' +
+    '.section-title .ar { font-size: 0.82rem; text-transform: none; letter-spacing: 0; direction: rtl; }' +
+    '.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }' +
+    '.field { background: #F7F7F7; border-radius: 6px; padding: 10px 12px; }' +
+    '.field .label { font-size: 0.63rem; text-transform: uppercase; color: #999; letter-spacing: 0.08em; font-weight: 700; display: flex; justify-content: space-between; }' +
+    '.field .label .ar { font-size: 0.75rem; text-transform: none; letter-spacing: 0; direction: rtl; }' +
+    '.field .value { font-size: 0.95rem; font-weight: 700; color: #111; margin-top: 5px; }' +
+    '.field.full { grid-column: 1 / -1; }' +
+    '.sign-box { border: 1px dashed #ccc; border-radius: 8px; padding: 20px; text-align: center; font-size: 0.72rem; color: #bbb; margin-top: 24px; min-height: 70px; line-height: 2; }' +
+    '.footer { margin-top: 24px; padding-top: 14px; border-top: 1px solid #eee; display: flex; justify-content: space-between; font-size: 0.68rem; color: #bbb; }' +
+    '@media print { body { padding: 10px; } }' +
+    '</style></head><body>' +
+
+    '<div class="header">' +
+      '<div class="logo">Stay<span>form</span></div>' +
+      '<div class="doc-title">' +
+        '<h1>Fiche de Police<span class="ar">بطاقة الإقامة</span></h1>' +
+        '<p>Générée le ' + new Date().toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}) + '</p>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="section">' +
+      '<div class="section-title"><span>Informations du logement</span><span class="ar">معلومات السكن</span></div>' +
+      '<div class="grid">' +
+        '<div class="field full">' +
+          '<div class="label"><span>Nom du logement</span><span class="ar">اسم السكن</span></div>' +
+          '<div class="value">' + propName + '</div>' +
+        '</div>' +
+        '<div class="field full">' +
+          '<div class="label"><span>Adresse</span><span class="ar">العنوان</span></div>' +
+          '<div class="value">' + address + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="section">' +
+      '<div class="section-title"><span>Informations du guest</span><span class="ar">معلومات النزيل</span></div>' +
+      '<div class="grid">' +
+        '<div class="field full">' +
+          '<div class="label"><span>Nom complet</span><span class="ar">الاسم الكامل</span></div>' +
+          '<div class="value">' + (g.name || '—') + '</div>' +
+        '</div>' +
+        '<div class="field">' +
+          '<div class="label"><span>Nationalité</span><span class="ar">الجنسية</span></div>' +
+          '<div class="value">' + (g.nationality || '—') + '</div>' +
+        '</div>' +
+        '<div class="field">' +
+          '<div class="label"><span>N° CIN / Passeport</span><span class="ar">رقم الهوية</span></div>' +
+          '<div class="value">' + (g.doc_number || '—') + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="section">' +
+      '<div class="section-title"><span>Détails du séjour</span><span class="ar">تفاصيل الإقامة</span></div>' +
+      '<div class="grid">' +
+        '<div class="field">' +
+          '<div class="label"><span>Date d\'arrivée</span><span class="ar">تاريخ الوصول</span></div>' +
+          '<div class="value">' + arrival + '</div>' +
+        '</div>' +
+        '<div class="field">' +
+          '<div class="label"><span>Date de départ</span><span class="ar">تاريخ المغادرة</span></div>' +
+          '<div class="value">' + departure + '</div>' +
+        '</div>' +
+        '<div class="field">' +
+          '<div class="label"><span>Nombre de nuits</span><span class="ar">عدد الليالي</span></div>' +
+          '<div class="value">' + (g.nights || '—') + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="sign-section" style="margin-top:24px;">' +
+      '<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:#888;font-weight:700;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:4px;display:flex;justify-content:space-between;">' +
+        '<span>Signature du responsable</span><span style="direction:rtl;">توقيع المسؤول</span>' +
+      '</div>' +
+      (signatureDataUrl
+        ? '<div style="border:1px solid #eee;border-radius:8px;padding:8px;display:inline-block;background:#fafafa;"><img src="' + signatureDataUrl + '" style="max-height:80px;display:block;"></div>'
+        : '<div style="border:1px dashed #ccc;border-radius:8px;height:80px;"></div>'
+      ) +
+    '</div>' +
+
+    '<div class="footer">' +
+      '<span>Stayform — Check-in digital pour hôtes au Maroc</span>' +
+      '<span>Document confidentiel</span>' +
+    '</div>' +
+
+    '<script>window.onload=function(){window.print();}<\/script>' +
+    '</body></html>';
+
+  var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
 }
 
 // ══════════════════════════════
@@ -2869,6 +3139,7 @@ async function loadProperties() {
     .order('created_at', { ascending: true });
   if (error) { console.error('loadProperties:', error); return; }
   currentProperties = data || [];
+  window.currentProperties = currentProperties;
   renderProperties();
 }
 
