@@ -2973,7 +2973,7 @@ function sendWelcome(guestId) {
   if (!prop) { showToast('Propriété introuvable', '#C13515'); return; }
 
   // Construire l'URL de la page bienvenue
-  var baseUrl = 'https://hichamboulaajoul-rgb.github.io/Stayform/welcome.html';
+  var baseUrl = window.location.origin + '/welcome.html';
   var params = new URLSearchParams();
   params.set('p', prop.id);
   params.set('g', g.id);
@@ -3563,7 +3563,7 @@ function _generateNewLink() {
   }
   const { token, expiry } = generateLinkToken();
   // URL courte — tout récupéré depuis Supabase via linkId
-  const url = `https://hichamboulaajoul-rgb.github.io/Stayform/checkin.html?t=${token}`;
+  const url = `${window.location.origin}/checkin.html?t=${token}`;
 
   // Save to localStorage (with host context)
   const linkData = { url, expiry, token, createdAt: Date.now() };
@@ -4105,7 +4105,7 @@ async function _generatePropertyLink(propId, presetData) {
   const shortPropId = propId.replace(/-/g,'').slice(0,8);
   const token = currentProfile.link_id + '.' + expiryB36 + '.' + shortPropId;
   // Ajouter les dates pré-remplies si fournies (depuis iCal)
-  let url = `https://hichamboulaajoul-rgb.github.io/Stayform/checkin.html?t=${token}`;
+  let url = `${window.location.origin}/checkin.html?t=${token}`;
   if (presetData && presetData.arrival && presetData.departure) {
     url += '&arr=' + encodeURIComponent(presetData.arrival) + '&dep=' + encodeURIComponent(presetData.departure);
     if (presetData.nights) url += '&n=' + presetData.nights;
