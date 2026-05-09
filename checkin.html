@@ -2630,7 +2630,10 @@ async function _runPDFGeneration(btn, silent) {
     doc.setFontSize(7.5);
     doc.setTextColor(255, 255, 255, 0.8);
     if (hostName) doc.text(hostName, W - margin, 14, { align: 'right' });
-    if (propName) doc.text(propName.substring(0, 45), W - margin, 20, { align: 'right' });
+    if (propName) {
+      const propLines = doc.splitTextToSize(propName, 80);
+      doc.text(propLines[0], W - margin, 20, { align: 'right' });
+    }
     // Date
     const now = new Date();
     doc.setFontSize(6.5);
@@ -2687,7 +2690,10 @@ async function _runPDFGeneration(btn, silent) {
     doc.setFontSize(8.5);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...DEEP);
-    doc.text((value || '—').substring(0, opts.full ? 80 : 40), margin + 3, y + 7);
+    const valStr = (value || '—');
+    const maxChars = opts.full ? 90 : 45;
+    const displayVal = valStr.length > maxChars ? valStr.substring(0, maxChars) + '…' : valStr;
+    doc.text(displayVal, margin + 3, y + 7);
     y += 9;
   }
 
@@ -2699,13 +2705,13 @@ async function _runPDFGeneration(btn, silent) {
     doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
     doc.text(l1.toUpperCase(), margin + 3, y + 3);
     doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...DEEP);
-    doc.text((v1||'—').substring(0,28), margin + 3, y + 7);
+    doc.text((v1||'—').substring(0,35), margin + 3, y + 7);
     // Col 2
     const x2 = margin + half + 4;
     doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
     doc.text(l2.toUpperCase(), x2, y + 3);
     doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...DEEP);
-    doc.text((v2||'—').substring(0,28), x2, y + 7);
+    doc.text((v2||'—').substring(0,35), x2, y + 7);
     y += 9;
   }
 
@@ -2803,49 +2809,77 @@ async function _runPDFGeneration(btn, silent) {
   newPage();
   addHeader();
 
-  // ── Photo CIN ──
-  sectionTitle('Piece d\'identite');
-  if (docImage1) {
-    checkY(70);
-    try {
-      // Calculer dimensions pour centrer et bien cadrer
-      const imgW = contentW;
-      const imgH = 60;
-      doc.setDrawColor(...BORDER);
-      doc.setLineWidth(0.5);
-      doc.roundedRect(margin, y, imgW, imgH, 2, 2, 'S');
-      doc.addImage(docImage1, 'JPEG', margin + 1, y + 1, imgW - 2, imgH - 2, '', 'FAST');
-      y += imgH + 4;
-    } catch(e) {
-      doc.setFontSize(8); doc.setTextColor(...LIGHT);
-      doc.text('Document fourni (erreur affichage)', margin + 3, y + 8);
-      y += 14;
-    }
-  } else {
-    checkY(10);
-    doc.setFillColor(...CREAM);
-    doc.rect(margin, y, contentW, 10, 'F');
-    doc.setFontSize(8); doc.setFont('helvetica','italic'); doc.setTextColor(...LIGHT);
-    doc.text('Aucun document fourni', margin + 4, y + 7);
-    y += 14;
+  // ── Corriger orientation CIN ──
+  async function fixImageOrientation(dataUrl) {
+    return new Promise(function(resolve) {
+      var img = new Image();
+      img.onload = function() {
+        var isPortrait = img.naturalHeight > img.naturalWidth;
+        if (!isPortrait) { resolve(dataUrl); return; }
+        var cv = document.createElement('canvas');
+        cv.width  = img.naturalHeight;
+        cv.height = img.naturalWidth;
+        var ctx = cv.getContext('2d');
+        ctx.translate(cv.width / 2, cv.height / 2);
+        ctx.rotate(90 * Math.PI / 180);
+        ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+        resolve(cv.toDataURL('image/jpeg', 0.92));
+      };
+      img.onerror = function() { resolve(dataUrl); };
+      img.src = dataUrl;
+    });
   }
 
-  // ── Selfie ──
-  if (selfieData) {
-    checkY(55);
-    doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(...MID);
-    doc.text('PHOTO DU VOYAGEUR', margin, y + 5);
-    y += 7;
+  // ── Section PIECE D'IDENTITE + PHOTO côte à côte ──
+  sectionTitle('Piece d\'identite & Photo du voyageur');
+  checkY(75);
+
+  // Largeurs : CIN 2/3, Selfie 1/3
+  const cinW  = contentW * 0.63;
+  const selW  = contentW * 0.33;
+  const selX  = margin + cinW + contentW * 0.04;
+  const imgH  = 68;
+
+  // Cadre CIN
+  doc.setDrawColor(...BORDER);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(margin, y, cinW, imgH, 2, 2, 'S');
+
+  // Cadre Selfie
+  doc.roundedRect(selX, y, selW, imgH, 2, 2, 'S');
+
+  // Labels
+  doc.setFontSize(6); doc.setFont('helvetica','bold'); doc.setTextColor(...LIGHT);
+  doc.text('PIECE D\'IDENTITE', margin + 2, y - 1.5);
+  doc.text('PHOTO DU VOYAGEUR', selX + 2, y - 1.5);
+
+  // Image CIN
+  if (docImage1) {
     try {
-      const sW = 50, sH = 50;
-      const sX = margin + (contentW - sW) / 2;
-      doc.setDrawColor(...BORDER); doc.setLineWidth(0.5);
-      doc.roundedRect(sX, y, sW, sH, 2, 2, 'S');
-      doc.addImage(selfieData, 'JPEG', sX + 1, y + 1, sW - 2, sH - 2, '', 'FAST');
-      y += sH + 6;
-    } catch(e) { y += 8; }
+      const fixedCIN = await fixImageOrientation(docImage1);
+      doc.addImage(fixedCIN, 'JPEG', margin + 1, y + 1, cinW - 2, imgH - 2, '', 'FAST');
+    } catch(e) {
+      doc.setFontSize(7); doc.setTextColor(...LIGHT);
+      doc.text('Document fourni', margin + 4, y + imgH/2);
+    }
+  } else {
+    doc.setFillColor(...CREAM); doc.rect(margin, y, cinW, imgH, 'F');
+    doc.setFontSize(7); doc.setFont('helvetica','italic'); doc.setTextColor(...LIGHT);
+    doc.text('Non fourni', margin + cinW/2, y + imgH/2, { align: 'center' });
   }
-  y += 4;
+
+  // Image Selfie
+  if (selfieData) {
+    try {
+      doc.addImage(selfieData, 'JPEG', selX + 1, y + 1, selW - 2, imgH - 2, '', 'FAST');
+    } catch(e) {}
+  } else {
+    doc.setFillColor(...CREAM); doc.rect(selX, y, selW, imgH, 'F');
+    doc.setFontSize(7); doc.setFont('helvetica','italic'); doc.setTextColor(...LIGHT);
+    doc.text('Non fourni', selX + selW/2, y + imgH/2, { align: 'center' });
+  }
+
+  y += imgH + 8;
 
   // ── Contrat ──
   sectionTitle('Contrat de location meublee touristique');
