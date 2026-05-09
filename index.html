@@ -555,6 +555,18 @@ body {
 // ═══════════════════════════════════════════════════
 
 // ── AUTH MODAL ──
+function toggleFaq(btn) {
+  var answer = btn.nextElementSibling;
+  var icon = btn.querySelector('span');
+  if (answer.style.display === 'none' || !answer.style.display) {
+    answer.style.display = 'block';
+    icon.textContent = '−';
+  } else {
+    answer.style.display = 'none';
+    icon.textContent = '+';
+  }
+}
+
 function openAuthModal(tab) {
   var modal = document.getElementById('authModal');
   if (modal) modal.style.display = 'flex';
@@ -1021,180 +1033,293 @@ function showToast(msg, color) {
     </div>
     <div style="display:flex;gap:0.7rem;align-items:center;">
       <a href="pricing.html" style="color:var(--text2);font-family:'Nunito Sans',sans-serif;font-size:0.88rem;text-decoration:none;padding:0.4rem 0.8rem;">Tarifs</a>
-      <button onclick="openAuthModal('login')" style="background:none;border:none;color:var(--text2);font-family:'Nunito Sans',sans-serif;font-size:0.88rem;cursor:pointer;padding:0.4rem 0.8rem;">
-        Se connecter
-      </button>
-      <button onclick="openAuthModal('register')" style="background:var(--riad-green);color:#fff;border:none;border-radius:20px;padding:0.45rem 1.1rem;font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;">
-        Commencer
-      </button>
+      <button onclick="openAuthModal('login')" style="background:none;border:none;color:var(--text2);font-family:'Nunito Sans',sans-serif;font-size:0.88rem;cursor:pointer;padding:0.4rem 0.8rem;">Se connecter</button>
+      <button onclick="openAuthModal('register')" style="background:var(--riad-green);color:#fff;border:none;border-radius:20px;padding:0.45rem 1.1rem;font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;">Commencer</button>
     </div>
   </nav>
 
-  <!-- HERO RIAD avec illustration SVG -->
-  <div style="position:relative;overflow:hidden;background:#FAF6F1;">
-
-    <!-- Illustration riad SVG -->
-    <div style="width:100%;max-height:380px;overflow:hidden;">
-      <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;" preserveAspectRatio="xMidYMid slice">
-        <!-- Ciel -->
-        <rect width="800" height="320" fill="#E8F0EC"/>
-        <!-- Sol -->
-        <rect y="200" width="800" height="120" fill="#C8B990"/>
-        <!-- Zellige floor -->
-        <rect y="230" width="800" height="90" fill="#BCA870"/>
-        <line x1="0" y1="245" x2="800" y2="245" stroke="#A89050" stroke-width="0.6"/>
-        <line x1="0" y1="260" x2="800" y2="260" stroke="#A89050" stroke-width="0.6"/>
-        <line x1="0" y1="275" x2="800" y2="275" stroke="#A89050" stroke-width="0.6"/>
-        <line x1="0" y1="290" x2="800" y2="290" stroke="#A89050" stroke-width="0.6"/>
-        <line x1="0" y1="305" x2="800" y2="305" stroke="#A89050" stroke-width="0.6"/>
-        <line x1="80" y1="230" x2="80" y2="320" stroke="#A89050" stroke-width="0.6"/>
-        <line x1="160" y1="230" x2="160" y2="320" stroke="#A89050" stroke-width="0.6"/>
-        <line x1="240" y1="230" x2="240" y2="320" stroke="#A89050" stroke-width="0.6"/>
-        <line x1="320" y1="230" x2="320" y2="320" stroke="#A89050" stroke-width="0.6"/>
-        <line x1="400" y1="230" x2="400" y2="320" stroke="#A89050" stroke-width="0.6"/>
-        <line x1="480" y1="230" x2="480" y2="320" stroke="#A89050" stroke-width="0.6"/>
-        <line x1="560" y1="230" x2="560" y2="320" stroke="#A89050" stroke-width="0.6"/>
-        <line x1="640" y1="230" x2="640" y2="320" stroke="#A89050" stroke-width="0.6"/>
-        <line x1="720" y1="230" x2="720" y2="320" stroke="#A89050" stroke-width="0.6"/>
-
-        <!-- Mur principal riad -->
-        <rect x="100" y="30" width="600" height="200" fill="#EDE0C8"/>
-
-        <!-- Bande zellige verte en haut -->
-        <rect x="100" y="30" width="600" height="14" fill="#2D4A3E"/>
-        <rect x="100" y="30" width="600" height="5" fill="#4A7C65"/>
-        <!-- Motif zellige sur bande -->
-        <rect x="118" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="134" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="150" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="166" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="182" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="198" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="214" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="230" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="246" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="262" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="278" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="294" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="310" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="326" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="342" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="358" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="374" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="390" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="406" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="422" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="438" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="454" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="470" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="486" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="502" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="518" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="534" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="550" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="566" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="582" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="598" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="614" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="630" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-        <rect x="646" y="32" width="8" height="8" fill="#2D4A3E" opacity="0.6"/>
-        <rect x="662" y="32" width="8" height="8" fill="#D4A853" opacity="0.8"/>
-
-        <!-- Grande arche centrale -->
-        <rect x="320" y="70" width="160" height="160" fill="#D4C4A0"/>
-        <ellipse cx="400" cy="70" rx="80" ry="50" fill="#D4C4A0"/>
-        <rect x="340" y="80" width="120" height="150" fill="#1A1008"/>
-        <ellipse cx="400" cy="80" rx="60" ry="38" fill="#1A1008"/>
-        <!-- Porte détail -->
-        <rect x="358" y="140" width="38" height="90" fill="#2D1A0A"/>
-        <rect x="404" y="140" width="38" height="90" fill="#2D1A0A"/>
-        <circle cx="397" cy="188" r="5" fill="#D4A853"/>
-        <circle cx="406" cy="188" r="5" fill="#D4A853"/>
-        <!-- Lanterne centrale -->
-        <rect x="392" y="44" width="16" height="28" rx="3" fill="#D4A853"/>
-        <line x1="400" y1="30" x2="400" y2="44" stroke="#B8903A" stroke-width="2"/>
-        <rect x="394" y="28" width="12" height="6" fill="#D4A853" opacity="0.6"/>
-
-        <!-- Arche gauche -->
-        <rect x="155" y="85" width="110" height="145" fill="#E8D8B8"/>
-        <ellipse cx="210" cy="85" rx="55" ry="35" fill="#E8D8B8"/>
-        <rect x="172" y="95" width="76" height="135" fill="#C8B090" opacity="0.5"/>
-        <!-- Arche droite -->
-        <rect x="535" y="85" width="110" height="145" fill="#E8D8B8"/>
-        <ellipse cx="590" cy="85" rx="55" ry="35" fill="#E8D8B8"/>
-        <rect x="552" y="95" width="76" height="135" fill="#C8B090" opacity="0.5"/>
-
-        <!-- Fenêtres ornementées -->
-        <rect x="135" y="110" width="30" height="40" rx="15" fill="#8B6914" opacity="0.4"/>
-        <rect x="635" y="110" width="30" height="40" rx="15" fill="#8B6914" opacity="0.4"/>
-
-        <!-- Plantes -->
-        <rect x="260" y="185" width="12" height="35" fill="#6B5030"/>
-        <ellipse cx="266" cy="178" rx="26" ry="20" fill="#2D4A3E" opacity="0.85"/>
-        <ellipse cx="252" cy="188" rx="18" ry="13" fill="#3D5A4E" opacity="0.7"/>
-        <rect x="518" y="185" width="12" height="35" fill="#6B5030"/>
-        <ellipse cx="524" cy="178" rx="26" ry="20" fill="#2D4A3E" opacity="0.85"/>
-        <ellipse cx="538" cy="188" rx="18" ry="13" fill="#3D5A4E" opacity="0.7"/>
-
-        <!-- Petites plantes latérales -->
-        <rect x="108" y="195" width="8" height="25" fill="#6B5030"/>
-        <ellipse cx="112" cy="190" rx="16" ry="12" fill="#2D4A3E" opacity="0.7"/>
-        <rect x="684" y="195" width="8" height="25" fill="#6B5030"/>
-        <ellipse cx="688" cy="190" rx="16" ry="12" fill="#2D4A3E" opacity="0.7"/>
-
-        <!-- Étoile de David marocaine (motif) -->
-        <polygon points="400,10 406,22 420,22 410,30 414,42 400,35 386,42 390,30 380,22 394,22" fill="#D4A853" opacity="0.3"/>
-
-        <!-- Gradient fade bas -->
-        <defs>
-          <linearGradient id="fadeBottom" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="70%" stop-color="#FAF6F1" stop-opacity="0"/>
-            <stop offset="100%" stop-color="#FAF6F1" stop-opacity="1"/>
-          </linearGradient>
-        </defs>
-        <rect width="800" height="320" fill="url(#fadeBottom)"/>
-      </svg>
-    </div>
-
-    <!-- Texte hero centré -->
-    <div style="text-align:center;padding:0 1.5rem 2rem;margin-top:-2rem;position:relative;z-index:2;">
-      <div style="display:inline-block;background:#2D4A3E;color:#D4A853;border-radius:20px;padding:0.3rem 1rem;font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:1rem;">الضيافة الرقمية · Hospitalité digitale</div>
-      <h1 style="font-family:'Nunito',sans-serif;font-size:2.2rem;font-weight:800;color:var(--riad-dark);margin-bottom:0.8rem;line-height:1.2;max-width:480px;margin-left:auto;margin-right:auto;">
-        Votre accueil,<br><span style="color:var(--riad-green);">zéro papier.</span>
+  <!-- HERO -->
+  <div style="position:relative;overflow:hidden;background:linear-gradient(160deg,#1A2E4A 0%,#2D4A3E 60%,#3D6B55 100%);padding:4rem 1.5rem 5rem;text-align:center;">
+    <!-- Zellige pattern -->
+    <div style="position:absolute;inset:0;opacity:0.04;background-image:repeating-linear-gradient(45deg,#D4A853 0,#D4A853 1px,transparent 0,transparent 50%);background-size:20px 20px;"></div>
+    <div style="position:relative;z-index:2;max-width:600px;margin:0 auto;">
+      <div style="display:inline-block;background:rgba(212,168,83,0.2);border:1px solid rgba(212,168,83,0.4);color:#D4A853;border-radius:20px;padding:0.3rem 1rem;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:1.5rem;">الضيافة الرقمية · Hospitalité digitale</div>
+      <h1 style="font-family:'Nunito',sans-serif;font-size:2.6rem;font-weight:800;color:#fff;margin-bottom:1rem;line-height:1.15;">
+        Votre accueil,<br><span style="color:#D4A853;">zéro papier.</span>
       </h1>
-      <p style="color:var(--text2);font-size:0.95rem;max-width:400px;line-height:1.7;margin:0 auto 2rem;">
-        Envoyez un lien à vos guests. Ils signent le contrat et uploadent leur CIN depuis leur téléphone.
+      <p style="color:rgba(255,255,255,0.8);font-size:1rem;max-width:440px;line-height:1.8;margin:0 auto 2rem;">
+        Envoyez un lien à vos guests. Ils signent le contrat et uploadent leur CIN depuis leur téléphone — en 3 minutes.
       </p>
       <div style="display:flex;gap:0.8rem;flex-wrap:wrap;justify-content:center;">
-        <button onclick="openAuthModal('register')" style="background:var(--riad-green);color:#fff;border:none;border-radius:10px;padding:0.9rem 2rem;font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;">
-          Commencer gratuitement
+        <button onclick="openAuthModal('register')" style="background:#D4A853;color:#1A2E4A;border:none;border-radius:10px;padding:0.9rem 2rem;font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:800;cursor:pointer;transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          Commencer gratuitement →
         </button>
-        <button onclick="openAuthModal('login')" style="background:#fff;color:var(--riad-green);border:1.5px solid var(--border);border-radius:10px;padding:0.9rem 1.8rem;font-family:'Nunito Sans',sans-serif;font-size:0.9rem;cursor:pointer;font-weight:500;">
+        <button onclick="openAuthModal('login')" style="background:rgba(255,255,255,0.1);color:#fff;border:1.5px solid rgba(255,255,255,0.3);border-radius:10px;padding:0.9rem 1.8rem;font-family:'Nunito Sans',sans-serif;font-size:0.9rem;cursor:pointer;">
           J'ai déjà un compte
         </button>
       </div>
+      <div style="margin-top:1.5rem;color:rgba(255,255,255,0.5);font-size:0.78rem;">✓ Gratuit · ✓ Sans carte bancaire · ✓ En 2 minutes</div>
     </div>
-
-    <!-- Features 3 colonnes -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border);background:#fff;">
-      <div style="padding:1.2rem;text-align:center;border-right:1px solid var(--border);">
-        <div style="width:36px;height:36px;background:#EEF5F1;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 0.6rem;font-size:1rem;">📋</div>
-        <div style="font-size:0.82rem;font-weight:600;color:var(--riad-dark);">Contrat signé</div>
-        <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">E-signature</div>
-      </div>
-      <div style="padding:1.2rem;text-align:center;border-right:1px solid var(--border);">
-        <div style="width:36px;height:36px;background:#EEF5F1;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 0.6rem;font-size:1rem;">🪪</div>
-        <div style="font-size:0.82rem;font-weight:600;color:var(--riad-dark);">Identité vérifiée</div>
-        <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">OCR auto</div>
-      </div>
-      <div style="padding:1.2rem;text-align:center;">
-        <div style="width:36px;height:36px;background:#EEF5F1;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 0.6rem;font-size:1rem;">🔑</div>
-        <div style="font-size:0.82rem;font-weight:600;color:var(--riad-dark);">Code d'accès</div>
-        <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">Généré auto</div>
-      </div>
-    </div>
-
   </div>
+
+  <!-- FEATURES RAPIDES -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--border);background:#fff;">
+    <div style="padding:1.4rem;text-align:center;border-right:1px solid var(--border);">
+      <div style="font-size:1.5rem;margin-bottom:0.5rem;">📋</div>
+      <div style="font-size:0.85rem;font-weight:700;color:var(--riad-dark);font-family:'Nunito',sans-serif;">Contrat signé</div>
+      <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">E-signature légale</div>
+    </div>
+    <div style="padding:1.4rem;text-align:center;border-right:1px solid var(--border);">
+      <div style="font-size:1.5rem;margin-bottom:0.5rem;">🪪</div>
+      <div style="font-size:0.85rem;font-weight:700;color:var(--riad-dark);font-family:'Nunito',sans-serif;">Identité vérifiée</div>
+      <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">Scan CIN automatique</div>
+    </div>
+    <div style="padding:1.4rem;text-align:center;">
+      <div style="font-size:1.5rem;margin-bottom:0.5rem;">🗂</div>
+      <div style="font-size:0.85rem;font-weight:700;color:var(--riad-dark);font-family:'Nunito',sans-serif;">Fiche de Police</div>
+      <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">Générée automatiquement</div>
+    </div>
+  </div>
+
+  <!-- PROBLÈME → SOLUTION -->
+  <div style="padding:3.5rem 1.5rem;background:#FAF6F1;max-width:700px;margin:0 auto;width:100%;">
+    <div style="text-align:center;margin-bottom:2.5rem;">
+      <div style="display:inline-block;background:rgba(45,74,62,0.08);color:var(--riad-green);border-radius:20px;padding:0.3rem 1rem;font-size:0.72rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.8rem;">Vous reconnaissez-vous ?</div>
+      <h2 style="font-family:'Nunito',sans-serif;font-size:1.6rem;font-weight:800;color:var(--riad-dark);">Fini les galères du check-in papier</h2>
+    </div>
+    <div style="display:grid;gap:1rem;">
+      <div style="background:#fff;border-radius:14px;padding:1.2rem 1.4rem;border:1px solid var(--border);display:flex;align-items:flex-start;gap:1rem;">
+        <div style="font-size:1.4rem;flex-shrink:0;">😤</div>
+        <div>
+          <div style="font-weight:700;font-size:0.9rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;">Photocopier les CIN à la main</div>
+          <div style="font-size:0.82rem;color:var(--text3);margin-top:3px;line-height:1.5;">Vos guests arrivent fatigués, vous stressez avec la paperasse. Tout ça prend 30 minutes minimum.</div>
+        </div>
+        <div style="font-size:1.2rem;flex-shrink:0;">→</div>
+        <div style="background:#EEF5F1;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.78rem;font-weight:600;color:var(--riad-green);flex-shrink:0;">Le guest scan sa CIN depuis son tel</div>
+      </div>
+      <div style="background:#fff;border-radius:14px;padding:1.2rem 1.4rem;border:1px solid var(--border);display:flex;align-items:flex-start;gap:1rem;">
+        <div style="font-size:1.4rem;flex-shrink:0;">📄</div>
+        <div>
+          <div style="font-weight:700;font-size:0.9rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;">Imprimer et signer des contrats papier</div>
+          <div style="font-size:0.82rem;color:var(--text3);margin-top:3px;line-height:1.5;">Des piles de papiers à archiver, des signatures illisibles, des contrats perdus.</div>
+        </div>
+        <div style="font-size:1.2rem;flex-shrink:0;">→</div>
+        <div style="background:#EEF5F1;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.78rem;font-weight:600;color:var(--riad-green);flex-shrink:0;">PDF signé reçu automatiquement</div>
+      </div>
+      <div style="background:#fff;border-radius:14px;padding:1.2rem 1.4rem;border:1px solid var(--border);display:flex;align-items:flex-start;gap:1rem;">
+        <div style="font-size:1.4rem;flex-shrink:0;">📞</div>
+        <div>
+          <div style="font-weight:700;font-size:0.9rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;">Expliquer le code WiFi et les règles 10 fois</div>
+          <div style="font-size:0.82rem;color:var(--text3);margin-top:3px;line-height:1.5;">Même questions, même réponses, chaque nouveau guest.</div>
+        </div>
+        <div style="font-size:1.2rem;flex-shrink:0;">→</div>
+        <div style="background:#EEF5F1;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.78rem;font-weight:600;color:var(--riad-green);flex-shrink:0;">Page bienvenue envoyée par WhatsApp</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMENT ÇA MARCHE -->
+  <div style="padding:3.5rem 1.5rem;background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+    <div style="max-width:700px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:2.5rem;">
+        <div style="display:inline-block;background:rgba(45,74,62,0.08);color:var(--riad-green);border-radius:20px;padding:0.3rem 1rem;font-size:0.72rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.8rem;">Simple comme bonjour</div>
+        <h2 style="font-family:'Nunito',sans-serif;font-size:1.6rem;font-weight:800;color:var(--riad-dark);">3 étapes, c'est tout</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;">
+        <div style="text-align:center;">
+          <div style="width:56px;height:56px;background:linear-gradient(135deg,#2D4A3E,#4A7C65);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.6rem;">🔗</div>
+          <div style="background:#2D4A3E;color:#D4A853;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;margin:0 auto 0.6rem;">1</div>
+          <div style="font-weight:700;font-size:0.88rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;margin-bottom:0.3rem;">Créez le lien</div>
+          <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;">En un clic depuis votre dashboard. Partagez par WhatsApp.</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="width:56px;height:56px;background:linear-gradient(135deg,#2D4A3E,#4A7C65);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.6rem;">📱</div>
+          <div style="background:#2D4A3E;color:#D4A853;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;margin:0 auto 0.6rem;">2</div>
+          <div style="font-weight:700;font-size:0.88rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;margin-bottom:0.3rem;">Le guest remplit</div>
+          <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;">Infos, CIN, selfie, signature. Tout depuis son téléphone.</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="width:56px;height:56px;background:linear-gradient(135deg,#2D4A3E,#4A7C65);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.6rem;">✅</div>
+          <div style="background:#2D4A3E;color:#D4A853;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;margin:0 auto 0.6rem;">3</div>
+          <div style="font-weight:700;font-size:0.88rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;margin-bottom:0.3rem;">Vous recevez tout</div>
+          <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;">PDF contrat + CIN + selfie. Archivé automatiquement.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FONCTIONNALITÉS -->
+  <div style="padding:3.5rem 1.5rem;background:#FAF6F1;">
+    <div style="max-width:700px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:2.5rem;">
+        <div style="display:inline-block;background:rgba(45,74,62,0.08);color:var(--riad-green);border-radius:20px;padding:0.3rem 1rem;font-size:0.72rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.8rem;">Tout inclus</div>
+        <h2 style="font-family:'Nunito',sans-serif;font-size:1.6rem;font-weight:800;color:var(--riad-dark);">Tout ce qu'il vous faut</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div style="background:#fff;border-radius:14px;padding:1.2rem;border:1px solid var(--border);display:flex;gap:0.8rem;align-items:flex-start;">
+          <div style="font-size:1.3rem;">📅</div>
+          <div><div style="font-weight:700;font-size:0.85rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;">Sync Airbnb iCal</div><div style="font-size:0.75rem;color:var(--text3);margin-top:2px;line-height:1.4;">Importez vos réservations automatiquement</div></div>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:1.2rem;border:1px solid var(--border);display:flex;gap:0.8rem;align-items:flex-start;">
+          <div style="font-size:1.3rem;">🗂</div>
+          <div><div style="font-weight:700;font-size:0.85rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;">Fiche de Police</div><div style="font-size:0.75rem;color:var(--text3);margin-top:2px;line-height:1.4;">Bilingue FR/AR, signature incluse</div></div>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:1.2rem;border:1px solid var(--border);display:flex;gap:0.8rem;align-items:flex-start;">
+          <div style="font-size:1.3rem;">🏡</div>
+          <div><div style="font-weight:700;font-size:0.85rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;">Page bienvenue</div><div style="font-size:0.75rem;color:var(--text3);margin-top:2px;line-height:1.4;">WiFi, code accès, règles — par WhatsApp</div></div>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:1.2rem;border:1px solid var(--border);display:flex;gap:0.8rem;align-items:flex-start;">
+          <div style="font-size:1.3rem;">📊</div>
+          <div><div style="font-weight:700;font-size:0.85rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;">Dashboard complet</div><div style="font-size:0.75rem;color:var(--text3);margin-top:2px;line-height:1.4;">Stats, graphiques, historique guests</div></div>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:1.2rem;border:1px solid var(--border);display:flex;gap:0.8rem;align-items:flex-start;">
+          <div style="font-size:1.3rem;">🔒</div>
+          <div><div style="font-weight:700;font-size:0.85rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;">Sécurité avancée</div><div style="font-size:0.75rem;color:var(--text3);margin-top:2px;line-height:1.4;">RLS, liens à usage unique, watermark CIN</div></div>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:1.2rem;border:1px solid var(--border);display:flex;gap:0.8rem;align-items:flex-start;">
+          <div style="font-size:1.3rem;">🌍</div>
+          <div><div style="font-weight:700;font-size:0.85rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;">Multilingue</div><div style="font-size:0.75rem;color:var(--text3);margin-top:2px;line-height:1.4;">Français, Anglais, Arabe</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SÉCURITÉ -->
+  <div style="padding:3.5rem 1.5rem;background:#1A2E4A;">
+    <div style="max-width:700px;margin:0 auto;text-align:center;">
+      <div style="display:inline-block;background:rgba(212,168,83,0.15);border:1px solid rgba(212,168,83,0.3);color:#D4A853;border-radius:20px;padding:0.3rem 1rem;font-size:0.72rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:1rem;">🔒 Sécurité</div>
+      <h2 style="font-family:'Nunito',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:1.2rem;">Vos données sont protégées</h2>
+      <p style="color:rgba(255,255,255,0.7);font-size:0.88rem;line-height:1.8;max-width:560px;margin:0 auto;">
+        Stayform applique plusieurs couches de sécurité. L'accès à la base de données est contrôlé par des politiques RLS — chaque hôte ne voit que ses propres données. Les informations sensibles (WiFi, codes) ne sont jamais exposées aux guests. Les liens sont à usage unique et expirent automatiquement. Les photos de CIN ne sont pas stockées sur nos serveurs — elles transitent uniquement dans le navigateur pour générer le PDF.
+      </p>
+      <div style="display:flex;flex-wrap:wrap;gap:0.8rem;justify-content:center;margin-top:1.5rem;">
+        <div style="background:rgba(255,255,255,0.08);border-radius:20px;padding:0.4rem 1rem;font-size:0.75rem;color:rgba(255,255,255,0.7);">✓ RLS Supabase</div>
+        <div style="background:rgba(255,255,255,0.08);border-radius:20px;padding:0.4rem 1rem;font-size:0.75rem;color:rgba(255,255,255,0.7);">✓ Liens à usage unique</div>
+        <div style="background:rgba(255,255,255,0.08);border-radius:20px;padding:0.4rem 1rem;font-size:0.75rem;color:rgba(255,255,255,0.7);">✓ CIN non stockée</div>
+        <div style="background:rgba(255,255,255,0.08);border-radius:20px;padding:0.4rem 1rem;font-size:0.75rem;color:rgba(255,255,255,0.7);">✓ Watermark documents</div>
+        <div style="background:rgba(255,255,255,0.08);border-radius:20px;padding:0.4rem 1rem;font-size:0.75rem;color:rgba(255,255,255,0.7);">✓ HTTPS uniquement</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING APERÇU -->
+  <div style="padding:3.5rem 1.5rem;background:#FAF6F1;border-top:1px solid var(--border);">
+    <div style="max-width:700px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:2.5rem;">
+        <div style="display:inline-block;background:rgba(45,74,62,0.08);color:var(--riad-green);border-radius:20px;padding:0.3rem 1rem;font-size:0.72rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.8rem;">Tarifs</div>
+        <h2 style="font-family:'Nunito',sans-serif;font-size:1.6rem;font-weight:800;color:var(--riad-dark);">Commencez gratuitement</h2>
+        <p style="color:var(--text3);font-size:0.85rem;margin-top:0.5rem;">Sans carte bancaire. Passez à un plan payant quand vous êtes prêt.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;">
+        <div style="background:#fff;border-radius:14px;padding:1.2rem;border:1px solid var(--border);text-align:center;">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">Free</div>
+          <div style="font-size:1.4rem;font-weight:800;color:var(--riad-dark);font-family:'Nunito',sans-serif;">0 DH</div>
+          <div style="font-size:0.7rem;color:var(--text3);margin:0.5rem 0 0.8rem;">Pour commencer</div>
+          <div style="font-size:0.75rem;color:var(--text2);line-height:1.6;">3 contrats/mois<br>1 logement</div>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:1.2rem;border:1px solid var(--border);text-align:center;">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">Starter</div>
+          <div style="font-size:1.4rem;font-weight:800;color:var(--riad-dark);font-family:'Nunito',sans-serif;">590 DH</div>
+          <div style="font-size:0.7rem;color:var(--text3);margin:0.5rem 0 0.8rem;">par an</div>
+          <div style="font-size:0.75rem;color:var(--text2);line-height:1.6;">8 contrats/mois<br>1 logement</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#2D4A3E,#3D6B55);border-radius:14px;padding:1.2rem;border:none;text-align:center;position:relative;">
+          <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#D4A853;color:#1A2E4A;font-size:0.62rem;font-weight:800;padding:0.15rem 0.6rem;border-radius:10px;white-space:nowrap;">POPULAIRE</div>
+          <div style="font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">Pro</div>
+          <div style="font-size:1.4rem;font-weight:800;color:#fff;font-family:'Nunito',sans-serif;">990 DH</div>
+          <div style="font-size:0.7rem;color:rgba(255,255,255,0.6);margin:0.5rem 0 0.8rem;">par an</div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.85);line-height:1.6;">20 contrats/mois<br>5 logements</div>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:1.2rem;border:1px solid var(--border);text-align:center;">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">Business</div>
+          <div style="font-size:1.4rem;font-weight:800;color:var(--riad-dark);font-family:'Nunito',sans-serif;">1990 DH</div>
+          <div style="font-size:0.7rem;color:var(--text3);margin:0.5rem 0 0.8rem;">par an</div>
+          <div style="font-size:0.75rem;color:var(--text2);line-height:1.6;">40 contrats/mois<br>10 logements</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:1.5rem;">
+        <a href="pricing.html" style="color:var(--riad-green);font-size:0.85rem;font-weight:600;text-decoration:none;">Voir tous les détails →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div style="padding:3.5rem 1.5rem;background:#fff;border-top:1px solid var(--border);">
+    <div style="max-width:600px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:2rem;">
+        <h2 style="font-family:'Nunito',sans-serif;font-size:1.5rem;font-weight:800;color:var(--riad-dark);">Questions fréquentes</h2>
+      </div>
+      <div style="display:grid;gap:0.8rem;" id="landingFaq">
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            Est-ce légal au Maroc ? <span>+</span>
+          </button>
+          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
+            Oui. Stayform génère un contrat de location meublée touristique conforme aux exigences légales marocaines. La signature électronique et la copie de la CIN constituent des preuves légales reconnues.
+          </div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            Les CIN des guests sont-elles stockées ? <span>+</span>
+          </button>
+          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
+            Non. Les photos de CIN transitent uniquement dans le navigateur du guest pour générer le PDF. Elles ne sont jamais envoyées ni stockées sur nos serveurs. Seul le numéro de document est conservé.
+          </div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            Fonctionne avec Airbnb ? <span>+</span>
+          </button>
+          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
+            Oui. Stayform se synchronise avec votre calendrier Airbnb via iCal. Les dates de vos réservations sont importées automatiquement et les liens de check-in sont pré-remplis.
+          </div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            Le guest doit-il installer une application ? <span>+</span>
+          </button>
+          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
+            Non. Tout se passe dans le navigateur. Le guest ouvre le lien que vous lui envoyez par WhatsApp ou SMS, remplit le formulaire et signe — sans télécharger quoi que ce soit.
+          </div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            Comment passer à un plan payant ? <span>+</span>
+          </button>
+          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
+            Depuis votre dashboard, cliquez sur votre plan actuel. Le paiement se fait par virement bancaire ou via WhatsApp. L'activation est manuelle sous 2h après confirmation.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA FINAL -->
+  <div style="padding:4rem 1.5rem;background:linear-gradient(135deg,#1A2E4A 0%,#2D4A3E 100%);text-align:center;">
+    <div style="max-width:500px;margin:0 auto;">
+      <div style="font-size:2rem;margin-bottom:1rem;">🏡</div>
+      <h2 style="font-family:'Nunito',sans-serif;font-size:1.7rem;font-weight:800;color:#fff;margin-bottom:0.8rem;line-height:1.2;">
+        Rejoignez les hôtes qui ont digitalisé leur check-in
+      </h2>
+      <p style="color:rgba(255,255,255,0.7);font-size:0.9rem;margin-bottom:2rem;line-height:1.7;">Commencez gratuitement. Aucune carte bancaire requise.</p>
+      <button onclick="openAuthModal('register')" style="background:#D4A853;color:#1A2E4A;border:none;border-radius:10px;padding:1rem 2.5rem;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        Créer mon compte gratuitement →
+      </button>
+      <div style="margin-top:1rem;color:rgba(255,255,255,0.4);font-size:0.75rem;">✓ Gratuit · ✓ Sans engagement · ✓ En 2 minutes</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="background:#111;padding:1.5rem;text-align:center;">
+    <div style="font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;color:#fff;margin-bottom:0.5rem;">stayform</div>
+    <div style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-bottom:0.8rem;">Plateforme de check-in digital pour hôtes Airbnb au Maroc</div>
+    <div style="display:flex;gap:1.5rem;justify-content:center;">
+      <a href="pricing.html" style="color:rgba(255,255,255,0.5);font-size:0.75rem;text-decoration:none;">Tarifs</a>
+      <a href="#" onclick="openAuthModal('login');return false;" style="color:rgba(255,255,255,0.5);font-size:0.75rem;text-decoration:none;">Connexion</a>
+      <a href="#" onclick="openAuthModal('register');return false;" style="color:rgba(255,255,255,0.5);font-size:0.75rem;text-decoration:none;">Inscription</a>
+    </div>
+  </div>
+
 </div>
 
 <!-- ══════════════════════════════
@@ -2833,12 +2958,63 @@ async function renderGuests(mode) {
           '<div><span style="color:var(--text3)">📄 </span>' + (g.doc_status === 'pending' ? '⚠ En attente' : '✓ Fournie') + '</div>' +
         '</div>' +
         buildTimeline(g) +
-        '<div style="margin-top:0.9rem;padding-top:0.9rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">' +
+        '<div style="margin-top:0.9rem;padding-top:0.9rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:0.5rem;flex-wrap:wrap;">' +
+          (g.signed ? '<button onclick="sendWelcome(\'' + (g.id||'') + '\')" style="display:inline-flex;align-items:center;gap:0.4rem;background:#25D366;color:#fff;border:none;border-radius:8px;padding:0.5rem 1rem;font-family:Nunito,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">🏡 Bienvenue</button>' : '') +
           '<button onclick="showSignatureModal(\'' + (g.id||'') + '\')" style="display:inline-flex;align-items:center;gap:0.4rem;background:#1A2E4A;color:#fff;border:none;border-radius:8px;padding:0.5rem 1rem;font-family:Nunito,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">🗂 Fiche de Police</button>' +
         '</div>' +
       '</div>';
     }).join('');
   }
+}
+
+// ══════════════════════════════
+// MESSAGE DE BIENVENUE
+// ══════════════════════════════
+function sendWelcome(guestId) {
+  var g = _guestsCache[guestId];
+  if (!g) { showToast('Guest introuvable', '#C13515'); return; }
+
+  // Trouver la propriété
+  var prop = null;
+  if (window.currentProperties && Array.isArray(window.currentProperties)) {
+    prop = window.currentProperties.find(function(p){ return p.id === g.property_id; })
+        || window.currentProperties.find(function(p){ return p.name === g.property_name; });
+  }
+  if (!prop) { showToast('Propriété introuvable', '#C13515'); return; }
+
+  // Construire l'URL de la page bienvenue
+  var baseUrl = 'https://hichamboulaajoul-rgb.github.io/Stayform/welcome.html';
+  var params = new URLSearchParams();
+  params.set('p', prop.id);
+  params.set('g', g.id);
+  params.set('h', currentUser.id);
+
+  // Ajouter le code d'accès si disponible
+  if (g.lock_code) params.set('code', g.lock_code);
+
+  // Numéro WhatsApp de l'hôte (depuis le profil si dispo)
+  if (currentProfile && currentProfile.phone) {
+    params.set('wa', currentProfile.phone.replace(/\D/g,''));
+  }
+
+  var welcomeUrl = baseUrl + '?' + params.toString();
+
+  // Message WhatsApp
+  var guestName = g.name ? g.name.split(' ')[0] : 'cher(e) voyageur';
+  var msg = 'Bonjour ' + guestName + ' ! 🏡\n\n';
+  msg += 'Votre check-in est confirmé. Retrouvez toutes les informations pour votre séjour ici :\n\n';
+  msg += welcomeUrl + '\n\n';
+  msg += '(Code WiFi, accès, règles, et plus)\n\n';
+  msg += 'Bon séjour ! 🌟\n— ' + (currentProfile && currentProfile.name ? currentProfile.name : 'Votre hôte');
+
+  // Ouvrir WhatsApp
+  var guestPhone = g.phone ? g.phone.replace(/\D/g, '') : '';
+  var waUrl = guestPhone
+    ? 'https://wa.me/' + guestPhone + '?text=' + encodeURIComponent(msg)
+    : 'https://wa.me/?text=' + encodeURIComponent(msg);
+
+  window.open(waUrl, '_blank');
+  showToast('✓ WhatsApp ouvert avec le message de bienvenue', '#25D366');
 }
 
 // ══════════════════════════════
@@ -3916,7 +4092,7 @@ async function deleteProperty(propId) {
   showToast('Hébergement supprimé', '#717171');
 }
 
-function _generatePropertyLink(propId, presetData) {
+async function _generatePropertyLink(propId, presetData) {
   if (!currentProfile) return;
   const prop = currentProperties.find(p => p.id === propId);
   if (!prop) return;
@@ -3927,6 +4103,13 @@ function _generatePropertyLink(propId, presetData) {
     linkCard.style.pointerEvents = 'auto';
     linkCard.style.filter = 'none';
   }
+
+  // ── Recharger le profil pour avoir le link_id à jour ──
+  try {
+    const { data: freshProfile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+    if (freshProfile) currentProfile = freshProfile;
+  } catch(e) { console.warn('Profile refresh failed:', e); }
+
   const expiry = Date.now() + 3 * 60 * 60 * 1000;
   const expiryB36 = expiry.toString(36);
   const shortPropId = propId.replace(/-/g,'').slice(0,8);
