@@ -2245,7 +2245,7 @@ async function fetchPropertyAndHost() {
       // shortPropId = premiers 8 chars de l'UUID sans tirets
       // On cherche dans les propriétés de cet hôte
       const propRes = await fetch(
-        SUPABASE_URL + '/rest/v1/properties?host_id=eq.' + window._hostId + '&select=*',
+        SUPABASE_URL + '/rest/v1/properties_public?host_id=eq.' + window._hostId + '&select=*',
         { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
       );
       const props = await propRes.json();
@@ -2268,7 +2268,7 @@ async function fetchPropertyAndHost() {
     if (!window._propertyData && window._propertyName) {
       const encodedName = encodeURIComponent(window._propertyName);
       const propRes2 = await fetch(
-        SUPABASE_URL + '/rest/v1/properties?name=eq.' + encodedName + '&select=*&limit=1',
+        SUPABASE_URL + '/rest/v1/properties_public?name=eq.' + encodedName + '&select=*&limit=1',
         { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
       );
       const props2 = await propRes2.json();
@@ -2858,6 +2858,23 @@ async function _runPDFGeneration(btn, silent) {
     try {
       const fixedCIN = await fixImageOrientation(docImage1);
       doc.addImage(fixedCIN, 'JPEG', margin + 1, y + 1, cinW - 2, imgH - 2, '', 'FAST');
+
+      // ── Watermark sur la CIN ──
+      doc.saveGraphicsState();
+      // Texte en diagonale semi-transparent
+      doc.setGState(new doc.GState({ opacity: 0.18 }));
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(45, 74, 62); // vert Stayform
+      // Centre de la zone CIN
+      const cinCX = margin + cinW / 2;
+      const cinCY = y + imgH / 2;
+      // Rotation 30° via transform
+      doc.text('STAYFORM · CONFIDENTIEL', cinCX, cinCY - 6, { angle: 30, align: 'center' });
+      doc.setFontSize(7.5);
+      doc.setGState(new doc.GState({ opacity: 0.12 }));
+      doc.text('USAGE UNIQUE · VÉRIFICATION IDENTITÉ', cinCX, cinCY + 6, { angle: 30, align: 'center' });
+      doc.restoreGraphicsState();
     } catch(e) {
       doc.setFontSize(7); doc.setTextColor(...LIGHT);
       doc.text('Document fourni', margin + 4, y + imgH/2);
