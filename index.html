@@ -353,8 +353,13 @@ body {
 .status-badge.complete { background: #F0FFF4; color: #008A05; }
 .status-badge.pending { background: #FFF8E1; color: #C67600; }
 
-.empty-state { text-align: center; padding: 3rem; color: var(--text3); font-size: 0.85rem; }
+.empty-state { text-align: center; padding: 2.5rem 1.5rem; color: var(--text3); font-size: 0.85rem; }
 .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+.empty-state svg { display: block; margin: 0 auto 1.2rem; }
+.empty-state h3 { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text2); margin-bottom: 0.4rem; }
+.empty-state p { font-size: 0.82rem; color: var(--text3); line-height: 1.5; margin-bottom: 1.2rem; }
+.empty-state .empty-btn { display: inline-flex; align-items: center; gap: 0.4rem; background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1.2rem; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: background 0.15s; }
+.empty-state .empty-btn:hover { background: var(--accent2); }
 
 /* MODALS */
 .modal-overlay {
@@ -449,7 +454,97 @@ body {
 .delay-2 { animation-delay: 0.1s; }
 .delay-3 { animation-delay: 0.15s; }
 .delay-4 { animation-delay: 0.2s; }
+
+/* SECTION TRANSITIONS */
+@keyframes sectionIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes sectionOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-10px); }
+}
+.section-entering {
+  animation: sectionIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.section-leaving {
+  animation: sectionOut 0.15s ease both;
+  pointer-events: none;
+}
+
+/* NAV ITEM HOVER */
+.nav-item {
+  position: relative;
+  overflow: hidden;
+}
+.nav-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 0.15s;
+  border-radius: 8px;
+}
+.nav-item:hover::after { opacity: 0.04; }
+.nav-item:active::after { opacity: 0.08; }
+
+/* STAT CARDS HOVER */
+.stat-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  cursor: default;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+/* BUTTON PULSE ON CLICK */
+@keyframes btnPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(45,74,62,0.4); }
+  70%  { box-shadow: 0 0 0 8px rgba(45,74,62,0); }
+  100% { box-shadow: 0 0 0 0 rgba(45,74,62,0); }
+}
+.btn-pulse { animation: btnPulse 0.5s ease; }
+
+/* GUEST CARD HOVER */
+#allGuestsWrap > div {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+#allGuestsWrap > div:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+}
+
+/* SIDEBAR NAV ACTIVE INDICATOR */
+.nav-item.active {
+  position: relative;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 20%; bottom: 20%;
+  width: 3px;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
+}
+
+/* COUNTER RING ANIMATION */
+#ringFill {
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s ease;
+}
+
+/* TOAST ANIMATION */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(10px) scale(0.95); }
+}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -610,9 +705,24 @@ function safe(str) {
 }
 
 function showSection(id) {
-  ['overview','property-detail','properties','guests','contrats','settings','reseller'].forEach(function(s) {
+  var sections = ['overview','property-detail','properties','guests','contrats','settings','reseller'];
+  var current = sections.find(function(s) {
     var el = document.getElementById('section-' + s);
-    if (el) el.style.display = s === id ? 'block' : 'none';
+    return el && el.style.display !== 'none' && el.style.display !== '';
+  });
+
+  sections.forEach(function(s) {
+    var el = document.getElementById('section-' + s);
+    if (!el) return;
+    if (s === id) {
+      el.style.display = 'block';
+      el.classList.remove('section-leaving');
+      el.classList.add('section-entering');
+      setTimeout(function(){ el.classList.remove('section-entering'); }, 400);
+    } else {
+      el.style.display = 'none';
+      el.classList.remove('section-entering', 'section-leaving');
+    }
   });
   document.querySelectorAll('.nav-item').forEach(function(el, i) {
     el.classList.toggle('active', ['overview','properties','guests','reseller','settings'][i] === id);
@@ -1348,6 +1458,19 @@ function showToast(msg, color) {
           </div>
         </div>
 
+        <!-- GRAPHIQUE CHECK-INS -->
+        <div class="section-card fade-in delay-4" style="margin-bottom:1rem;">
+          <div class="section-header" style="margin-bottom:1rem;">
+            <div>
+              <div class="section-title">Check-ins par mois</div>
+              <div class="section-sub">Évolution sur les 6 derniers mois</div>
+            </div>
+          </div>
+          <div style="position:relative;height:200px;">
+            <canvas id="checkinChart"></canvas>
+          </div>
+        </div>
+
         <!-- RECENT GUESTS -->
         <div class="section-card fade-in delay-4">
           <div class="section-header">
@@ -1420,6 +1543,24 @@ function showToast(msg, color) {
         <!-- WiFi + Rules -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;" id="detailExtras"></div>
 
+        <!-- ICAL SYNC -->
+        <div class="section-card fade-in" id="icalSection" style="margin-top:1rem;">
+          <div class="section-header" style="margin-bottom:1rem;">
+            <div>
+              <div class="section-title">📅 Sync Calendrier Airbnb</div>
+              <div class="section-sub">Importez vos réservations depuis votre calendrier iCal</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:0.6rem;margin-bottom:1rem;">
+            <input id="icalUrlInput" type="url" placeholder="https://www.airbnb.com/calendar/ical/..." style="flex:1;border:1.5px solid var(--border2);border-radius:8px;padding:0.7rem 1rem;font-family:'Nunito Sans',sans-serif;font-size:0.85rem;color:var(--text);outline:none;background:#fff;">
+            <button onclick="syncIcal()" id="icalSyncBtn" style="display:inline-flex;align-items:center;gap:0.4rem;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:0.7rem 1.2rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;white-space:nowrap;">🔄 Sync</button>
+          </div>
+          <div style="font-size:0.72rem;color:var(--text3);margin-bottom:1rem;">
+            Airbnb → Calendrier → Exporter le calendrier → Copier le lien iCal
+          </div>
+          <div id="icalResults"></div>
+        </div>
+
       </div>
 
       <!-- PROPERTIES SECTION -->
@@ -1436,7 +1577,7 @@ function showToast(msg, color) {
         <div id="propertiesGrid" class="fade-in">
           <div class="empty-state">
             <div class="empty-icon">🏠</div>
-            Aucun hébergement ajouté.<br>Cliquez sur "+ Ajouter" pour commencer.
+            <h3>Aucun hébergement</h3><p>Ajoutez votre premier logement<br>pour générer des liens de check-in.</p><button class="empty-btn" onclick="openAddProperty()">+ Ajouter un hébergement</button>
           </div>
         </div>
       </div>
@@ -2224,6 +2365,7 @@ async function loadDashboard(user) {
 
   updatePlanUI();
   await updateStats();
+  await renderCheckinChart();
   await renderGuests('recent');
   await loadProperties();
 }
@@ -2316,7 +2458,7 @@ function updatePlanUI() {
   const circumference = 207.3;
   const ring = document.getElementById('ringFill');
   ring.style.strokeDashoffset = circumference * (1 - pct);
-  ring.style.stroke = isPaid ? 'var(--accent)' : (pct>=1?'#C05050':pct>=0.7?'var(--warning)':'#5A9A6A');
+  ring.style.stroke = pct>=1 ? '#C05050' : pct>=0.7 ? 'var(--warning)' : '#5A9A6A';
   document.getElementById('ringNum').textContent = count;
   document.querySelector('#counterRing .ring-label').textContent = '/ ' + getContractLimit();
 
@@ -2378,7 +2520,7 @@ async function updateStats() {
   
   if (ring) {
     ring.style.strokeDashoffset = circumference * (1 - pct);
-    ring.style.stroke = isPaid ? 'var(--accent)' : (pct>=1 ? '#C05050' : pct>=0.7 ? 'var(--warning)' : '#5A9A6A');
+    ring.style.stroke = pct>=1 ? '#C05050' : pct>=0.7 ? 'var(--warning)' : '#5A9A6A';
   }
   if (ringNum) ringNum.textContent = count;
   if (ringLabel) ringLabel.textContent = '/ ' + getContractLimit();
@@ -2387,7 +2529,252 @@ async function updateStats() {
   
   // Limit banner
   const lb = document.getElementById('limitBanner');
-  if (lb) lb.style.display = (!isPaid && count >= FREE_LIMIT_LOCAL) ? 'flex' : 'none';
+  if (lb) lb.style.display = (count >= getContractLimit()) ? 'flex' : 'none';
+}
+
+async function renderCheckinChart() {
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js pas encore chargé');
+    return;
+  }
+  var client = getSb();
+  if (!client || !currentUser) return;
+
+  // Récupérer tous les guests avec leur date de création
+  const { data: guests } = await client
+    .from('guests')
+    .select('created_at')
+    .eq('host_id', currentUser.id);
+
+  if (!guests) return;
+
+  // Construire les 6 derniers mois
+  var months = [];
+  var labels = [];
+  var counts = [];
+  var now = new Date();
+
+  for (var i = 5; i >= 0; i--) {
+    var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    months.push(key);
+    labels.push(d.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' }));
+    counts.push(0);
+  }
+
+  // Compter les check-ins par mois
+  guests.forEach(function(g) {
+    var d = new Date(g.created_at);
+    var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    var idx = months.indexOf(key);
+    if (idx !== -1) counts[idx]++;
+  });
+
+  // Détruire le chart existant si besoin
+  if (window._checkinChart) {
+    window._checkinChart.destroy();
+    window._checkinChart = null;
+  }
+
+  var canvas = document.getElementById('checkinChart');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+
+  var maxVal = Math.max(...counts, 1);
+
+  window._checkinChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Check-ins',
+        data: counts,
+        backgroundColor: counts.map(function(v) {
+          return v === maxVal ? 'rgba(45,74,62,0.85)' : 'rgba(45,74,62,0.2)';
+        }),
+        borderColor: counts.map(function(v) {
+          return v === maxVal ? '#2D4A3E' : 'rgba(45,74,62,0.4)';
+        }),
+        borderWidth: 1.5,
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1A2E4A',
+          titleColor: '#D4A853',
+          bodyColor: '#fff',
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: {
+            label: function(ctx) {
+              return ' ' + ctx.parsed.y + ' check-in' + (ctx.parsed.y > 1 ? 's' : '');
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: { color: '#B09A88', font: { size: 11, family: 'Nunito Sans' } }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+          border: { display: false, dash: [4,4] },
+          ticks: {
+            color: '#B09A88',
+            font: { size: 11, family: 'Nunito Sans' },
+            stepSize: 1,
+            precision: 0
+          }
+        }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════
+// BADGE NATIONALITÉ + DRAPEAU
+// ══════════════════════════════
+function getNationalityFlag(nationality) {
+  if (!nationality) return { flag: '🌍', label: '—' };
+  var n = nationality.trim().toLowerCase();
+  var map = {
+    // Maghreb & Moyen-Orient
+    'maroc': '🇲🇦', 'marocain': '🇲🇦', 'marocaine': '🇲🇦', 'moroccan': '🇲🇦', 'morocco': '🇲🇦',
+    'algérie': '🇩🇿', 'algérien': '🇩🇿', 'algérienne': '🇩🇿', 'algerian': '🇩🇿', 'algeria': '🇩🇿',
+    'tunisie': '🇹🇳', 'tunisien': '🇹🇳', 'tunisienne': '🇹🇳', 'tunisian': '🇹🇳', 'tunisia': '🇹🇳',
+    'libye': '🇱🇾', 'libyen': '🇱🇾', 'libyan': '🇱🇾', 'libya': '🇱🇾',
+    'égypte': '🇪🇬', 'égyptien': '🇪🇬', 'egyptian': '🇪🇬', 'egypt': '🇪🇬',
+    'mauritanie': '🇲🇷', 'mauritanien': '🇲🇷', 'mauritanian': '🇲🇷',
+    'arabie saoudite': '🇸🇦', 'saoudien': '🇸🇦', 'saudi': '🇸🇦',
+    'émirats': '🇦🇪', 'émirati': '🇦🇪', 'uae': '🇦🇪',
+    'qatar': '🇶🇦', 'qatari': '🇶🇦',
+    'koweït': '🇰🇼', 'koweïtien': '🇰🇼', 'kuwaiti': '🇰🇼',
+    'liban': '🇱🇧', 'libanais': '🇱🇧', 'lebanese': '🇱🇧',
+    'jordanie': '🇯🇴', 'jordanien': '🇯🇴', 'jordanian': '🇯🇴',
+    'irak': '🇮🇶', 'irakien': '🇮🇶', 'iraqi': '🇮🇶',
+    'syrie': '🇸🇾', 'syrien': '🇸🇾', 'syrian': '🇸🇾',
+    // Europe
+    'france': '🇫🇷', 'français': '🇫🇷', 'française': '🇫🇷', 'french': '🇫🇷',
+    'espagne': '🇪🇸', 'espagnol': '🇪🇸', 'spanish': '🇪🇸', 'spain': '🇪🇸',
+    'italie': '🇮🇹', 'italien': '🇮🇹', 'italian': '🇮🇹', 'italy': '🇮🇹',
+    'allemagne': '🇩🇪', 'allemand': '🇩🇪', 'german': '🇩🇪', 'germany': '🇩🇪',
+    'belgique': '🇧🇪', 'belge': '🇧🇪', 'belgian': '🇧🇪', 'belgium': '🇧🇪',
+    'pays-bas': '🇳🇱', 'néerlandais': '🇳🇱', 'dutch': '🇳🇱', 'netherlands': '🇳🇱',
+    'portugal': '🇵🇹', 'portugais': '🇵🇹', 'portuguese': '🇵🇹',
+    'royaume-uni': '🇬🇧', 'britannique': '🇬🇧', 'british': '🇬🇧', 'uk': '🇬🇧', 'england': '🇬🇧',
+    'suisse': '🇨🇭', 'suissesse': '🇨🇭', 'swiss': '🇨🇭', 'switzerland': '🇨🇭',
+    'suède': '🇸🇪', 'suédois': '🇸🇪', 'swedish': '🇸🇪', 'sweden': '🇸🇪',
+    'norvège': '🇳🇴', 'norvégien': '🇳🇴', 'norwegian': '🇳🇴', 'norway': '🇳🇴',
+    'danemark': '🇩🇰', 'danois': '🇩🇰', 'danish': '🇩🇰', 'denmark': '🇩🇰',
+    'russie': '🇷🇺', 'russe': '🇷🇺', 'russian': '🇷🇺', 'russia': '🇷🇺',
+    'pologne': '🇵🇱', 'polonais': '🇵🇱', 'polish': '🇵🇱', 'poland': '🇵🇱',
+    // Amériques
+    'états-unis': '🇺🇸', 'américain': '🇺🇸', 'american': '🇺🇸', 'usa': '🇺🇸', 'us': '🇺🇸',
+    'canada': '🇨🇦', 'canadien': '🇨🇦', 'canadian': '🇨🇦',
+    'brésil': '🇧🇷', 'brésilien': '🇧🇷', 'brazilian': '🇧🇷', 'brazil': '🇧🇷',
+    'mexique': '🇲🇽', 'mexicain': '🇲🇽', 'mexican': '🇲🇽', 'mexico': '🇲🇽',
+    // Asie & Afrique
+    'chine': '🇨🇳', 'chinois': '🇨🇳', 'chinese': '🇨🇳', 'china': '🇨🇳',
+    'japon': '🇯🇵', 'japonais': '🇯🇵', 'japanese': '🇯🇵', 'japan': '🇯🇵',
+    'inde': '🇮🇳', 'indien': '🇮🇳', 'indian': '🇮🇳', 'india': '🇮🇳',
+    'turquie': '🇹🇷', 'turc': '🇹🇷', 'turkish': '🇹🇷', 'turkey': '🇹🇷',
+    'sénégal': '🇸🇳', 'sénégalais': '🇸🇳', 'senegalese': '🇸🇳',
+    'cote divoire': '🇨🇮', 'ivoirien': '🇨🇮', 'ivorian': '🇨🇮',
+    'cameroun': '🇨🇲', 'camerounais': '🇨🇲', 'cameroonian': '🇨🇲',
+    'mali': '🇲🇱', 'malien': '🇲🇱', 'malian': '🇲🇱',
+    'niger': '🇳🇪', 'nigérien': '🇳🇪',
+    'nigeria': '🇳🇬', 'nigérian': '🇳🇬', 'nigerian': '🇳🇬',
+  };
+  var flag = map[n] || '🌍';
+  return { flag: flag, label: nationality };
+}
+
+function nationalityBadge(nationality) {
+  var f = getNationalityFlag(nationality);
+  return '<span style="display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border-radius:20px;padding:3px 10px;font-size:0.78rem;font-weight:600;color:var(--text2);">' + f.flag + ' ' + (f.label || '—') + '</span>';
+}
+
+function buildTimeline(g) {
+  var parts = (g.dates || '').split(/\s*[\-–→]\s*/);
+  var arrival = parts[0] ? parts[0].trim() : null;
+  var departure = parts[1] ? parts[1].trim() : null;
+  var nights = parseInt(g.nights) || 0;
+
+  if (!arrival && !departure) return '';
+
+  // Parser une date en plusieurs formats: DD/MM/YYYY ou "DD mois YYYY"
+  var frMonths = {jan:0,fév:1,févr:1,mar:2,mars:2,avr:3,avril:3,mai:4,jun:5,juin:5,jul:6,juil:6,août:7,sep:8,sept:8,oct:9,nov:10,déc:11};
+  function parseDate(str) {
+    if (!str) return null;
+    str = str.trim();
+    // Format DD/MM/YYYY
+    var m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (m) return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+    // Format "DD mois YYYY"
+    m = str.match(/^(\d{1,2})\s+(\w+)\s+(\d{4})$/);
+    if (m) {
+      var mon = frMonths[m[2].toLowerCase()];
+      if (mon !== undefined) return new Date(parseInt(m[3]), mon, parseInt(m[1]));
+    }
+    return null;
+  }
+
+  // Calculer progression (où on en est dans le séjour)
+  var pct = 0;
+  var statusLabel = '';
+  var statusColor = '#888';
+
+  if (arrival && departure) {
+    try {
+      var arrDate = parseDate(arrival);
+      var depDate = parseDate(departure);
+      var now = new Date();
+      now.setHours(0,0,0,0);
+
+      if (now < arrDate) {
+        pct = 0;
+        statusLabel = 'À venir';
+        statusColor = '#2D7A9A';
+      } else if (now >= depDate) {
+        pct = 100;
+        statusLabel = 'Terminé';
+        statusColor = '#888';
+      } else {
+        var total = depDate - arrDate;
+        var elapsed = now - arrDate;
+        pct = Math.round((elapsed / total) * 100);
+        statusLabel = 'En cours · J+' + Math.round(elapsed / 86400000);
+        statusColor = '#2D4A3E';
+      }
+    } catch(e) {}
+  }
+
+  var barColor = statusColor;
+
+  return '<div style="margin-top:0.8rem;padding-top:0.8rem;border-top:1px solid var(--border);">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+      '<div style="display:flex;align-items:center;gap:6px;">' +
+        '<span style="font-size:0.72rem;font-weight:700;color:' + barColor + ';background:' + barColor + '18;padding:2px 8px;border-radius:20px;">' + statusLabel + '</span>' +
+        (nights ? '<span style="font-size:0.72rem;color:var(--text3);">' + nights + ' nuit' + (nights>1?'s':'') + '</span>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div style="position:relative;height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;">' +
+      '<div style="position:absolute;left:0;top:0;height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:99px;transition:width 0.6s ease;"></div>' +
+    '</div>' +
+    '<div style="display:flex;justify-content:space-between;margin-top:5px;">' +
+      '<span style="font-size:0.7rem;color:var(--text3);">✈️ ' + (arrival || '—') + '</span>' +
+      '<span style="font-size:0.7rem;color:var(--text3);">' + (departure || '—') + ' 🏠</span>' +
+    '</div>' +
+  '</div>';
 }
 
 async function renderGuests(mode) {
@@ -2395,7 +2782,7 @@ async function renderGuests(mode) {
   if (!client || !currentUser) return;
   const wrap = document.getElementById(mode === 'recent' ? 'recentGuestsWrap' : 'allGuestsWrap');
   if (!wrap) return;
-  wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div>Chargement...</div>';
+  wrap.innerHTML = '<div class="empty-state">' + '<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">  <circle cx="40" cy="40" r="30" stroke="#E8D8C4" stroke-width="6"/>  <path d="M40 10 A30 30 0 0 1 70 40" stroke="#2D4A3E" stroke-width="6" stroke-linecap="round">    <animateTransform attributeName="transform" type="rotate" from="0 40 40" to="360 40 40" dur="1s" repeatCount="indefinite"/>  </path></svg>' + '<p>Chargement...</p></div>';
   
   let query = client.from('guests')
     .select('id,name,email,phone,nationality,doc_number,dates,arrival_time,guest_count,nights,doc_status,lock_code,status,signed,created_at,property_name,property_id')
@@ -2409,7 +2796,7 @@ async function renderGuests(mode) {
   _cacheGuests(list);
   
   if (!list.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div>Aucun guest pour le moment.<br>Partagez votre lien pour commencer !</div>';
+    wrap.innerHTML = '<div class="empty-state">' + '<svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">  <ellipse cx="60" cy="88" rx="40" ry="6" fill="#F0EBE3"/>  <circle cx="44" cy="38" r="14" fill="#E8D8C4"/>  <circle cx="44" cy="38" r="10" fill="#D4A853" opacity="0.3"/>  <path d="M28 62c0-8.8 7.2-16 16-16s16 7.2 16 16" fill="#2D4A3E" opacity="0.15"/>  <circle cx="76" cy="34" r="12" fill="#E8D8C4"/>  <circle cx="76" cy="34" r="8" fill="#2D4A3E" opacity="0.2"/>  <path d="M62 56c0-7.7 6.3-14 14-14s14 6.3 14 14" fill="#2D4A3E" opacity="0.1"/>  <path d="M44 38 Q60 28 76 34" stroke="#D4A853" stroke-width="1.5" stroke-dasharray="3 2" fill="none"/>  <circle cx="60" cy="20" r="3" fill="#D4A853" opacity="0.6"/></svg>' + '<h3>Pas encore de guests</h3><p>Partagez votre lien de check-in<br>pour recevoir vos premiers guests.</p><button class="empty-btn" onclick="showSection(\'properties\')">🔗 Voir mes hébergements</button></div>';
     return;
   }
   
@@ -2417,7 +2804,7 @@ async function renderGuests(mode) {
     // Vue compacte
     wrap.innerHTML = '<table class="guests-table"><thead><tr><th>Guest</th><th>Dates</th><th>Statut</th></tr></thead><tbody>' +
       list.map(g => '<tr>' +
-        '<td><div class="guest-name">' + (g.name||'—') + '</div><div style="font-size:0.72rem;color:var(--text3)">' + (g.email||'') + '</div></td>' +
+        '<td><div style="display:flex;align-items:center;gap:0.5rem;"><div class="guest-name">' + (g.name||'—') + '</div>' + (g.nationality ? '<span style="font-size:1rem;" title="' + g.nationality + '">' + getNationalityFlag(g.nationality).flag + '</span>' : '') + '</div><div style="font-size:0.72rem;color:var(--text3)">' + (g.email||'') + '</div></td>' +
         '<td class="guest-dates">' + (g.dates||'—') + '</td>' +
         '<td><span class="status-badge ' + (g.status||'complete') + '">' + (g.signed ? '✓ Signé' : '⏳ En attente') + '</span></td>' +
       '</tr>').join('') +
@@ -2438,14 +2825,14 @@ async function renderGuests(mode) {
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;font-size:0.82rem;">' +
           '<div><span style="color:var(--text3)">📧 </span>' + (g.email||'—') + '</div>' +
           '<div><span style="color:var(--text3)">📞 </span>' + (g.phone||'—') + '</div>' +
-          '<div><span style="color:var(--text3)">🌍 </span>' + (g.nationality||'—') + '</div>' +
+          '<div>' + nationalityBadge(g.nationality) + '</div>' +
           '<div><span style="color:var(--text3)">🪪 </span>' + (g.doc_number||'—') + '</div>' +
           '<div><span style="color:var(--text3)">📅 </span>' + (g.dates||'—') + '</div>' +
-          '<div><span style="color:var(--text3)">🌙 </span>' + (g.nights||0) + ' nuit(s)</div>' +
           '<div><span style="color:var(--text3)">👥 </span>' + (g.guest_count||'—') + '</div>' +
           '<div><span style="color:var(--text3)">🔑 </span>' + (g.lock_code ? '<strong style="color:#FF385C;letter-spacing:0.1em">' + g.lock_code + '</strong>' : '—') + '</div>' +
           '<div><span style="color:var(--text3)">📄 </span>' + (g.doc_status === 'pending' ? '⚠ En attente' : '✓ Fournie') + '</div>' +
         '</div>' +
+        buildTimeline(g) +
         '<div style="margin-top:0.9rem;padding-top:0.9rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">' +
           '<button onclick="showSignatureModal(\'' + (g.id||'') + '\')" style="display:inline-flex;align-items:center;gap:0.4rem;background:#1A2E4A;color:#fff;border:none;border-radius:8px;padding:0.5rem 1rem;font-family:Nunito,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">🗂 Fiche de Police</button>' +
         '</div>' +
@@ -3164,20 +3551,55 @@ async function loadProperties() {
   renderProperties();
 }
 
+function calcCompletion(p) {
+  var fields = [
+    { key: 'name',          label: 'Nom',           done: !!p.name },
+    { key: 'address',       label: 'Adresse',        done: !!p.address },
+    { key: 'checkin_time',  label: 'Check-in',       done: !!p.checkin_time },
+    { key: 'checkout_time', label: 'Check-out',      done: !!p.checkout_time },
+    { key: 'airbnb_url',    label: 'Lien Airbnb',    done: !!p.airbnb_url },
+    { key: 'wifi_name',     label: 'WiFi',           done: !!p.wifi_name },
+    { key: 'cover_emoji',   label: 'Emoji',          done: !!p.cover_emoji && p.cover_emoji !== '🏠' },
+    { key: 'description',   label: 'Description',    done: !!p.description },
+  ];
+  var done = fields.filter(function(f){ return f.done; }).length;
+  var pct = Math.round((done / fields.length) * 100);
+  var missing = fields.filter(function(f){ return !f.done; }).map(function(f){ return f.label; });
+  return { pct: pct, done: done, total: fields.length, missing: missing };
+}
+
+function completionBar(p) {
+  var c = calcCompletion(p);
+  var color = c.pct === 100 ? '#2D7A45' : c.pct >= 60 ? '#D4A853' : '#C13515';
+  var label = c.pct === 100
+    ? '✓ Profil complet'
+    : c.done + '/' + c.total + ' — Manque : ' + c.missing.slice(0,3).join(', ') + (c.missing.length > 3 ? '…' : '');
+
+  return '<div style="margin-top:0.9rem;padding-top:0.9rem;border-top:1px solid var(--border);">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">' +
+      '<span style="font-size:0.68rem;color:' + color + ';font-weight:700;">' + label + '</span>' +
+      '<span style="font-size:0.68rem;font-weight:800;color:' + color + ';">' + c.pct + '%</span>' +
+    '</div>' +
+    '<div style="height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;">' +
+      '<div style="height:100%;width:' + c.pct + '%;background:' + color + ';border-radius:99px;transition:width 0.6s ease;"></div>' +
+    '</div>' +
+  '</div>';
+}
+
 function renderProperties() {
   const grid = document.getElementById('propertiesGrid');
   if (!grid) return;
   if (!currentProperties.length) {
-    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🏠</div>Aucun hébergement.<br>Cliquez sur "+ Ajouter" pour commencer.</div>';
+    grid.innerHTML = '<div class="empty-state">' + '<svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">  <ellipse cx="60" cy="88" rx="42" ry="6" fill="#F0EBE3"/>  <rect x="30" y="48" width="60" height="38" rx="3" fill="#E8D8C4"/>  <rect x="30" y="48" width="60" height="38" rx="3" fill="#2D4A3E" opacity="0.08"/>  <polygon points="22,50 60,20 98,50" fill="#2D4A3E"/>  <polygon points="22,50 60,20 98,50" fill="#2D4A3E" opacity="0.85"/>  <rect x="48" y="62" width="14" height="24" rx="2" fill="#1A2E4A" opacity="0.3"/>  <rect x="68" y="58" width="14" height="12" rx="2" fill="#D4A853" opacity="0.5"/>  <circle cx="38" cy="62" r="5" fill="#D4A853" opacity="0.4"/>  <line x1="60" y1="20" x2="60" y2="12" stroke="#D4A853" stroke-width="2"/>  <circle cx="60" cy="10" r="3" fill="#D4A853"/></svg>' + '<h3>Aucun hébergement</h3><p>Ajoutez votre premier logement<br>pour générer des liens de check-in.</p><button class=\"empty-btn\" onclick=\"openAddProperty()\">+ Ajouter un hébergement</button></div>';
     return;
   }
   grid.innerHTML = currentProperties.map(p => `
     <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
         <div style="display:flex;align-items:center;gap:0.8rem;">
-          <div style="font-size:2rem;width:52px;height:52px;background:#F7F7F7;border-radius:12px;display:flex;align-items:center;justify-content:center;">${p.cover_emoji||'🏠'}</div>
+          <div onclick="openPropertyDetail('${p.id}')" style="font-size:2rem;width:52px;height:52px;background:#F7F7F7;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;">${p.cover_emoji||'🏠'}</div>
           <div>
-            <div style="font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;color:var(--text)">${safe(p.name)}</div>
+            <div onclick="openPropertyDetail('${p.id}')" style="font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;color:var(--text);cursor:pointer;" title="Voir la fiche">${safe(p.name)}</div>
             <div style="font-size:0.78rem;color:var(--text3);margin-top:2px">${p.address||'Adresse non renseignée'}</div>
             ${p.airbnb_url ? `<a href="${p.airbnb_url}" target="_blank" style="font-size:0.72rem;color:#FF385C;text-decoration:none;">🔗 Voir sur Airbnb</a>` : ''}
           </div>
@@ -3202,6 +3624,7 @@ function renderProperties() {
         </div>
         <div style="font-size:0.68rem;color:var(--text3);margin-top:0.3rem;" id="prop-link-expiry-${p.id}"></div>
       </div>
+      ${completionBar(p)}
     </div>
   `).join('');
   currentProperties.forEach(p => restorePropertyLink(p.id));
@@ -3493,7 +3916,7 @@ async function deleteProperty(propId) {
   showToast('Hébergement supprimé', '#717171');
 }
 
-function _generatePropertyLink(propId) {
+function _generatePropertyLink(propId, presetData) {
   if (!currentProfile) return;
   const prop = currentProperties.find(p => p.id === propId);
   if (!prop) return;
@@ -3508,15 +3931,27 @@ function _generatePropertyLink(propId) {
   const expiryB36 = expiry.toString(36);
   const shortPropId = propId.replace(/-/g,'').slice(0,8);
   const token = currentProfile.link_id + '.' + expiryB36 + '.' + shortPropId;
-  // URL courte — pas de params, tout est récupéré depuis Supabase
-  const url = `https://hichamboulaajoul-rgb.github.io/Stayform/checkin.html?t=${token}`;
+  // Ajouter les dates pré-remplies si fournies (depuis iCal)
+  let url = `https://hichamboulaajoul-rgb.github.io/Stayform/checkin.html?t=${token}`;
+  if (presetData && presetData.arrival && presetData.departure) {
+    url += '&arr=' + encodeURIComponent(presetData.arrival) + '&dep=' + encodeURIComponent(presetData.departure);
+    if (presetData.nights) url += '&n=' + presetData.nights;
+  }
   localStorage.setItem(`sf_prop_link_${propId}`, JSON.stringify({ url, expiry, token, createdAt: Date.now() }));
+
+  // Mettre à jour dans la liste si visible
   const linkDiv = document.getElementById(`prop-link-${propId}`);
   const linkUrl = document.getElementById(`prop-link-url-${propId}`);
   const linkExpiry = document.getElementById(`prop-link-expiry-${propId}`);
   if (linkDiv) linkDiv.style.display = 'block';
   if (linkUrl) linkUrl.textContent = url;
-  startPropertyCountdown(propId, expiry, linkExpiry);
+  if (linkExpiry) startPropertyCountdown(propId, expiry, linkExpiry);
+
+  // Mettre à jour dans la fiche détail si visible
+  if (currentPropertyId === propId) {
+    restoreDetailLink(propId);
+  }
+
   showToast(`🔗 Lien généré pour ${prop.name}`, '#FF385C');
 }
 
@@ -3561,6 +3996,116 @@ function sharePropertyWhatsApp(propId) {
   if (!el) return;
   const msg = encodeURIComponent('Check-in en ligne : ' + el.textContent + ' (valable 3h)');
   window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
+// ══════════════════════════════
+// SYNC ICAL
+// ══════════════════════════════
+async function syncIcal() {
+  var propId = currentPropertyId;
+  if (!propId) return;
+  var prop = currentProperties.find(function(p){ return p.id === propId; });
+  if (!prop) return;
+
+  var urlInput = document.getElementById('icalUrlInput');
+  var icalUrl = urlInput ? urlInput.value.trim() : '';
+  if (!icalUrl) { showToast('Collez votre lien iCal Airbnb', '#C13515'); return; }
+  if (!icalUrl.includes('airbnb.com')) { showToast('Le lien doit provenir d\'Airbnb', '#C13515'); return; }
+
+  var btn = document.getElementById('icalSyncBtn');
+  var results = document.getElementById('icalResults');
+  if (btn) { btn.textContent = '⏳ Sync...'; btn.disabled = true; }
+  if (results) results.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text3);font-size:0.85rem;">Récupération du calendrier...</div>';
+
+  try {
+    var client = getSb();
+    var { data, error } = await client.functions.invoke('fetch-ical', {
+      body: { ical_url: icalUrl }
+    });
+
+    if (error) throw new Error(error.message);
+    if (data.error) throw new Error(data.error);
+
+    // Sauvegarder l'URL iCal dans la propriété
+    await client.from('properties').update({ ical_url: icalUrl }).eq('id', propId);
+    prop.ical_url = icalUrl;
+
+    renderIcalResults(data.events || [], prop);
+    showToast('✓ ' + (data.events||[]).length + ' réservation(s) importée(s)', '#008A05');
+
+  } catch(e) {
+    if (results) results.innerHTML = '<div style="background:#FFF2F2;border:1px solid #FFCDD2;border-radius:8px;padding:1rem;font-size:0.82rem;color:#C13515;">❌ ' + e.message + '</div>';
+    showToast('Erreur sync iCal', '#C13515');
+  } finally {
+    if (btn) { btn.textContent = '🔄 Sync'; btn.disabled = false; }
+  }
+}
+
+function renderIcalResults(events, prop) {
+  var results = document.getElementById('icalResults');
+  if (!results) return;
+
+  if (!events.length) {
+    results.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text3);font-size:0.85rem;">Aucune réservation à venir trouvée.</div>';
+    return;
+  }
+
+  var now = new Date(); now.setHours(0,0,0,0);
+
+  results.innerHTML = '<div style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.8rem;">' + events.length + ' réservation(s) à venir</div>' +
+    events.map(function(ev) {
+      var arrDate = new Date(ev.arrival);
+      var depDate = new Date(ev.departure);
+      var isToday = arrDate <= now && depDate > now;
+      var isSoon  = !isToday && (arrDate - now) < 7 * 86400000;
+
+      var statusColor = isToday ? '#2D7A45' : isSoon ? '#C07050' : 'var(--text3)';
+      var statusLabel = isToday ? '🟢 En cours' : isSoon ? '🟡 Dans ' + Math.round((arrDate-now)/86400000) + 'j' : '📅 À venir';
+
+      var arrFr = arrDate.toLocaleDateString('fr-FR', {day:'2-digit',month:'short',year:'numeric'});
+      var depFr = depDate.toLocaleDateString('fr-FR', {day:'2-digit',month:'short',year:'numeric'});
+
+      return '<div style="border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.7rem;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:0.8rem;flex-wrap:wrap;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem;">' +
+            '<span style="font-size:0.72rem;font-weight:700;color:' + statusColor + ';">' + statusLabel + '</span>' +
+            '<span style="font-size:0.72rem;color:var(--text3);">· ' + ev.nights + ' nuit' + (ev.nights>1?'s':'') + '</span>' +
+          '</div>' +
+          '<div style="font-weight:700;font-size:0.9rem;color:var(--text);font-family:Nunito,sans-serif;margin-bottom:0.2rem;">' + (ev.guest_name || 'Guest Airbnb') + '</div>' +
+          '<div style="font-size:0.78rem;color:var(--text3);">✈️ ' + arrFr + ' → 🏠 ' + depFr + '</div>' +
+        '</div>' +
+        '<button onclick="generateCheckinFromIcal(\'' + encodeURIComponent(JSON.stringify(ev)) + '\',\'' + prop.id + '\')" style="display:inline-flex;align-items:center;gap:0.4rem;background:#1A2E4A;color:#fff;border:none;border-radius:8px;padding:0.5rem 0.9rem;font-family:Nunito,sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;white-space:nowrap;">🔗 Créer check-in</button>' +
+      '</div>';
+    }).join('');
+}
+
+async function generateCheckinFromIcal(evJson, propId) {
+  try {
+    var ev = JSON.parse(decodeURIComponent(evJson));
+    var prop = currentProperties.find(function(p){ return p.id === propId; });
+    if (!prop) return;
+
+    // Formater les dates en DD/MM/YYYY pour Stayform
+    function fmtDate(iso) {
+      var d = new Date(iso);
+      return d.toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric'});
+    }
+
+    var dates = fmtDate(ev.arrival) + ' - ' + fmtDate(ev.departure);
+
+    // Vérifier la limite de contrats
+    if ((currentProfile.guest_count || 0) >= getContractLimit()) {
+      openUpgradeModal('pro', 'Limite de contrats atteinte. Passez au plan supérieur.');
+      return;
+    }
+
+    // Générer le lien avec dates pré-remplies
+    await _generatePropertyLink(propId, { arrival: ev.arrival, departure: ev.departure, nights: ev.nights });
+    showToast('✓ Lien créé pour ' + (ev.guest_name || 'le guest'), '#008A05');
+
+  } catch(e) {
+    showToast('Erreur : ' + e.message, '#C13515');
+  }
 }
 
 // ══════════════════════════════
@@ -3625,6 +4170,14 @@ async function openPropertyDetail(propId) {
 
   restoreDetailLink(propId);
   loadPropertyGuests(propId);
+  // Restaurer l'URL iCal si elle existe
+  var icalInput = document.getElementById('icalUrlInput');
+  if (icalInput) icalInput.value = prop.ical_url || '';
+  // Auto-sync si URL déjà sauvegardée
+  if (prop.ical_url) {
+    var icalResults = document.getElementById('icalResults');
+    if (icalResults) icalResults.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text3);font-size:0.82rem;">Cliquez sur Sync pour rafraîchir les réservations.</div>';
+  }
   showSection('property-detail');
 }
 

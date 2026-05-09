@@ -1279,6 +1279,75 @@ function _changeMonth(delta) {
 renderCalendar();
 initCalendarEvents();
 
+// ── PRÉ-REMPLISSAGE DATES DEPUIS ICAL ──
+// Les variables du calendrier sont prêtes, mais le DOM pas encore
+// On pré-remplit les variables maintenant, et on met à jour le DOM après
+(function presetDates() {
+  var params = new URLSearchParams(window.location.search);
+  var arr = params.get('arr');
+  var dep = params.get('dep');
+  if (!arr || !dep) return;
+
+  function parseISO(s) {
+    var p = s.split('-');
+    if (p.length !== 3) return null;
+    return new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
+  }
+
+  var arrDate = parseISO(arr);
+  var depDate = parseISO(dep);
+  if (!arrDate || !depDate || depDate <= arrDate) return;
+
+  // Pré-remplir les variables globales maintenant
+  startDate = arrDate;
+  endDate = depDate;
+  selecting = 'start';
+  currentYear = arrDate.getFullYear();
+  currentMonth = arrDate.getMonth();
+  renderCalendar();
+
+  // Mettre à jour le DOM une fois prêt
+  document.addEventListener('DOMContentLoaded', function() {
+    var fmtD = function(d) {
+      return d ? d.toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'}) : '—';
+    };
+
+    var txtStart    = document.getElementById('txtStart');
+    var txtEnd      = document.getElementById('txtEnd');
+    var boxStart    = document.getElementById('boxStart');
+    var boxEnd      = document.getElementById('boxEnd');
+    var nightsBadge = document.getElementById('nightsBadge');
+
+    if (txtStart) txtStart.textContent = fmtD(arrDate);
+    if (txtEnd)   txtEnd.textContent   = fmtD(depDate);
+    if (boxStart) { boxStart.classList.add('filled'); }
+    if (boxEnd)   { boxEnd.classList.add('filled'); }
+
+    var nights = Math.round((depDate - arrDate) / 86400000);
+    if (nightsBadge) nightsBadge.innerHTML = '<span class="nights-badge">🌙 ' + nights + ' nuit' + (nights>1?'s':'') + ' · Dates pré-remplies</span>';
+
+    // Activer le bouton Continuer — dates déjà définies par l'hôte
+    var btn1 = document.getElementById('btn1');
+    if (btn1) btn1.disabled = false;
+
+    var calWrap = document.querySelector('.calendar-wrap');
+    if (calWrap) {
+      calWrap.style.pointerEvents = 'none';
+      calWrap.style.opacity = '0.75';
+    }
+
+    var subtitle = document.querySelector('[data-i18n="t_sejour_sub"]');
+    if (subtitle) {
+      subtitle.textContent = 'Les dates de votre séjour ont été pré-remplies par votre hôte.';
+      subtitle.style.color = '#2D7A45';
+      subtitle.style.fontWeight = '600';
+    }
+
+    // Re-render avec les dates pour que la sélection soit visible
+    renderCalendar();
+  });
+})();
+
 // ── NAVIGATION ──
 let currentStep = 1;
 
@@ -1978,6 +2047,8 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // ── DÉTECTION TOKEN TEMPORAIRE ──
 const urlParams = new URLSearchParams(window.location.search);
 const rawToken = urlParams.get('t') || null;
+
+
 const legacyHost = urlParams.get('host') || null; // rétrocompatibilité
 
 let hostLinkId = legacyHost;
