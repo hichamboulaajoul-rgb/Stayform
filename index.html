@@ -545,8 +545,22 @@ body {
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <!-- Google One Tap -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    #g_id_onload { position: fixed; top: 70px; right: 20px; z-index: 9999; }
+  </style>
 </head>
 <body>
+  <!-- Google One Tap container -->
+  <div id="g_id_onload"
+    data-client_id="398303757821-mqcdvjb324mg9vskpc1799c3ugttapdp.apps.googleusercontent.com"
+    data-callback="handleOneTapResponse"
+    data-auto_prompt="true"
+    data-cancel_on_tap_outside="false"
+    data-context="signin"
+    data-itp_support="true">
+  </div>
 
 <script>
 // ═══════════════════════════════════════════════════
@@ -635,6 +649,22 @@ function getSb() {
   return null;
 }
 function initSupabase() { getSb(); }
+// ── Google One Tap ──
+async function handleOneTapResponse(response) {
+  var client = getSb();
+  if (!client) return;
+  try {
+    var { data, error } = await client.auth.signInWithIdToken({
+      provider: 'google',
+      token: response.credential,
+    });
+    if (error) { console.error('One Tap error:', error); return; }
+    // Auth state change handler prendra le relais
+  } catch(e) {
+    console.error('One Tap exception:', e);
+  }
+}
+
 function handleGoogleLogin() {
   var client = getSb();
   if (!client) { showError('Patientez 2 secondes et réessayez.'); return; }
