@@ -1609,6 +1609,7 @@ async function callVisionOCR(base64, mediaType, canvasEl) {
 
     if (result.verified) {
       cinVerified = true;
+
       stopCINScanner();
 
       // Remplir auto numéro si vide
@@ -1616,24 +1617,15 @@ async function callVisionOCR(base64, mediaType, canvasEl) {
         docNumField.value = result.detectedNum;
       }
 
-      // Stocker la photo
-      var sourceCanvas = canvasEl || document.getElementById('cinCanvas');
-      if (sourceCanvas) {
-        var dataUrl2 = sourceCanvas.toDataURL('image/jpeg', 0.9);
+      // Stocker la photo — seulement si scan caméra (canvasEl fourni)
+      if (canvasEl) {
+        var dataUrl2 = canvasEl.toDataURL('image/jpeg', 0.9);
         docImage1 = dataUrl2;
         filesUploaded[0] = true;
-        sourceCanvas.toBlob(function(blob) {
-          var file = new File([blob], 'cin_scan.jpg', { type: 'image/jpeg' });
-          var dt = new DataTransfer();
-          dt.items.add(file);
-          var f1 = document.getElementById('file1');
-          if (f1) f1.files = dt.files;
-        }, 'image/jpeg', 0.9);
         var img = document.getElementById('cinCaptured');
         if (img) { img.src = dataUrl2; img.style.display = 'block'; }
       } else {
-        // Fallback pour upload galerie — stocker directement depuis base64
-        docImage1 = 'data:' + mediaType + ';base64,' + base64;
+        // Upload galerie — docImage1 déjà assigné dans handleFile, ne pas toucher
         filesUploaded[0] = true;
       }
 
