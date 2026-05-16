@@ -1721,6 +1721,9 @@ function handleFile(input, previewId, idx) {
   if (file.type.startsWith('image/')) {
     const reader = new FileReader();
     reader.onload = e => {
+      // Stocker l'image pour le PDF
+      if (idx === 1) docImage1 = e.target.result;
+      if (idx === 2) docImage2 = e.target.result;
       preview.innerHTML = `
         <div style="position:relative;display:inline-block;width:100%">
           <img src="${e.target.result}" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px;border:1.5px solid var(--warm)">
@@ -2867,7 +2870,8 @@ async function _runPDFGeneration(btn, silent) {
   if (docImage1) {
     try {
       const fixedCIN = await fixImageOrientation(docImage1);
-      doc.addImage(fixedCIN, 'JPEG', margin + 1, y + 1, cinW - 2, imgH - 2, '', 'FAST');
+      const cinFmt = fixedCIN.startsWith('data:image/png') ? 'PNG' : 'JPEG';
+      doc.addImage(fixedCIN, cinFmt, margin + 1, y + 1, cinW - 2, imgH - 2, '', 'FAST');
 
       // ── Watermark sur la CIN ──
       doc.saveGraphicsState();
