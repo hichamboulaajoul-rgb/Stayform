@@ -970,7 +970,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div id="scanSuccess" style="display:none;">
           <div style="background:#EEF5F1;border:2px solid #2D4A3E;border-radius:14px;padding:1.5rem;text-align:center;">
             <div style="font-size:2.5rem;margin-bottom:0.6rem;">✅</div>
-            <div style="font-size:1rem;font-weight:700;color:#2D4A3E;margin-bottom:0.3rem;">Carte valide — Identité vérifiée</div>
+            <div id="scanSuccessTitle" style="font-size:1rem;font-weight:700;color:#2D4A3E;margin-bottom:0.3rem;">Document valide — Identité vérifiée</div>
             <div id="scanSuccessDetails" style="font-size:0.82rem;color:#4A7C65;margin-bottom:1rem;line-height:1.6;"></div>
             <!-- Aperçu photo capturée -->
             <img id="cinCaptured" style="max-width:100%;border-radius:8px;border:1px solid var(--border);margin-bottom:0.8rem;display:none;" alt="CIN capturée">
@@ -1476,13 +1476,14 @@ function onDocTypeChange() {
   var type = document.getElementById('docType').value;
   var section = document.getElementById('scannerSection');
   if (section) {
-    if (type === 'cin') {
-      section.style.display = 'block';
-    } else {
-      // Pour passeport/titre séjour → aller directement à la galerie
-      stopCINScanner();
-      showGalleryFallback();
-    }
+    // Tous les types de document peuvent utiliser la caméra ou la galerie
+    section.style.display = 'block';
+    // Réinitialiser le scanner pour le nouveau type de document
+    stopCINScanner();
+    document.getElementById('scanReady').style.display = 'block';
+    document.getElementById('scanActive').style.display = 'none';
+    document.getElementById('scanFallback').style.display = 'none';
+    document.getElementById('scanSuccess').style.display = 'none';
   }
 }
 
@@ -1610,6 +1611,15 @@ async function callVisionOCR(base64, mediaType, canvasEl) {
     if (result.verified) {
       cinVerified = true;
 
+      // ── Capturer docImage1 AVANT stopCINScanner() ──
+      var sourceCanvas = canvasEl || document.getElementById('cinCanvas');
+      var dataUrl2 = null;
+      if (sourceCanvas && sourceCanvas.width > 0) {
+        dataUrl2 = sourceCanvas.toDataURL('image/jpeg', 0.9);
+        docImage1 = dataUrl2;
+        filesUploaded[0] = true;
+      }
+
       stopCINScanner();
 
       // Remplir auto numéro si vide
@@ -1617,15 +1627,20 @@ async function callVisionOCR(base64, mediaType, canvasEl) {
         docNumField.value = result.detectedNum;
       }
 
-      // Stocker la photo — seulement si scan caméra (canvasEl fourni)
-      if (canvasEl) {
-        var dataUrl2 = canvasEl.toDataURL('image/jpeg', 0.9);
-        docImage1 = dataUrl2;
-        filesUploaded[0] = true;
+      // Stocker la photo
+      if (sourceCanvas && dataUrl2) {
+        sourceCanvas.toBlob(function(blob) {
+          var file = new File([blob], 'cin_scan.jpg', { type: 'image/jpeg' });
+          var dt = new DataTransfer();
+          dt.items.add(file);
+          var f1 = document.getElementById('file1');
+          if (f1) f1.files = dt.files;
+        }, 'image/jpeg', 0.9);
         var img = document.getElementById('cinCaptured');
         if (img) { img.src = dataUrl2; img.style.display = 'block'; }
       } else {
-        // Upload galerie — docImage1 déjà assigné dans handleFile, ne pas toucher
+        // Fallback pour upload galerie — stocker directement depuis base64
+        docImage1 = 'data:' + mediaType + ';base64,' + base64;
         filesUploaded[0] = true;
       }
 
@@ -1633,11 +1648,22 @@ async function callVisionOCR(base64, mediaType, canvasEl) {
       var sa = document.getElementById('scanActive');
       var ss = document.getElementById('scanSuccess');
       if (sa) sa.style.display = 'none';
-      if (ss) ss.style.display = 'block';
+      if (ss) {
+        ss.style.display = 'block';
+        var titleEl = document.getElementById('scanSuccessTitle');
+        if (titleEl) {
+          var dtSel = document.getElementById('docType');
+          var dtVal = dtSel ? dtSel.value : 'cin';
+          titleEl.textContent = dtVal === 'cin' ? 'Carte valide — Identité vérifiée' : dtVal === 'passport' ? 'Passeport valide — Identité vérifiée' : 'Document valide — Identité vérifiée';
+        }
+      }
 
       // Dans la galerie, afficher dans ocrStatus
       var ocrEl = document.getElementById('ocrStatus');
-      if (ocrEl) { ocrEl.style.display='block'; ocrEl.style.background='#F0FFF4'; ocrEl.style.border='1px solid rgba(0,138,5,0.3)'; ocrEl.style.color='#008A05'; ocrEl.innerHTML = '✅ <strong>Carte valide — Identité vérifiée</strong>'; }
+      if (ocrEl) { ocrEl.style.display='block'; ocrEl.style.background='#F0FFF4'; ocrEl.style.border='1px solid rgba(0,138,5,0.3)'; ocrEl.style.color='#008A05'; var docTypeSel = document.getElementById('docType');
+          var docTypeVal = docTypeSel ? docTypeSel.value : 'cin';
+          var docLabel = docTypeVal === 'cin' ? 'Carte valide' : docTypeVal === 'passport' ? 'Passeport valide' : 'Document valide';
+          ocrEl.innerHTML = '✅ <strong>' + docLabel + ' — Identité vérifiée</strong>'; }
 
       var details = document.getElementById('scanSuccessDetails');
       if (details) {
