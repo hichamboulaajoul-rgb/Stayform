@@ -1032,7 +1032,6 @@ function showToast(msg, color) {
       <span style="font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:800;color:var(--riad-green);letter-spacing:-0.02em;">stayform</span>
     </div>
     <div style="display:flex;gap:0.7rem;align-items:center;">
-      <a href="pricing.html" style="color:var(--text2);font-family:'Nunito Sans',sans-serif;font-size:0.88rem;text-decoration:none;padding:0.4rem 0.8rem;">Tarifs</a>
       <button onclick="openAuthModal('login')" style="background:none;border:none;color:var(--text2);font-family:'Nunito Sans',sans-serif;font-size:0.88rem;cursor:pointer;padding:0.4rem 0.8rem;">Se connecter</button>
       <button onclick="openAuthModal('register')" style="background:var(--riad-green);color:#fff;border:none;border-radius:20px;padding:0.45rem 1.1rem;font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;">Commencer</button>
     </div>
@@ -1202,43 +1201,53 @@ function showToast(msg, color) {
     </div>
   </div>
 
-  <!-- PRICING APERÇU -->
-  <div style="padding:3.5rem 1.5rem;background:#FAF6F1;border-top:1px solid var(--border);">
-    <div style="max-width:700px;margin:0 auto;">
-      <div style="text-align:center;margin-bottom:2.5rem;">
-        <div style="display:inline-block;background:rgba(45,74,62,0.08);color:var(--riad-green);border-radius:20px;padding:0.3rem 1rem;font-size:0.72rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.8rem;">Tarifs</div>
-        <h2 style="font-family:'Nunito',sans-serif;font-size:1.6rem;font-weight:800;color:var(--riad-dark);">Commencez gratuitement</h2>
-        <p style="color:var(--text3);font-size:0.85rem;margin-top:0.5rem;">Sans carte bancaire. Passez à un plan payant quand vous êtes prêt.</p>
+  <!-- FAQ -->
+  <div style="padding:3.5rem 1.5rem;background:#fff;border-top:1px solid var(--border);">
+    <div style="max-width:600px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:2rem;">
+        <h2 style="font-family:'Nunito',sans-serif;font-size:1.5rem;font-weight:800;color:var(--riad-dark);">Questions fréquentes</h2>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;">
-        <div style="background:#fff;border-radius:14px;padding:1.2rem;border:1px solid var(--border);text-align:center;">
-          <div style="font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">Free</div>
-          <div style="font-size:1.4rem;font-weight:800;color:var(--riad-dark);font-family:'Nunito',sans-serif;">0 DH</div>
-          <div style="font-size:0.7rem;color:var(--text3);margin:0.5rem 0 0.8rem;">Pour commencer</div>
-          <div style="font-size:0.75rem;color:var(--text2);line-height:1.6;">3 contrats/mois<br>1 logement</div>
+      <div style="display:grid;gap:0.8rem;" id="landingFaq">
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            Est-ce légal au Maroc ? <span>+</span>
+          </button>
+          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
+            Oui. Stayform génère un contrat de location meublée touristique conforme aux exigences légales marocaines. La signature électronique et la copie de la CIN constituent des preuves légales reconnues.
+          </div>
         </div>
-        <div style="background:#fff;border-radius:14px;padding:1.2rem;border:1px solid var(--border);text-align:center;">
-          <div style="font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">Starter</div>
-          <div style="font-size:1.4rem;font-weight:800;color:var(--riad-dark);font-family:'Nunito',sans-serif;">590 DH</div>
-          <div style="font-size:0.7rem;color:var(--text3);margin:0.5rem 0 0.8rem;">par an</div>
-          <div style="font-size:0.75rem;color:var(--text2);line-height:1.6;">8 contrats/mois<br>1 logement</div>
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            Les CIN des guests sont-elles stockées ? <span>+</span>
+          </button>
+          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
+            Non. Les photos de CIN transitent uniquement dans le navigateur du guest pour générer le PDF. Elles ne sont jamais envoyées ni stockées sur nos serveurs. Seul le numéro de document est conservé.
+          </div>
         </div>
-        <div style="background:linear-gradient(135deg,#2D4A3E,#3D6B55);border-radius:14px;padding:1.2rem;border:none;text-align:center;position:relative;">
-          <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#D4A853;color:#1A2E4A;font-size:0.62rem;font-weight:800;padding:0.15rem 0.6rem;border-radius:10px;white-space:nowrap;">POPULAIRE</div>
-          <div style="font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">Pro</div>
-          <div style="font-size:1.4rem;font-weight:800;color:#fff;font-family:'Nunito',sans-serif;">990 DH</div>
-          <div style="font-size:0.7rem;color:rgba(255,255,255,0.6);margin:0.5rem 0 0.8rem;">par an</div>
-          <div style="font-size:0.75rem;color:rgba(255,255,255,0.85);line-height:1.6;">20 contrats/mois<br>5 logements</div>
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            Fonctionne avec Airbnb ? <span>+</span>
+          </button>
+          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
+            Oui. Stayform se synchronise avec votre calendrier Airbnb via iCal. Les dates de vos réservations sont importées automatiquement et les liens de check-in sont pré-remplis.
+          </div>
         </div>
-        <div style="background:#fff;border-radius:14px;padding:1.2rem;border:1px solid var(--border);text-align:center;">
-          <div style="font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">Business</div>
-          <div style="font-size:1.4rem;font-weight:800;color:var(--riad-dark);font-family:'Nunito',sans-serif;">1990 DH</div>
-          <div style="font-size:0.7rem;color:var(--text3);margin:0.5rem 0 0.8rem;">par an</div>
-          <div style="font-size:0.75rem;color:var(--text2);line-height:1.6;">40 contrats/mois<br>10 logements</div>
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            Le guest doit-il installer une application ? <span>+</span>
+          </button>
+          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
+            Non. Tout se passe dans le navigateur. Le guest ouvre le lien que vous lui envoyez par WhatsApp ou SMS, remplit le formulaire et signe — sans télécharger quoi que ce soit.
+          </div>
         </div>
-      </div>
-      <div style="text-align:center;margin-top:1.5rem;">
-        <a href="pricing.html" style="color:var(--riad-green);font-size:0.85rem;font-weight:600;text-decoration:none;">Voir tous les détails →</a>
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            Comment passer à un plan payant ? <span>+</span>
+          </button>
+          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
+            Depuis votre dashboard, cliquez sur votre plan actuel. Le paiement se fait par virement bancaire ou via WhatsApp. L'activation est manuelle sous 2h après confirmation.
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1307,13 +1316,13 @@ function showToast(msg, color) {
           <div style="font-size:2.5rem;color:#D4A853;opacity:0.4;position:absolute;top:0.8rem;left:1.2rem;font-family:Georgia,serif;line-height:1;">"</div>
           <div style="padding-top:1rem;">
             <div style="font-size:0.88rem;color:var(--text2);line-height:1.8;margin-bottom:1rem;font-style:italic;">
-              كنت خايف على معطيات ضيوفي، لكن Stayform واضح أنه آمن. الصور ديال CIN ما تخزنش في السيرفير. أنصح بيه كل مضيف فالمغرب.
+              As a foreign guest, I was impressed by how smooth the check-in process was. Everything was clear, the form was easy to fill, and I received the signed contract immediately. Very professional.
             </div>
             <div style="display:flex;align-items:center;gap:0.8rem;">
-              <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#2D4A3E,#1A2E4A);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:0.9rem;flex-shrink:0;">OZ</div>
+              <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#2D4A3E,#1A2E4A);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:0.9rem;flex-shrink:0;">JM</div>
               <div>
-                <div style="font-weight:700;font-size:0.88rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;">Omar Zniber</div>
-                <div style="font-size:0.75rem;color:var(--text3);">هاوي ضيافة · أكادير · شقة واحدة</div>
+                <div style="font-weight:700;font-size:0.88rem;color:var(--riad-dark);font-family:'Nunito',sans-serif;">James Mitchell</div>
+                <div style="font-size:0.75rem;color:var(--text3);">Guest · London · Stayed in Agadir</div>
               </div>
               <div style="margin-left:auto;color:#D4A853;font-size:0.85rem;">★★★★★</div>
             </div>
@@ -1341,57 +1350,6 @@ function showToast(msg, color) {
     </div>
   </div>
 
-  <!-- FAQ -->
-  <div style="padding:3.5rem 1.5rem;background:#fff;border-top:1px solid var(--border);">
-    <div style="max-width:600px;margin:0 auto;">
-      <div style="text-align:center;margin-bottom:2rem;">
-        <h2 style="font-family:'Nunito',sans-serif;font-size:1.5rem;font-weight:800;color:var(--riad-dark);">Questions fréquentes</h2>
-      </div>
-      <div style="display:grid;gap:0.8rem;" id="landingFaq">
-        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
-            Est-ce légal au Maroc ? <span>+</span>
-          </button>
-          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
-            Oui. Stayform génère un contrat de location meublée touristique conforme aux exigences légales marocaines. La signature électronique et la copie de la CIN constituent des preuves légales reconnues.
-          </div>
-        </div>
-        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
-            Les CIN des guests sont-elles stockées ? <span>+</span>
-          </button>
-          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
-            Non. Les photos de CIN transitent uniquement dans le navigateur du guest pour générer le PDF. Elles ne sont jamais envoyées ni stockées sur nos serveurs. Seul le numéro de document est conservé.
-          </div>
-        </div>
-        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
-            Fonctionne avec Airbnb ? <span>+</span>
-          </button>
-          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
-            Oui. Stayform se synchronise avec votre calendrier Airbnb via iCal. Les dates de vos réservations sont importées automatiquement et les liens de check-in sont pré-remplis.
-          </div>
-        </div>
-        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
-            Le guest doit-il installer une application ? <span>+</span>
-          </button>
-          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
-            Non. Tout se passe dans le navigateur. Le guest ouvre le lien que vous lui envoyez par WhatsApp ou SMS, remplit le formulaire et signe — sans télécharger quoi que ce soit.
-          </div>
-        </div>
-        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-          <button onclick="toggleFaq(this)" style="width:100%;text-align:left;padding:1rem 1.2rem;background:none;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;color:var(--riad-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
-            Comment passer à un plan payant ? <span>+</span>
-          </button>
-          <div style="display:none;padding:0 1.2rem 1rem;font-size:0.82rem;color:var(--text2);line-height:1.7;">
-            Depuis votre dashboard, cliquez sur votre plan actuel. Le paiement se fait par virement bancaire ou via WhatsApp. L'activation est manuelle sous 2h après confirmation.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- CTA FINAL -->
   <div style="padding:4rem 1.5rem;background:linear-gradient(135deg,#1A2E4A 0%,#2D4A3E 100%);text-align:center;">
     <div style="max-width:500px;margin:0 auto;">
@@ -1412,7 +1370,6 @@ function showToast(msg, color) {
     <div style="font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;color:#fff;margin-bottom:0.5rem;">stayform</div>
     <div style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-bottom:0.8rem;">Plateforme de check-in digital pour hôtes Airbnb au Maroc</div>
     <div style="display:flex;gap:1.5rem;justify-content:center;">
-      <a href="pricing.html" style="color:rgba(255,255,255,0.5);font-size:0.75rem;text-decoration:none;">Tarifs</a>
       <a href="#" onclick="openAuthModal('login');return false;" style="color:rgba(255,255,255,0.5);font-size:0.75rem;text-decoration:none;">Connexion</a>
       <a href="#" onclick="openAuthModal('register');return false;" style="color:rgba(255,255,255,0.5);font-size:0.75rem;text-decoration:none;">Inscription</a>
     </div>
