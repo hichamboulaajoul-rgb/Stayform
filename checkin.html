@@ -1032,9 +1032,18 @@ document.addEventListener('DOMContentLoaded', function() {
       <!-- Skip -->
 
 
+      <!-- Bouton passer l'étape -->
+      <div id="skipBanner" style="display:none;background:#FFF8EE;border:1px solid #F0D9A0;border-radius:10px;padding:1rem 1.2rem;margin-bottom:1rem;text-align:center;">
+        <div style="font-size:0.82rem;color:#8B6914;margin-bottom:0.8rem;">Vous pouvez passer cette étape, mais votre document sera marqué comme non fourni dans le contrat.</div>
+        <button onclick="skipDocuments()" style="background:#D4A853;color:#1A2E4A;border:none;border-radius:8px;padding:0.6rem 1.4rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;" data-i18n="skip_step">Passer cette étape →</button>
+      </div>
+
       <div class="btn-group">
         <button class="btn btn-secondary" onclick="prevStep(3)">← Retour</button>
         <button class="btn btn-primary" onclick="nextStepDoc()" id="btn3" disabled>Continuer →</button>
+      </div>
+      <div style="text-align:center;margin-top:0.8rem;">
+        <button id="toggleSkipBtn" onclick="toggleSkip()" style="background:none;border:none;color:var(--text3);font-size:0.78rem;cursor:pointer;text-decoration:underline;" data-i18n="skip_doc">Je n'ai pas mon document maintenant</button>
       </div>
     </div>
   </div>
@@ -1881,7 +1890,7 @@ function initCanvas() {
     if (ph) ph.style.display = 'none';
     checkSubmit();
   });
-  canvas.addEventListener('mouseup', () => { drawing = false; if (hasSig) captureSignature(); });
+  canvas.addEventListener('mouseup', () => { drawing = false; if (hasSig) { captureSignature(); checkSubmit(); } });
   canvas.addEventListener('mouseleave', () => drawing = false);
   canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, {passive:false});
   canvas.addEventListener('touchmove', e => {
@@ -1895,7 +1904,7 @@ function initCanvas() {
     if (ph) ph.style.display = 'none';
     checkSubmit();
   }, {passive:false});
-  canvas.addEventListener('touchend', () => { drawing = false; if (hasSig) captureSignature(); });
+  canvas.addEventListener('touchend', () => { drawing = false; if (hasSig) { captureSignature(); checkSubmit(); } });
 }
 
 document.addEventListener('DOMContentLoaded', initCanvas);
@@ -1913,6 +1922,7 @@ function captureSignature() {
       tctx.drawImage(canvas, 0, 0);
       signatureDataURL = tmp.toDataURL('image/png');
     }
+    checkSubmit();
   } catch(e) { console.error('Capture sig error:', e); }
 }
 
