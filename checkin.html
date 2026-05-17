@@ -1611,15 +1611,6 @@ async function callVisionOCR(base64, mediaType, canvasEl) {
     if (result.verified) {
       cinVerified = true;
 
-      // ── Capturer docImage1 AVANT stopCINScanner() ──
-      var sourceCanvas = canvasEl || document.getElementById('cinCanvas');
-      var dataUrl2 = null;
-      if (sourceCanvas && sourceCanvas.width > 0) {
-        dataUrl2 = sourceCanvas.toDataURL('image/jpeg', 0.9);
-        docImage1 = dataUrl2;
-        filesUploaded[0] = true;
-      }
-
       stopCINScanner();
 
       // Remplir auto numéro si vide
@@ -1628,19 +1619,15 @@ async function callVisionOCR(base64, mediaType, canvasEl) {
       }
 
       // Stocker la photo
-      if (sourceCanvas && dataUrl2) {
-        sourceCanvas.toBlob(function(blob) {
-          var file = new File([blob], 'cin_scan.jpg', { type: 'image/jpeg' });
-          var dt = new DataTransfer();
-          dt.items.add(file);
-          var f1 = document.getElementById('file1');
-          if (f1) f1.files = dt.files;
-        }, 'image/jpeg', 0.9);
+      if (canvasEl) {
+        // ── Scan caméra : capturer depuis le canvas fourni ──
+        var dataUrl2 = canvasEl.toDataURL('image/jpeg', 0.9);
+        docImage1 = dataUrl2;
+        filesUploaded[0] = true;
         var img = document.getElementById('cinCaptured');
         if (img) { img.src = dataUrl2; img.style.display = 'block'; }
       } else {
-        // Fallback pour upload galerie — stocker directement depuis base64
-        docImage1 = 'data:' + mediaType + ';base64,' + base64;
+        // ── Upload galerie : docImage1 déjà assigné dans handleFile ──
         filesUploaded[0] = true;
       }
 
