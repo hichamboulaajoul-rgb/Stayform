@@ -672,6 +672,7 @@ function initSupabase() { getSb(); }
 function handleGoogleLogin() {
   var client = getSb();
   if (!client) { showError('Patientez 2 secondes et réessayez.'); return; }
+  if (typeof fbq !== 'undefined') fbq('track', 'Lead');
   client.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: window.location.origin + '/' }
@@ -2514,6 +2515,7 @@ async function handleRegister() {
   // Profile created automatically via trigger
   // Wait a bit for trigger then load
   setTimeout(async () => {
+    if (typeof fbq !== 'undefined') fbq('track', 'Lead');
     closeAuthModal();
     document.getElementById('landingScreen').style.display = 'none';
     await loadDashboard(data.user);
