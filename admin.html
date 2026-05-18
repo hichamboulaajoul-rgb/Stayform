@@ -299,10 +299,21 @@ async function adminLogin() {
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
   if (error || !data.user) { errEl.style.display = 'block'; return; }
 
-  // Vérifier que l'email est dans la liste admin
+  // Vérification 1 : email dans la liste blanche
   if (!ADMIN_EMAILS.includes(data.user.email)) {
     await sb.auth.signOut();
-    errEl.textContent = 'Accès non autorisé pour cet email.';
+    errEl.textContent = 'Accès non autorisé.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Vérification 2 : role = admin dans la DB
+  const { data: profile, error: profileErr } = await sb.from('profiles')
+    .select('role').eq('id', data.user.id).single();
+
+  if (profileErr || !profile || profile.role !== 'admin') {
+    await sb.auth.signOut();
+    errEl.textContent = 'Accès refusé — droits insuffisants.';
     errEl.style.display = 'block';
     return;
   }
@@ -324,10 +335,17 @@ async function adminLogout() {
 window.addEventListener('DOMContentLoaded', async () => {
   const { data: { session } } = await sb.auth.getSession();
   if (session && session.user && ADMIN_EMAILS.includes(session.user.email)) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('adminScreen').style.display = 'block';
-    document.getElementById('adminUserEmail').textContent = session.user.email;
-    await loadUsers();
+    // Vérifier le role dans la DB
+    const { data: profile } = await sb.from('profiles')
+      .select('role').eq('id', session.user.id).single();
+    if (profile && profile.role === 'admin') {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminScreen').style.display = 'block';
+      document.getElementById('adminUserEmail').textContent = session.user.email;
+      await loadUsers();
+    } else {
+      await sb.auth.signOut();
+    }
   }
 });
 
