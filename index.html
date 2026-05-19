@@ -3,25 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stayform — Check-in en ligne pour hôtes Airbnb</title>
-<meta name="description" content="Stayform permet à vos voyageurs de faire leur check-in en ligne : vérification CIN, contrat de bail signé, zéro papier.">
-
-<!-- Open Graph / WhatsApp / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://stayform.link">
-<meta property="og:title" content="Stayform — Check-in en ligne pour hôtes Airbnb">
-<meta property="og:description" content="Vos voyageurs font leur check-in en ligne en 2 minutes : vérification d'identité, contrat de bail signé automatiquement. Zéro papier, zéro stress.">
-<meta property="og:image" content="https://stayform.link/og-image.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:locale" content="fr_MA">
-<meta property="og:site_name" content="Stayform">
-
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Stayform — Check-in en ligne pour hôtes Airbnb">
-<meta name="twitter:description" content="Vos voyageurs font leur check-in en ligne en 2 minutes : vérification d'identité, contrat de bail signé automatiquement.">
-<meta name="twitter:image" content="https://stayform.link/og-image.png">
+<title>Stayform — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;500;600&family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -563,22 +545,6 @@ body {
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-  <!-- Meta Pixel -->
-  <script>
-  !function(f,b,e,v,n,t,s)
-  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-  n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];
-  s.parentNode.insertBefore(t,s)}(window, document,'script',
-  'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '1727754251924188');
-  fbq('track', 'PageView');
-  </script>
-  <noscript><img height="1" width="1" style="display:none"
-  src="https://www.facebook.com/tr?id=1727754251924188&ev=PageView&noscript=1"
-  /></noscript>
 </head>
 <body>
 
@@ -672,7 +638,6 @@ function initSupabase() { getSb(); }
 function handleGoogleLogin() {
   var client = getSb();
   if (!client) { showError('Patientez 2 secondes et réessayez.'); return; }
-  if (typeof fbq !== 'undefined') fbq('track', 'Lead');
   client.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: window.location.origin + '/' }
@@ -2515,7 +2480,6 @@ async function handleRegister() {
   // Profile created automatically via trigger
   // Wait a bit for trigger then load
   setTimeout(async () => {
-    if (typeof fbq !== 'undefined') fbq('track', 'Lead');
     closeAuthModal();
     document.getElementById('landingScreen').style.display = 'none';
     await loadDashboard(data.user);
@@ -3055,7 +3019,6 @@ function sendWelcome(guestId) {
   var g = _guestsCache[guestId];
   if (!g) { showToast('Guest introuvable', '#C13515'); return; }
 
-  // Trouver la propriété
   var prop = null;
   if (window.currentProperties && Array.isArray(window.currentProperties)) {
     prop = window.currentProperties.find(function(p){ return p.id === g.property_id; })
@@ -3069,18 +3032,13 @@ function sendWelcome(guestId) {
   params.set('p', prop.id);
   params.set('g', g.id);
   params.set('h', currentUser.id);
-
-  // Ajouter le code d'accès si disponible
   if (g.lock_code) params.set('code', g.lock_code);
-
-  // Numéro WhatsApp de l'hôte (depuis le profil si dispo)
   if (currentProfile && currentProfile.phone) {
     params.set('wa', currentProfile.phone.replace(/\D/g,''));
   }
 
   var welcomeUrl = baseUrl + '?' + params.toString();
 
-  // Message WhatsApp
   var guestName = g.name ? g.name.split(' ')[0] : 'cher(e) voyageur';
   var msg = 'Bonjour ' + guestName + ' ! 🏡\n\n';
   msg += 'Votre check-in est confirmé. Retrouvez toutes les informations pour votre séjour ici :\n\n';
@@ -3088,14 +3046,101 @@ function sendWelcome(guestId) {
   msg += '(Code WiFi, accès, règles, et plus)\n\n';
   msg += 'Bon séjour ! 🌟\n— ' + (currentProfile && currentProfile.name ? currentProfile.name : 'Votre hôte');
 
-  // Ouvrir WhatsApp
   var guestPhone = g.phone ? g.phone.replace(/\D/g, '') : '';
-  var waUrl = guestPhone
-    ? 'https://wa.me/' + guestPhone + '?text=' + encodeURIComponent(msg)
-    : 'https://wa.me/?text=' + encodeURIComponent(msg);
 
-  window.open(waUrl, '_blank');
-  showToast('✓ WhatsApp ouvert avec le message de bienvenue', '#25D366');
+  // Afficher le modal au lieu d'ouvrir WhatsApp directement
+  showWelcomeModal(guestPhone, msg);
+}
+
+function showWelcomeModal(phone, msg) {
+  var existing = document.getElementById('welcomeSendModal');
+  if (existing) existing.remove();
+
+  var modal = document.createElement('div');
+  modal.id = 'welcomeSendModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+
+  var inner = document.createElement('div');
+  inner.style.cssText = 'background:#fff;border-radius:16px;padding:1.5rem;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,0.2);';
+
+  // Header
+  var header = document.createElement('div');
+  header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;';
+  header.innerHTML = '<div style="font-family:Nunito,sans-serif;font-size:1rem;font-weight:800;color:#1A2E4A;">🏡 Message de bienvenue</div>';
+  var btnClose = document.createElement('button');
+  btnClose.textContent = '✕';
+  btnClose.style.cssText = 'background:none;border:none;font-size:1.2rem;cursor:pointer;color:#aaa;';
+  btnClose.onclick = function(){ modal.remove(); };
+  header.appendChild(btnClose);
+
+  // Champ numéro
+  var phoneLabel = document.createElement('div');
+  phoneLabel.style.cssText = 'font-size:0.75rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.4rem;';
+  phoneLabel.textContent = 'Numéro WhatsApp du guest';
+
+  var phoneInput = document.createElement('input');
+  phoneInput.type = 'tel';
+  phoneInput.value = phone;
+  phoneInput.placeholder = '212612345678';
+  phoneInput.style.cssText = 'width:100%;border:1.5px solid #e0d5c8;border-radius:8px;padding:0.7rem 1rem;font-family:Nunito Sans,sans-serif;font-size:0.9rem;color:#1A2E4A;outline:none;margin-bottom:0.4rem;box-sizing:border-box;';
+  phoneInput.addEventListener('focus', function(){ this.style.borderColor='#2D4A3E'; });
+  phoneInput.addEventListener('blur', function(){ this.style.borderColor='#e0d5c8'; });
+
+  var phoneHint = document.createElement('div');
+  phoneHint.style.cssText = 'font-size:0.72rem;color:#aaa;margin-bottom:1.2rem;';
+  phoneHint.textContent = 'Format international sans + (ex: 212612345678)';
+
+  // Aperçu du message
+  var msgLabel = document.createElement('div');
+  msgLabel.style.cssText = 'font-size:0.75rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.4rem;';
+  msgLabel.textContent = 'Aperçu du message';
+
+  var msgPreview = document.createElement('div');
+  msgPreview.style.cssText = 'background:#F7F7F7;border-radius:8px;padding:0.8rem;font-size:0.78rem;color:#444;line-height:1.6;white-space:pre-wrap;max-height:120px;overflow-y:auto;margin-bottom:1.2rem;font-family:monospace;';
+  msgPreview.textContent = msg;
+
+  // Boutons
+  var btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:0.7rem;';
+
+  var btnCopy = document.createElement('button');
+  btnCopy.innerHTML = '📋 Copier';
+  btnCopy.style.cssText = 'flex:1;background:#F5F0EB;color:#6B5848;border:none;border-radius:8px;padding:0.75rem;font-family:Nunito,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;';
+  btnCopy.onclick = function() {
+    navigator.clipboard.writeText(msg).then(function() {
+      btnCopy.innerHTML = '✓ Copié !';
+      btnCopy.style.background = '#EEF5F1';
+      btnCopy.style.color = '#2D7A45';
+      setTimeout(function(){ btnCopy.innerHTML = '📋 Copier'; btnCopy.style.background='#F5F0EB'; btnCopy.style.color='#6B5848'; }, 2000);
+    });
+  };
+
+  var btnWA = document.createElement('button');
+  btnWA.innerHTML = '📱 Envoyer via WhatsApp';
+  btnWA.style.cssText = 'flex:2;background:#25D366;color:#fff;border:none;border-radius:8px;padding:0.75rem;font-family:Nunito,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;';
+  btnWA.onclick = function() {
+    var num = phoneInput.value.replace(/\D/g,'');
+    var waUrl = num
+      ? 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg)
+      : 'https://wa.me/?text=' + encodeURIComponent(msg);
+    window.open(waUrl, '_blank');
+    modal.remove();
+  };
+
+  btnRow.appendChild(btnCopy);
+  btnRow.appendChild(btnWA);
+
+  inner.appendChild(header);
+  inner.appendChild(phoneLabel);
+  inner.appendChild(phoneInput);
+  inner.appendChild(phoneHint);
+  inner.appendChild(msgLabel);
+  inner.appendChild(msgPreview);
+  inner.appendChild(btnRow);
+  modal.appendChild(inner);
+  document.body.appendChild(modal);
+
+  modal.addEventListener('click', function(e){ if (e.target === modal) modal.remove(); });
 }
 
 // ══════════════════════════════
