@@ -1067,16 +1067,16 @@ document.addEventListener('DOMContentLoaded', function() {
         La location commence et se termine aux dates sélectionnées lors de ce check-in. Le locataire devra libérer les lieux au plus tard à 11h00 le jour du départ. Le bailleur se réserve le droit de facturer une nuit supplémentaire en cas de départ tardif non convenu.
 
         <h4>Article 3 — Prix et conditions de paiement</h4>
-        Le loyer a été réglé via la plateforme Airbnb conformément aux conditions de la réservation. Tous frais de ménage, taxes de séjour et autres charges ont été inclus dans le montant total indiqué sur la réservation.
+        Le montant du loyer, les frais de ménage, taxes de séjour et autres charges ont été convenus entre les parties conformément aux conditions de la réservation.
 
         <h4>Article 4 — Dépôt de garantie</h4>
         Un dépôt de garantie peut être demandé par le bailleur. En l'absence de dommages constatés lors de l'état des lieux de sortie, ce dépôt est intégralement restitué dans un délai de 7 jours ouvrés après le départ.
 
         <h4>Article 5 — Occupation et règles de séjour</h4>
-        Le logement est loué à usage exclusivement touristique et résidentiel temporaire. Il est expressément interdit : d'introduire plus de personnes que le nombre déclaré ; d'organiser des fêtes, soirées ou rassemblements ; de fumer à l'intérieur du logement ; d'introduire des animaux de compagnie sans autorisation préalable ; d'endommager les équipements et le mobilier.
+        <span id="contract-art5">Le logement est loué à usage exclusivement touristique et résidentiel temporaire. Il est expressément interdit : d'introduire plus de personnes que le nombre déclaré ; d'organiser des fêtes, soirées ou rassemblements ; de fumer à l'intérieur du logement ; d'introduire des animaux de compagnie sans autorisation préalable ; d'endommager les équipements et le mobilier.</span>
 
         <h4>Article 6 — Règlement intérieur</h4>
-        Le locataire s'engage à respecter le règlement intérieur du logement remis lors de l'arrivée ou accessible via le livret d'accueil numérique. Le non-respect du règlement peut entraîner une résiliation immédiate du contrat sans remboursement.
+        <span id="contract-art6">Le locataire s'engage à respecter le règlement intérieur du logement. Le non-respect du règlement peut entraîner une résiliation immédiate du contrat sans remboursement.</span>
 
         <h4>Article 7 — Responsabilité</h4>
         Le locataire est responsable de tout dommage causé au logement, à son contenu et aux équipements durant son séjour. Le bailleur ne pourra être tenu responsable des vols, pertes ou dommages affectant les biens personnels du locataire.
@@ -1356,6 +1356,40 @@ initCalendarEvents();
     renderCalendar();
   });
 })();
+
+function updateContractArticles(pd) {
+  if (!pd) return;
+
+  // Article 5
+  const noSmoking   = pd.no_smoking !== false;
+  const petsOk      = pd.pets_allowed;
+  const partiesOk   = pd.parties_allowed;
+  const acteMariage = pd.acte_mariage !== false;
+
+  let art5 = "Le logement est loué à usage exclusivement touristique et résidentiel temporaire. Il est expressément interdit : d'introduire plus de personnes que le nombre déclaré ; ";
+  if (!partiesOk) art5 += "d'organiser des fêtes, soirées ou rassemblements ; ";
+  if (noSmoking)  art5 += "de fumer à l'intérieur du logement ; ";
+  if (!petsOk)    art5 += "d'introduire des animaux de compagnie sans autorisation préalable ; ";
+  else            art5 += "les animaux de compagnie sont autorisés sur accord préalable ; ";
+  if (acteMariage) art5 += "un acte de mariage est exigé pour les couples de nationalité marocaine ; ";
+  art5 += "d'endommager les équipements et le mobilier.";
+
+  // Article 6
+  const quietStart   = pd.quiet_hours_start || '22:00';
+  const quietEnd     = pd.quiet_hours_end   || '08:00';
+  const parkingOk    = pd.parking;
+  const specialInstr = pd.special_instructions || '';
+
+  let art6 = "Le locataire s'engage à respecter le règlement intérieur du logement. Le non-respect du règlement peut entraîner une résiliation immédiate du contrat sans remboursement. ";
+  art6 += "Heures calmes : de " + quietStart + " à " + quietEnd + ". ";
+  if (parkingOk) art6 += "Un emplacement de parking est disponible. ";
+  if (specialInstr) art6 += specialInstr;
+
+  var el5 = document.getElementById('contract-art5');
+  var el6 = document.getElementById('contract-art6');
+  if (el5) el5.textContent = art5;
+  if (el6) el6.textContent = art6.trim();
+}
 
 // ── NAVIGATION ──
 let currentStep = 1;
@@ -1807,8 +1841,12 @@ function toggleSkip() {
 function skipDocuments() {
   docSkipped = true;
   currentStep = 4;
+  // Cocher automatiquement le consentement CIN — pas de document fourni
+  var check4 = document.getElementById('check4');
+  if (check4) { check4.checked = true; }
   buildContractSummary();
   updateUI();
+  checkSubmit();
 }
 
 // Drag & drop
@@ -2007,7 +2045,7 @@ function showPropertyInfoBanner(prop) {
   if (prop.wifi_name) infos.push({ icon: '📶', label: 'WiFi', val: prop.wifi_name });
   if (prop.wifi_password) infos.push({ icon: '🔑', label: 'Mot de passe', val: prop.wifi_password });
   
-  if (infos.length === 0 && !prop.rules) return;
+  if (infos.length === 0) return;
   
   const banner = document.createElement('div');
   banner.id = 'propInfoBanner';
@@ -2023,10 +2061,6 @@ function showPropertyInfoBanner(prop) {
           <strong style="color:var(--deep)">${i.val}</strong>
         </div>`).join('')}
     </div>
-    ${prop.rules ? `
-      <div style="margin-top:0.8rem;font-size:0.78rem;color:var(--mid);line-height:1.6;">
-        <strong>Règles :</strong> ${prop.rules.split('\n').slice(0,3).join(' · ')}
-      </div>` : ''}
   `;
   
   // Insert after header
@@ -2042,7 +2076,7 @@ function showPropertyInfoBanner(prop) {
   if (prop.checkout_time) infos.push({ icon: '🕚', label: 'Check-out', val: prop.checkout_time });
   if (prop.wifi_name) infos.push({ icon: '📶', label: 'WiFi', val: prop.wifi_name });
   if (prop.wifi_password) infos.push({ icon: '🔐', label: 'Mot de passe', val: prop.wifi_password });
-  if (infos.length === 0 && !prop.rules) return;
+  if (infos.length === 0) return;
   const banner = document.createElement('div');
   banner.id = 'propInfoBanner';
   banner.style.cssText = 'background:linear-gradient(135deg,#FFF8F5,#FFF0EC);border:1px solid rgba(192,112,80,0.2);border-radius:14px;padding:1.2rem 1.5rem;margin:1rem 0 0;';
@@ -2051,7 +2085,7 @@ function showPropertyInfoBanner(prop) {
     <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
       ${infos.map(i => `<div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:0.5rem 0.8rem;font-size:0.82rem;"><span style="opacity:0.7">${i.icon} ${i.label} : </span><strong style="color:var(--deep)">${i.val}</strong></div>`).join('')}
     </div>
-    ${prop.rules ? `<div style="margin-top:0.7rem;font-size:0.78rem;color:var(--mid);line-height:1.6;"><strong>Règles :</strong> ${prop.rules.split('\n').slice(0,3).join(' · ')}</div>` : ''}
+
   `;
   const main = document.querySelector('.container') || document.querySelector('main') || document.body;
   const firstPage = document.querySelector('.page.active') || document.querySelector('.page');
@@ -2165,7 +2199,7 @@ async function findHostByLinkId(linkId) {
   if (!linkId) return null;
   try {
     // Utilise la vue publique sécurisée (pas de données sensibles)
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles_public?link_id=eq.${linkId}&select=id,name,link_id`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles_public?link_id=eq.${linkId}&select=id,name,link_id,phone,cin`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
     });
     const data = await res.json();
@@ -2226,7 +2260,7 @@ async function fetchPropertyAndHost() {
     // ── 1. Fetch l'hôte via link_id + vérification immédiate ──
     if (hostLinkId) {
       const hostRes = await fetch(
-        SUPABASE_URL + '/rest/v1/profiles_public?link_id=eq.' + hostLinkId + '&select=id,name,link_id&limit=1',
+        SUPABASE_URL + '/rest/v1/profiles_public?link_id=eq.' + hostLinkId + '&select=id,name,link_id,phone,cin&limit=1',
         { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
       );
       const hosts = await hostRes.json();
@@ -2241,6 +2275,8 @@ async function fetchPropertyAndHost() {
       if (hosts && hosts[0]) {
         window._hostName = hosts[0].name;
         window._hostId = hosts[0].id;
+        window._hostCin = hosts[0].cin || '';
+        window._hostPhone = hosts[0].phone || '';
         console.log('Host loaded:', hosts[0].name);
         // Fetch email separately via RPC (not exposed in public view)
         try {
@@ -2305,6 +2341,7 @@ async function fetchPropertyAndHost() {
 
     // ── 5. Afficher la bannière infos logement ──
     if (pd) showPropertyInfoBanner(pd);
+    if (pd) updateContractArticles(pd);
 
   } catch(e) {
     console.warn('fetchPropertyAndHost error:', e);
@@ -2684,7 +2721,7 @@ async function _runPDFGeneration(btn, silent) {
     doc.setFillColor(...GOLD);
     doc.rect(margin, y + 8, contentW, 0.8, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
+    doc.setFontSize(8.5);
     doc.setTextColor(...WHITE);
     doc.text(title.toUpperCase(), margin + 4, y + 5.5);
     y += 12;
@@ -2693,44 +2730,42 @@ async function _runPDFGeneration(btn, silent) {
   // ── Ligne info label/valeur ──
   function infoRow(label, value, opts) {
     opts = opts || {};
-    checkY(9);
+    checkY(10);
     const half = opts.full ? contentW : contentW / 2 - 1;
-    const x2   = opts.full ? null : margin + contentW / 2 + 1;
-    // Fond alterné
     if (opts.shade) {
       doc.setFillColor(...CREAM);
-      doc.rect(margin, y, contentW, 8, 'F');
+      doc.rect(margin, y, contentW, 9, 'F');
     }
-    doc.setFontSize(6.5);
+    doc.setFontSize(7);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...LIGHT);
-    doc.text(label.toUpperCase(), margin + 3, y + 3);
-    doc.setFontSize(8.5);
+    doc.text(label.toUpperCase(), margin + 3, y + 3.5);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...DEEP);
     const valStr = (value || '—');
     const maxChars = opts.full ? 90 : 45;
     const displayVal = valStr.length > maxChars ? valStr.substring(0, maxChars) + '…' : valStr;
-    doc.text(displayVal, margin + 3, y + 7);
-    y += 9;
+    doc.text(displayVal, margin + 3, y + 8);
+    y += 10;
   }
 
   function infoRowDual(l1, v1, l2, v2, shade) {
-    checkY(9);
+    checkY(10);
     const half = (contentW - 3) / 2;
-    if (shade) { doc.setFillColor(...CREAM); doc.rect(margin, y, contentW, 8, 'F'); }
+    if (shade) { doc.setFillColor(...CREAM); doc.rect(margin, y, contentW, 9, 'F'); }
     // Col 1
-    doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
-    doc.text(l1.toUpperCase(), margin + 3, y + 3);
-    doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...DEEP);
-    doc.text((v1||'—').substring(0,35), margin + 3, y + 7);
+    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
+    doc.text(l1.toUpperCase(), margin + 3, y + 3.5);
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...DEEP);
+    doc.text((v1||'—').substring(0,35), margin + 3, y + 8);
     // Col 2
     const x2 = margin + half + 4;
-    doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
-    doc.text(l2.toUpperCase(), x2, y + 3);
-    doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...DEEP);
-    doc.text((v2||'—').substring(0,35), x2, y + 7);
-    y += 9;
+    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
+    doc.text(l2.toUpperCase(), x2, y + 3.5);
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...DEEP);
+    doc.text((v2||'—').substring(0,35), x2, y + 8);
+    y += 10;
   }
 
   function divider() {
@@ -2771,20 +2806,15 @@ async function _runPDFGeneration(btn, silent) {
   // ── Logement & Bailleur ──
   if (pd || bailName !== 'Le bailleur') {
     sectionTitle('Logement & Bailleur');
-    infoRowDual('Bailleur', bailName, 'Logement', (pd && pd.name) || window._propertyName || '—', false);
+    const hostQuality = (pd && pd.host_quality) || 'Proprietaire';
+    const bailDisplay = bailName + ' (' + hostQuality + ')';
+    const hostCin = window._hostCin || '';
+    infoRowDual('Bailleur', bailDisplay, 'Logement', (pd && pd.name) || window._propertyName || '—', false);
+    if (hostCin) infoRowDual('N° CNIE Bailleur', hostCin, 'Adresse', (pd && pd.address) || '—', true);
     if (pd && pd.address) infoRowDual('Adresse', pd.address, 'Localisation', pd.city || '—', true);
     if (pd && pd.checkin_time) infoRowDual('Check-in', pd.checkin_time, 'Check-out', pd.checkout_time || '—', false);
     if (pd && pd.wifi_name) infoRowDual('WiFi', pd.wifi_name, 'Mot de passe', pd.wifi_password || '—', true);
-    if (pd && pd.rules) {
-      checkY(8);
-      doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
-      doc.text('RÈGLES', margin + 3, y + 3);
-      doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(...MID);
-      const rulesLines = doc.splitTextToSize(pd.rules.substring(0, 200), contentW - 6);
-      rulesLines.slice(0, 3).forEach(line => { checkY(5); doc.text(line, margin + 3, y + 7); y += 5; });
-      y += 4;
-    }
-    y += 2;
+    y += 1;
   }
 
   // ── Identité ──
@@ -2919,24 +2949,82 @@ async function _runPDFGeneration(btn, silent) {
 
   // ── Contrat ──
   sectionTitle('Contrat de location meublee touristique');
+  // Préambule
+  checkY(14);
+  const hostQuality = (pd && pd.host_quality) || 'Proprietaire';
+  const bailDisplay = window._hostName || 'Le bailleur';
+  const hostCinPreamble = window._hostCin ? ', CIN : ' + window._hostCin : '';
+  doc.setFontSize(7.5); doc.setFont('helvetica','italic'); doc.setTextColor(...MID);
+  const preamble = doc.splitTextToSize(
+    "Entre le soussigne " + bailDisplay + hostCinPreamble + ", " + hostQuality + ", ci-apres denomme « le Bailleur », et le(s) voyageur(s) mentionne(s) dans le present contrat, ci-apres denomme(s) « le(s) Locataire(s) ».",
+    contentW - 4
+  );
+  doc.setFontSize(8); doc.setFont('helvetica','italic'); doc.setTextColor(...MID);
+  preamble.forEach(line => { checkY(5); doc.text(line, margin + 2, y + 5); y += 5; });
+  y += 3;
+
+  // Données dynamiques règlement
+  const noSmoking    = !pd || pd.no_smoking !== false;
+  const petsOk       = pd && pd.pets_allowed;
+  const partiesOk    = pd && pd.parties_allowed;
+  const acteMariage  = !pd || pd.acte_mariage !== false;
+  const parkingOk    = pd && pd.parking;
+  const quietStart   = (pd && pd.quiet_hours_start) || '22:00';
+  const quietEnd     = (pd && pd.quiet_hours_end)   || '08:00';
+  const specialInstr = (pd && pd.special_instructions) || '';
+  const checkoutTime = (pd && pd.checkout_time) || '11:00';
+
+  // Article 5 — règles d'occupation dynamiques
+  let art5 = "Le logement est loue a usage exclusivement touristique et residentiel temporaire. Il est expressement interdit : d'introduire plus de personnes que le nombre declare ; ";
+  if (!partiesOk) art5 += "d'organiser des fetes, soirees ou rassemblements ; ";
+  if (noSmoking)  art5 += "de fumer a l'interieur du logement ; ";
+  if (!petsOk)    art5 += "d'introduire des animaux de compagnie sans autorisation prealable ; ";
+  else            art5 += "les animaux de compagnie sont autorises sur accord prealable ; ";
+  if (acteMariage) art5 += "un acte de mariage est exige pour les couples de nationalite marocaine ; ";
+  art5 += "d'endommager les equipements et le mobilier.";
+
+  // Article 6 — règlement intérieur dynamique
+  let art6 = "Le locataire s'engage a respecter le reglement interieur du logement. Le non-respect du reglement peut entrainer une resilitation immediate du contrat sans remboursement. ";
+  art6 += "Heures calmes : de " + quietStart + " a " + quietEnd + ". ";
+  if (parkingOk) art6 += "Un emplacement de parking est disponible. ";
+  if (specialInstr) art6 += specialInstr;
+  art6 = art6.trim();
 
   const clauses = [
-    ['OBJET', 'Le present contrat a pour objet la location meublee a titre touristique du logement decrit dans la reservation. Cette location ne peut en aucun cas beneficier a des tiers et ne peut faire l\'objet d\'une sous-location sans accord ecrit du bailleur.'],
-    ['DUREE', `La location s\'etend du ${fmtDate(startDate)} au ${fmtDate(endDate)}, soit ${nights} nuit${nights>1?'s':''}. Le locataire devra liberer les lieux avant ${(pd&&pd.checkout_time)||'11h00'} le jour du depart.`],
-    ['LOYER', 'Le montant du loyer et des charges est convenu entre les parties. En cas de depart anticipe, aucun remboursement ne sera effectue.'],
-    ['DEPOT', 'Un depot de garantie peut etre demande par le bailleur. En l\'absence de dommages constates lors de l\'etat des lieux de sortie, ce depot est restitue dans un delai de 7 jours ouvres.'],
-    ['RESPONSABILITE', 'Le locataire est responsable de tout dommage cause au logement durant son sejour. Il s\'engage a respecter le reglement interieur et les regles de bonne conduite.'],
-    ['JURIDICTION', 'Tout litige sera soumis a la juridiction competente du lieu du logement, apres tentative de resolution amiable.'],
+    ["Article 1 — Objet du contrat",
+     "Le present contrat a pour objet la location meublee a titre touristique du logement decrit dans la reservation. Cette location est consentie et acceptee aux conditions stipulees ci-apres. La location ne peut en aucun cas beneficier a des tiers et ne peut faire l'objet d'une sous-location ou cession sans accord ecrit prealable du bailleur."],
+    ["Article 2 — Duree de la location",
+     `La location s'etend du ${fmtDate(startDate)} au ${fmtDate(endDate)}, soit ${nights} nuit${nights>1?'s':''}. Le locataire devra liberer les lieux au plus tard a ${checkoutTime} le jour du depart. Le bailleur se reserve le droit de facturer une nuit supplementaire en cas de depart tardif non convenu.`],
+    ["Article 3 — Prix et conditions de paiement",
+     "Le montant du loyer, les frais de menage, taxes de sejour et autres charges ont ete convenus entre les parties conformement aux conditions de la reservation."],
+    ["Article 4 — Depot de garantie",
+     "Un depot de garantie peut etre demande par le bailleur. En l'absence de dommages constates lors de l'etat des lieux de sortie, ce depot est integralement restitue dans un delai de 7 jours ouvres apres le depart."],
+    ["Article 5 — Occupation et regles de sejour", art5],
+    ["Article 6 — Reglement interieur", art6],
+    ["Article 7 — Responsabilite",
+     "Le locataire est responsable de tout dommage cause au logement, a son contenu et aux equipements durant son sejour. Le bailleur ne pourra etre tenu responsable des vols, pertes ou dommages affectant les biens personnels du locataire."],
+    ["Article 8 — Protection des donnees",
+     "Les donnees personnelles collectees dans ce formulaire sont traitees conformement au Reglement General sur la Protection des Donnees (RGPD - UE 2016/679). Elles sont utilisees uniquement aux fins de verification d'identite et de gestion de la location."],
+    ["Article 9 — Litiges",
+     "Tout litige relatif au present contrat sera soumis a la juridiction competente du lieu du logement loue, apres tentative de resolution amiable."],
   ];
 
+  // Article personnalisé (optionnel)
+  if (pd && pd.custom_article_title && pd.custom_article_content) {
+    const artNum = clauses.length + 1;
+    clauses.push(["Article " + artNum + " — " + pd.custom_article_title, pd.custom_article_content]);
+  }
+
   clauses.forEach((clause, i) => {
-    checkY(20);
-    doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...GREEN);
-    doc.text(`${i+1}. ${clause[0]}`, margin + 2, y + 4);
-    doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(...MID);
+    checkY(18);
+    y += 2;
+    doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...GREEN);
+    doc.text(clause[0], margin + 2, y + 5);
+    y += 7;
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...MID);
     const lines = doc.splitTextToSize(clause[1], contentW - 4);
-    lines.forEach(line => { checkY(5); doc.text(line, margin + 2, y + 9); y += 5; });
-    y += 6;
+    lines.forEach(line => { checkY(5); doc.text(line, margin + 4, y + 5); y += 5; });
+    y += 3;
   });
 
   // ══════════════════════════════════════════
@@ -2954,12 +3042,13 @@ async function _runPDFGeneration(btn, silent) {
     'Je consens a l\'utilisation de ma piece d\'identite uniquement a des fins de verification — non stockee sur les serveurs de Stayform.',
   ];
   decls.forEach(d => {
-    checkY(7);
+    checkY(8);
     doc.setFillColor(...SUCCESS);
-    doc.roundedRect(margin + 2, y + 1, 4, 4, 0.5, 0.5, 'F');
-    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...MID);
-    doc.text(d, margin + 9, y + 5, { maxWidth: contentW - 10 });
-    y += 8;
+    doc.roundedRect(margin + 2, y + 1.5, 4, 4, 0.5, 0.5, 'F');
+    doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(...MID);
+    const dLines = doc.splitTextToSize(d, contentW - 12);
+    doc.text(dLines, margin + 9, y + 5);
+    y += (dLines.length * 4.5) + 3;
   });
 
   y += 6;

@@ -214,7 +214,7 @@ async function loadWelcome() {
 
   // Charger les données
   const [propRes, hostRes, guestRes] = await Promise.all([
-    sb.from('properties').select('*').eq('id', propId).single(),
+    sb.from('properties_public').select('*').eq('id', propId).single(),
     sb.from('profiles').select('name').eq('id', hostId).single(),
     guestId ? sb.from('guests').select('name,dates,nights,arrival_time,guest_count').eq('id', guestId).single() : Promise.resolve({ data: null })
   ]);
@@ -301,16 +301,29 @@ async function loadWelcome() {
     </div>`;
   }
 
-  // ── Règles ──
-  if (prop.rules) {
-    const rulesList = prop.rules.split('\n').filter(r => r.trim());
+  // ── Règles dynamiques ──
+  const ruleItems = [];
+  if (prop.no_smoking !== false) ruleItems.push('🚬 Interdiction de fumer à l\'intérieur du logement');
+  if (!prop.pets_allowed)        ruleItems.push('🐾 Animaux de compagnie non autorisés');
+  else                           ruleItems.push('🐾 Animaux autorisés sur accord préalable');
+  if (!prop.parties_allowed)     ruleItems.push('🎉 Fêtes et rassemblements interdits');
+  if (prop.acte_mariage !== false) ruleItems.push('💍 Acte de mariage exigé pour les couples marocains');
+  if (prop.quiet_hours_start || prop.quiet_hours_end) {
+    ruleItems.push('🕐 Heures calmes : de ' + (prop.quiet_hours_start||'22:00') + ' à ' + (prop.quiet_hours_end||'08:00'));
+  }
+  if (prop.parking) ruleItems.push('🅿️ Parking disponible');
+  if (prop.special_instructions) {
+    prop.special_instructions.split('\n').filter(r => r.trim()).forEach(r => ruleItems.push('📝 ' + r.trim()));
+  }
+
+  if (ruleItems.length > 0) {
     html += `<div class="card">
       <div class="card-header">
         <div class="card-icon red">📋</div>
         <div><div class="card-title">Règles du logement</div><div class="card-sub">À respecter durant votre séjour</div></div>
       </div>
       <div class="card-body">
-        ${rulesList.map(r => `<div class="rule-item"><div class="rule-dot"></div><div>${r.trim()}</div></div>`).join('')}
+        ${ruleItems.map(r => `<div class="rule-item"><div class="rule-dot"></div><div>${r}</div></div>`).join('')}
       </div>
     </div>`;
   }

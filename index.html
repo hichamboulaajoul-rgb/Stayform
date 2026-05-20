@@ -1654,85 +1654,6 @@ function showToast(msg, color) {
       </div>
 
       <!-- GUESTS SECTION -->
-      <!-- PROPERTY DETAIL SECTION -->
-      <div id="section-property-detail" style="display:none">
-
-        <!-- Back button + title -->
-        <div class="topbar fade-in">
-          <div style="display:flex;align-items:center;gap:1rem;">
-            <button onclick="showSection('properties')" style="background:#F7F7F7;border:1px solid var(--border);border-radius:8px;padding:0.4rem 0.8rem;font-size:0.85rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;color:var(--text2);">← Retour</button>
-            <div>
-              <div class="topbar-title" id="detailPropName">Hébergement</div>
-              <div class="topbar-sub" id="detailPropAddress">—</div>
-            </div>
-          </div>
-          <div style="display:flex;gap:0.5rem;">
-            <button onclick="editCurrentProperty()" style="background:#F7F7F7;border:1px solid var(--border);border-radius:8px;padding:0.5rem 1rem;font-size:0.85rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:600;">✏️ Modifier</button>
-            <button onclick="generateDetailLink()" style="background:var(--riad-green);color:white;border:none;border-radius:8px;padding:0.5rem 1.2rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">🔗 Nouveau lien</button>
-          </div>
-        </div>
-
-        <!-- Property info cards -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem;" id="detailInfoCards"></div>
-
-        <!-- Active link -->
-        <div class="section-card fade-in" id="detailLinkCard" style="display:none">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem;">
-            <div>
-              <div class="section-title">🔗 Lien de check-in actif</div>
-              <div class="section-sub" id="detailLinkExpiry">—</div>
-            </div>
-            <span id="detailLinkTimer" style="background:#F0FFF4;color:#008A05;padding:0.25rem 0.8rem;border-radius:20px;font-size:0.75rem;font-weight:600;"></span>
-          </div>
-          <div class="link-box" style="margin-bottom:0.8rem;">
-            <span class="link-url" id="detailLinkUrl">—</span>
-            <button class="btn-copy" onclick="copyDetailLink()">📋 Copier</button>
-          </div>
-          <div style="display:flex;gap:0.7rem;flex-wrap:wrap;">
-            <button onclick="shareDetailWhatsApp()" style="flex:1;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);border-radius:8px;padding:0.6rem;color:#25D166;font-size:0.82rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;">📱 WhatsApp</button>
-            <button onclick="copyDetailLink()" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.6rem;color:var(--text2);font-size:0.82rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;">🔗 Copier</button>
-          </div>
-        </div>
-        <div class="section-card fade-in" id="detailNoLinkCard">
-          <div style="text-align:center;padding:1.5rem;color:var(--text3);">
-            <div style="font-size:2rem;margin-bottom:0.5rem;">🔗</div>
-            <p style="font-size:0.85rem;margin-bottom:1rem;">Aucun lien actif.<br>Générez un nouveau lien pour votre prochain guest.</p>
-            <button onclick="generateDetailLink()" style="background:var(--accent);color:white;border:none;border-radius:8px;padding:0.6rem 1.4rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;">🔗 Nouveau lien</button>
-          </div>
-        </div>
-
-        <!-- Guests of this property -->
-        <div class="section-card fade-in" style="margin-top:0;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-            <div class="section-title">👥 Guests de ce logement</div>
-            <span id="detailGuestsCount" style="background:#F7F7F7;color:var(--text3);padding:0.2rem 0.7rem;border-radius:20px;font-size:0.75rem;font-weight:600;">0 guest(s)</span>
-          </div>
-          <div id="detailGuestsList"></div>
-        </div>
-
-        <!-- WiFi + Rules -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;" id="detailExtras"></div>
-
-        <!-- ICAL SYNC -->
-        <div class="section-card fade-in" id="icalSection" style="margin-top:1rem;">
-          <div class="section-header" style="margin-bottom:1rem;">
-            <div>
-              <div class="section-title">📅 Sync Calendrier Airbnb</div>
-              <div class="section-sub">Importez vos réservations depuis votre calendrier iCal</div>
-            </div>
-          </div>
-          <div style="display:flex;gap:0.6rem;margin-bottom:1rem;">
-            <input id="icalUrlInput" type="url" placeholder="https://www.airbnb.com/calendar/ical/..." style="flex:1;border:1.5px solid var(--border2);border-radius:8px;padding:0.7rem 1rem;font-family:'Nunito Sans',sans-serif;font-size:0.85rem;color:var(--text);outline:none;background:#fff;">
-            <button onclick="syncIcal()" id="icalSyncBtn" style="display:inline-flex;align-items:center;gap:0.4rem;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:0.7rem 1.2rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;white-space:nowrap;">🔄 Sync</button>
-          </div>
-          <div style="font-size:0.72rem;color:var(--text3);margin-bottom:1rem;">
-            Airbnb → Calendrier → Exporter le calendrier → Copier le lien iCal
-          </div>
-          <div id="icalResults"></div>
-        </div>
-
-      </div>
-
       <!-- PROPERTIES SECTION -->
       <div id="section-properties" style="display:none">
         <div class="topbar fade-in">
@@ -1740,9 +1661,7 @@ function showToast(msg, color) {
             <div class="topbar-title">Mes hébergements</div>
             <div class="topbar-sub">Gérez vos logements et leurs liens de check-in</div>
           </div>
-          <button class="btn-upgrade" onclick="openAddProperty()">
-            + Ajouter un hébergement
-          </button>
+          <button class="btn-upgrade" onclick="openAddProperty()">+ Ajouter un hébergement</button>
         </div>
         <div id="propertiesGrid" class="fade-in">
           <div class="empty-state">
@@ -1755,7 +1674,7 @@ function showToast(msg, color) {
       <!-- PROPERTY DETAIL SECTION -->
       <div id="section-property-detail" style="display:none">
 
-        <!-- Back button + title -->
+        <!-- Topbar -->
         <div class="topbar fade-in">
           <div style="display:flex;align-items:center;gap:1rem;">
             <button onclick="showSection('properties')" style="background:#F7F7F7;border:1px solid var(--border);border-radius:8px;padding:0.4rem 0.8rem;font-size:0.85rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;color:var(--text2);">← Retour</button>
@@ -1770,11 +1689,11 @@ function showToast(msg, color) {
           </div>
         </div>
 
-        <!-- Property info cards -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem;" id="detailInfoCards"></div>
+        <!-- Info cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1rem;" id="detailInfoCards"></div>
 
-        <!-- Active link -->
-        <div class="section-card fade-in" id="detailLinkCard" style="display:none">
+        <!-- 1. LIEN CHECK-IN -->
+        <div class="section-card fade-in" id="detailLinkCard" style="display:none;margin-bottom:1rem;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem;">
             <div>
               <div class="section-title">🔗 Lien de check-in actif</div>
@@ -1791,7 +1710,7 @@ function showToast(msg, color) {
             <button onclick="copyDetailLink()" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.6rem;color:var(--text2);font-size:0.82rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;">🔗 Copier</button>
           </div>
         </div>
-        <div class="section-card fade-in" id="detailNoLinkCard">
+        <div class="section-card fade-in" id="detailNoLinkCard" style="margin-bottom:1rem;">
           <div style="text-align:center;padding:1.5rem;color:var(--text3);">
             <div style="font-size:2rem;margin-bottom:0.5rem;">🔗</div>
             <p style="font-size:0.85rem;margin-bottom:1rem;">Aucun lien actif.<br>Générez un nouveau lien pour votre prochain guest.</p>
@@ -1799,8 +1718,126 @@ function showToast(msg, color) {
           </div>
         </div>
 
-        <!-- Guests of this property -->
-        <div class="section-card fade-in" style="margin-top:0;">
+        <!-- 2. TEMPLATE CONTRAT -->
+        <div class="section-card fade-in" style="margin-bottom:1rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;">
+            <div style="display:flex;align-items:center;gap:0.7rem;">
+              <div style="width:36px;height:36px;background:rgba(45,74,62,0.1);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;">📋</div>
+              <div>
+                <div style="font-size:0.95rem;font-weight:700;color:var(--text);">Template de contrat</div>
+                <div style="font-size:0.75rem;color:var(--text3);margin-top:1px;">Personnalisez votre contrat de location</div>
+              </div>
+            </div>
+            <button onclick="saveContractTemplate()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:0.55rem 1rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">💾 Enregistrer</button>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:1rem;">
+            <!-- Onglets -->
+            <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.2rem;">
+              <button onclick="switchContractTab('bailleur')" id="ctab-bailleur" style="padding:0.6rem 1.1rem;border:none;background:none;font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:700;color:var(--accent);border-bottom:2px solid var(--accent);cursor:pointer;">Bailleur</button>
+              <button onclick="switchContractTab('reglement')" id="ctab-reglement" style="padding:0.6rem 1.1rem;border:none;background:none;font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:600;color:var(--text3);border-bottom:2px solid transparent;cursor:pointer;">Règlement</button>
+              <button onclick="switchContractTab('conditions')" id="ctab-conditions" style="padding:0.6rem 1.1rem;border:none;background:none;font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:600;color:var(--text3);border-bottom:2px solid transparent;cursor:pointer;">Conditions</button>
+            </div>
+
+            <!-- Tab: Bailleur -->
+            <div id="ctab-content-bailleur">
+              <div style="background:#F7F7F7;border-radius:10px;padding:1rem;margin-bottom:0.8rem;font-size:0.78rem;color:var(--text3);">Ces informations apparaîtront dans le contrat signé par vos guests.</div>
+              <div style="display:flex;flex-direction:column;gap:0.8rem;">
+                <div class="field-group"><label class="field-label">Nom complet</label><input class="field-input" id="ct-host-name" placeholder="Votre nom complet"></div>
+                <div class="field-group"><label class="field-label">Qualité</label>
+                  <select class="field-input" id="ct-host-quality" style="appearance:auto;">
+                    <option value="Propriétaire">Propriétaire</option>
+                    <option value="Gestionnaire">Gestionnaire</option>
+                    <option value="Mandataire">Mandataire</option>
+                    <option value="Société">Société</option>
+                  </select>
+                </div>
+                <div class="field-group"><label class="field-label">Téléphone</label><input class="field-input" id="ct-host-phone" placeholder="+212 6 00 00 00 00"></div>
+                <div class="field-group"><label class="field-label">N° CNIE</label><input class="field-input" id="ct-host-cin" placeholder="Ex: AB123456"></div>
+              </div>
+            </div>
+
+            <!-- Tab: Règlement -->
+            <div id="ctab-content-reglement" style="display:none;">
+              <div style="background:#F7F7F7;border-radius:10px;padding:1rem;margin-bottom:1rem;font-size:0.78rem;color:var(--text3);">Ces règles apparaîtront dans l'Article 5 du contrat.</div>
+              <div style="display:flex;flex-direction:column;gap:0;">
+                <label style="display:flex;align-items:center;justify-content:space-between;padding:0.9rem 0;border-bottom:1px solid var(--border);cursor:pointer;">
+                  <div><div style="font-size:0.88rem;font-weight:600;">🚬 Interdiction de fumer</div><div style="font-size:0.73rem;color:var(--text3);margin-top:2px;">À l'intérieur du logement</div></div>
+                  <input type="checkbox" id="ct-no-smoking" checked style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+                </label>
+                <label style="display:flex;align-items:center;justify-content:space-between;padding:0.9rem 0;border-bottom:1px solid var(--border);cursor:pointer;">
+                  <div><div style="font-size:0.88rem;font-weight:600;">🐾 Animaux autorisés</div><div style="font-size:0.73rem;color:var(--text3);margin-top:2px;">Sur accord préalable</div></div>
+                  <input type="checkbox" id="ct-pets" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+                </label>
+                <label style="display:flex;align-items:center;justify-content:space-between;padding:0.9rem 0;border-bottom:1px solid var(--border);cursor:pointer;">
+                  <div><div style="font-size:0.88rem;font-weight:600;">🎉 Fêtes autorisées</div><div style="font-size:0.73rem;color:var(--text3);margin-top:2px;">Rassemblements dans le logement</div></div>
+                  <input type="checkbox" id="ct-parties" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+                </label>
+                <label style="display:flex;align-items:center;justify-content:space-between;padding:0.9rem 0;border-bottom:1px solid var(--border);cursor:pointer;">
+                  <div><div style="font-size:0.88rem;font-weight:600;">💍 Acte de mariage exigé</div><div style="font-size:0.73rem;color:var(--text3);margin-top:2px;">Pour les couples marocains</div></div>
+                  <input type="checkbox" id="ct-acte-mariage" checked style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+                </label>
+                <label style="display:flex;align-items:center;justify-content:space-between;padding:0.9rem 0;border-bottom:1px solid var(--border);cursor:pointer;">
+                  <div><div style="font-size:0.88rem;font-weight:600;">🅿️ Parking disponible</div></div>
+                  <input type="checkbox" id="ct-parking" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+                </label>
+                <div style="padding:0.9rem 0;border-bottom:1px solid var(--border);">
+                  <div style="font-size:0.88rem;font-weight:600;margin-bottom:0.6rem;">🕐 Heures calmes</div>
+                  <div style="display:flex;align-items:center;gap:0.8rem;">
+                    <select class="field-input" id="ct-quiet-start" style="appearance:auto;flex:1;">
+                      <option value="20:00">20:00</option><option value="21:00">21:00</option>
+                      <option value="22:00" selected>22:00</option><option value="23:00">23:00</option>
+                    </select>
+                    <span style="font-size:0.82rem;color:var(--text3);">à</span>
+                    <select class="field-input" id="ct-quiet-end" style="appearance:auto;flex:1;">
+                      <option value="07:00">07:00</option><option value="08:00" selected>08:00</option>
+                      <option value="09:00">09:00</option><option value="10:00">10:00</option>
+                    </select>
+                  </div>
+                </div>
+                <div style="padding:0.9rem 0;">
+                  <div style="font-size:0.88rem;font-weight:600;margin-bottom:0.5rem;">📝 Instructions particulières</div>
+                  <textarea class="field-input" id="ct-special-instructions" rows="8" placeholder="Ex: Code boîte à clés : 1234&#10;Poubelles : sortir le lundi&#10;Climatisation : ne pas descendre sous 20°" style="resize:vertical;font-size:0.9rem;line-height:1.6;"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab: Conditions -->
+            <div id="ctab-content-conditions" style="display:none;">
+              <div style="display:flex;flex-direction:column;gap:1rem;">
+                <div>
+                  <div style="font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:0.2rem;">Article personnalisé <span style="font-size:0.72rem;font-weight:400;color:var(--text3);">(optionnel)</span></div>
+                  <div style="font-size:0.75rem;color:var(--text3);margin-bottom:0.8rem;">Ajoutez un article supplémentaire à votre contrat</div>
+                  <div class="field-group" style="margin-bottom:0.6rem;"><label class="field-label">Titre de l'article</label><input class="field-input" id="ct-custom-title" placeholder="Ex: Conditions spéciales"></div>
+                  <div class="field-group"><label class="field-label">Contenu</label><textarea class="field-input" id="ct-custom-content" rows="4" placeholder="Rédigez le contenu de votre article personnalisé..." style="resize:vertical;"></textarea></div>
+                </div>
+                <div style="background:#F0F4F8;border-radius:10px;padding:1rem;border-left:3px solid #4A6FA5;">
+                  <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;"><span>📄</span><span style="font-size:0.78rem;font-weight:700;color:#1A2E4A;">Clauses juridiques non modifiables</span></div>
+                  <div style="font-size:0.72rem;color:#6B7A8D;line-height:1.6;">Articles générés automatiquement conformes au droit marocain :<br>Art. 1 Objet · Art. 3 Prix · Art. 4 Dépôt · Art. 7 Responsabilité · Art. 8 RGPD · Art. 9 Litiges</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. SYNC AIRBNB ICAL -->
+        <div class="section-card fade-in" style="margin-bottom:1rem;">
+          <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:1rem;">
+            <div style="width:36px;height:36px;background:rgba(212,168,83,0.15);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;">📅</div>
+            <div>
+              <div style="font-size:0.95rem;font-weight:700;color:var(--text);">Sync Calendrier Airbnb</div>
+              <div style="font-size:0.75rem;color:var(--text3);margin-top:1px;">Importez vos réservations depuis votre calendrier iCal</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:0.6rem;margin-bottom:0.7rem;">
+            <input id="icalUrlInput" type="url" placeholder="https://www.airbnb.com/calendar/ical/..." style="flex:1;border:1.5px solid var(--border2);border-radius:8px;padding:0.7rem 1rem;font-family:'Nunito Sans',sans-serif;font-size:0.85rem;color:var(--text);outline:none;background:#fff;">
+            <button onclick="syncIcal()" id="icalSyncBtn" style="display:inline-flex;align-items:center;gap:0.4rem;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:0.7rem 1.2rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;white-space:nowrap;">🔄 Sync</button>
+          </div>
+          <div style="font-size:0.72rem;color:var(--text3);margin-bottom:1rem;">Airbnb → Calendrier → Exporter le calendrier → Copier le lien iCal</div>
+          <div id="icalResults"></div>
+        </div>
+
+        <!-- 4. GUESTS (en bas) -->
+        <div class="section-card fade-in">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
             <div class="section-title">👥 Guests de ce logement</div>
             <span id="detailGuestsCount" style="background:#F7F7F7;color:var(--text3);padding:0.2rem 0.7rem;border-radius:20px;font-size:0.75rem;font-weight:600;">0 guest(s)</span>
@@ -1808,22 +1845,12 @@ function showToast(msg, color) {
           <div id="detailGuestsList"></div>
         </div>
 
-        <!-- WiFi + Rules -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;" id="detailExtras"></div>
+        <!-- detailExtras caché (WiFi gardé pour compatibilité JS) -->
+        <div id="detailExtras" style="display:none;"></div>
 
       </div>
 
-      <!-- PROPERTIES SECTION -->
-      <div id="section-properties" style="display:none">
-        <div class="topbar fade-in">
-          <div>
-            <div class="topbar-title">Mes hébergements</div>
-            <div class="topbar-sub">Gérez vos logements et leurs liens de check-in</div>
-          </div>
-          <button class="btn-upgrade" onclick="openAddProperty()">+ Ajouter</button>
-        </div>
-        <div id="propertiesGrid" class="fade-in"></div>
-      </div>
+
 
       <div id="section-guests" style="display:none">
         <div class="topbar fade-in">
@@ -2246,10 +2273,6 @@ function showToast(msg, color) {
               <input class="field-input" id="propWifiPass" placeholder="••••••••">
             </div>
           </div>
-          <div class="field-group">
-            <label class="field-label">Règles & infos</label>
-            <textarea class="field-input" id="propRules" rows="3" style="resize:vertical;"></textarea>
-          </div>
           <input type="hidden" id="propEmoji" value="🏠">
         </div>
       </div>
@@ -2285,10 +2308,6 @@ function showToast(msg, color) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
           <div class="field-group"><label class="field-label">WiFi</label><input class="field-input" id="propWifi3" placeholder="Nom réseau"></div>
           <div class="field-group"><label class="field-label">Mot de passe</label><input class="field-input" id="propWifiPass3" placeholder="••••••••"></div>
-        </div>
-        <div class="field-group">
-          <label class="field-label">Règles & infos</label>
-          <textarea class="field-input" id="propRules3" rows="3" style="resize:vertical;"></textarea>
         </div>
         <input type="hidden" id="propEmoji3" value="🏠">
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
@@ -3984,13 +4003,13 @@ async function _importFromAirbnb() {
     if (d.beds) rulesParts.push(d.beds);
     if (d.bathrooms) rulesParts.push(d.bathrooms);
     if (d.rules && d.rules.length > 0) rulesParts.push(...d.rules);
-    if (rulesParts.length > 0) document.getElementById('propRules').value = rulesParts.join('\n');
+    if (rulesParts.length > 0) if (document.getElementById('propRules')) document.getElementById('propRules').value = rulesParts.join('\n');
 
     // Équipements dans la description
     if (d.amenities && d.amenities.length > 0) {
-      const existing = document.getElementById('propRules').value;
+      const existing = document.getElementById('propRules') ? document.getElementById('propRules').value : '';
       const amenStr = '\n\nEquipements : ' + d.amenities.slice(0, 12).join(', ');
-      document.getElementById('propRules').value = existing + amenStr;
+      if (document.getElementById('propRules')) document.getElementById('propRules').value = existing + amenStr;
     }
 
     // Résumé de ce qui a été importé
@@ -4082,7 +4101,7 @@ function _openAddProperty(propId) {
     document.getElementById('propCheckout').value = prop.checkout_time || '11:00';
     document.getElementById('propWifi').value = prop.wifi_name || '';
     document.getElementById('propWifiPass').value = prop.wifi_password || '';
-    document.getElementById('propRules').value = prop.rules || '';
+    if (document.getElementById('propRules')) document.getElementById('propRules').value = prop.rules || '';
     document.getElementById('propEmoji').value = prop.cover_emoji || '🏠';
 
     // Build preview
@@ -4157,7 +4176,7 @@ async function _saveProperty() {
     wifi_name: editVisible ? document.getElementById('propWifi').value.trim() : '',
     wifi_password: editVisible ? document.getElementById('propWifiPass').value.trim() : '',
     rules: editVisible 
-      ? document.getElementById('propRules').value.trim()
+      ? (document.getElementById('propRules') ? document.getElementById('propRules').value.trim() : '')
       : (() => {
           const parts = [];
           if (imp.guests) parts.push('Maximum ' + imp.guests + ' voyageurs');
@@ -4314,6 +4333,133 @@ function sharePropertyWhatsApp(propId) {
   if (!el) return;
   const msg = encodeURIComponent('Check-in en ligne : ' + el.textContent + ' (valable 3h)');
   window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
+// ══════════════════════════════
+// TEMPLATE CONTRAT
+// ══════════════════════════════
+function toggleAccordion(id) {
+  var panel = document.getElementById(id);
+  var icon = document.getElementById(id + 'Icon');
+  if (!panel) return;
+  var isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (icon) icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+function switchContractTab(tab) {
+  ['bailleur','reglement','conditions'].forEach(function(t) {
+    var btn = document.getElementById('ctab-' + t);
+    var panel = document.getElementById('ctab-content-' + t);
+    if (btn) {
+      btn.style.color = t === tab ? 'var(--accent)' : 'var(--text3)';
+      btn.style.borderBottom = t === tab ? '2px solid var(--accent)' : '2px solid transparent';
+      btn.style.fontWeight = t === tab ? '700' : '600';
+    }
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
+  });
+}
+
+function toggleCheck(id) {
+  var cb = document.getElementById(id);
+  var track = document.getElementById(id + '-track');
+  if (!cb || !track) return;
+  cb.checked = !cb.checked;
+  track.style.background = cb.checked ? 'var(--accent)' : '#ccc';
+}
+
+function setCancellationDesc(val) {
+  var desc = document.getElementById('ct-cancellation-desc');
+  if (!desc) return;
+  var texts = {
+    'flexible': 'Plus de 48h : 100%. 24-48h : 50%. Moins de 24h : 0%.',
+    'moderate': 'Plus de 7j : 100%. 3-7j : 50%. Moins de 3j : 0%.',
+    'strict':   'Non remboursable dans tous les cas.'
+  };
+  desc.textContent = texts[val] || '';
+}
+
+function loadContractTemplate(prop) {
+  if (!prop) return;
+  // Bailleur
+  var hostName = document.getElementById('ct-host-name');
+  var hostQuality = document.getElementById('ct-host-quality');
+  var hostPhone = document.getElementById('ct-host-phone');
+  var hostCin = document.getElementById('ct-host-cin');
+  if (hostName) hostName.value = (currentProfile && currentProfile.name) || prop.host_name_airbnb || '';
+  if (hostQuality) hostQuality.value = prop.host_quality || 'Propriétaire';
+  if (hostPhone) hostPhone.value = (currentProfile && currentProfile.phone) || '';
+  if (hostCin) hostCin.value = (currentProfile && currentProfile.cin) || '';
+
+  // Règlement
+  function setToggle(id, val) {
+    var cb = document.getElementById(id);
+    if (cb) cb.checked = !!val;
+  }
+  setToggle('ct-no-smoking', prop.no_smoking !== false);
+  setToggle('ct-pets', !!prop.pets_allowed);
+  setToggle('ct-parties', !!prop.parties_allowed);
+  setToggle('ct-acte-mariage', prop.acte_mariage !== false);
+  setToggle('ct-parking', !!prop.parking);
+
+  var qs = document.getElementById('ct-quiet-start');
+  var qe = document.getElementById('ct-quiet-end');
+  var si = document.getElementById('ct-special-instructions');
+  if (qs) qs.value = prop.quiet_hours_start || '22:00';
+  if (qe) qe.value = prop.quiet_hours_end || '08:00';
+  if (si) si.value = prop.special_instructions || '';
+
+  // Conditions
+  var ct = document.getElementById('ct-custom-title');
+  var cc = document.getElementById('ct-custom-content');
+  if (ct) ct.value = prop.custom_article_title || '';
+  if (cc) cc.value = prop.custom_article_content || '';
+}
+
+async function saveContractTemplate() {
+  var propId = currentPropertyId;
+  if (!propId) return;
+  var client = getSb();
+  if (!client) return;
+
+  var propData = {
+    host_quality:           document.getElementById('ct-host-quality') ? document.getElementById('ct-host-quality').value : 'Propriétaire',
+    no_smoking:             document.getElementById('ct-no-smoking') ? document.getElementById('ct-no-smoking').checked : true,
+    pets_allowed:           document.getElementById('ct-pets') ? document.getElementById('ct-pets').checked : false,
+    parties_allowed:        document.getElementById('ct-parties') ? document.getElementById('ct-parties').checked : false,
+    acte_mariage:           document.getElementById('ct-acte-mariage') ? document.getElementById('ct-acte-mariage').checked : true,
+    quiet_hours_start:      document.getElementById('ct-quiet-start') ? document.getElementById('ct-quiet-start').value : '22:00',
+    quiet_hours_end:        document.getElementById('ct-quiet-end') ? document.getElementById('ct-quiet-end').value : '08:00',
+    parking:                document.getElementById('ct-parking') ? document.getElementById('ct-parking').checked : false,
+    special_instructions:   document.getElementById('ct-special-instructions') ? document.getElementById('ct-special-instructions').value.trim() || null : null,
+    custom_article_title:   document.getElementById('ct-custom-title') ? document.getElementById('ct-custom-title').value.trim() || null : null,
+    custom_article_content: document.getElementById('ct-custom-content') ? document.getElementById('ct-custom-content').value.trim() || null : null,
+  };
+
+  // Préserver ical_url
+  var existingProp = currentProperties.find(function(p){ return p.id === propId; });
+  if (existingProp && existingProp.ical_url) propData.ical_url = existingProp.ical_url;
+
+  // Sauvegarder les données propriété
+  var { error: propErr } = await client.from('properties').update(propData).eq('id', propId);
+  if (propErr) { showToast('Erreur : ' + propErr.message, '#C13515'); return; }
+  if (existingProp) Object.assign(existingProp, propData);
+
+  // Sauvegarder les données bailleur dans profiles
+  var profileData = {};
+  var hostName = document.getElementById('ct-host-name');
+  var hostPhone = document.getElementById('ct-host-phone');
+  var hostCin = document.getElementById('ct-host-cin');
+  if (hostName && hostName.value.trim()) profileData.name = hostName.value.trim();
+  if (hostPhone && hostPhone.value.trim()) profileData.phone = hostPhone.value.trim();
+  if (hostCin && hostCin.value.trim()) profileData.cin = hostCin.value.trim();
+
+  if (Object.keys(profileData).length > 0) {
+    var { error: profileErr } = await client.from('profiles').update(profileData).eq('id', currentUser.id);
+    if (!profileErr && currentProfile) Object.assign(currentProfile, profileData);
+  }
+
+  showToast('✓ Template de contrat enregistré', '#008A05');
 }
 
 // ══════════════════════════════
@@ -4498,6 +4644,8 @@ async function openPropertyDetail(propId) {
 
   restoreDetailLink(propId);
   loadPropertyGuests(propId);
+  // Charger le template contrat
+  loadContractTemplate(prop);
   // Restaurer l'URL iCal si elle existe
   var icalInput = document.getElementById('icalUrlInput');
   if (icalInput) icalInput.value = prop.ical_url || '';
