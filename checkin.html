@@ -799,17 +799,29 @@ document.addEventListener('DOMContentLoaded', function() {
         </select>
       </div>
 
+      <!-- Adultes -->
       <div class="form-group">
-        <label data-i18n="lbl_guests">Nombre de voyageurs</label>
-        <select id="guestCount">
-          <option>1 voyageur</option>
-          <option selected>2 voyageurs</option>
-          <option>3 voyageurs</option>
-          <option>4 voyageurs</option>
-          <option>5 voyageurs</option>
-          <option>6 voyageurs</option>
-        </select>
+        <label>👤 Adultes <span style="font-size:0.75rem;color:var(--text3);font-weight:400;">(18 ans et plus)</span></label>
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <button type="button" onclick="changeCount('adults', -1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);background:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;">−</button>
+          <span id="adultsDisplay" style="font-size:1.3rem;font-weight:800;font-family:'Nunito',sans-serif;min-width:2rem;text-align:center;">1</span>
+          <button type="button" onclick="changeCount('adults', 1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);background:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;">+</button>
+        </div>
       </div>
+
+      <!-- Enfants -->
+      <div class="form-group">
+        <label>🧒 Enfants <span style="font-size:0.75rem;color:var(--text3);font-weight:400;">(moins de 18 ans)</span></label>
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.8rem;">
+          <button type="button" onclick="changeCount('children', -1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);background:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;">−</button>
+          <span id="childrenDisplay" style="font-size:1.3rem;font-weight:800;font-family:'Nunito',sans-serif;min-width:2rem;text-align:center;">0</span>
+          <button type="button" onclick="changeCount('children', 1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);background:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;">+</button>
+        </div>
+        <div id="childrenAges" style="display:none;display:flex;flex-direction:column;gap:0.5rem;"></div>
+      </div>
+
+      <!-- Input caché pour compatibilité JS -->
+      <input type="hidden" id="guestCount" value="1 adulte">
 
       <div class="btn-group">
         <div></div>
@@ -885,6 +897,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="btn btn-primary" onclick="nextStep(2)" data-i18n="btn_next">Continuer →</button>
       </div>
     </div>
+
+    <!-- Accompagnants adultes -->
+    <div id="companionsSection" style="display:none;margin-top:1rem;"></div>
+
   </div>
 
   <!-- STEP 3: DOCUMENTS -->
@@ -1389,6 +1405,92 @@ function updateContractArticles(pd) {
   var el6 = document.getElementById('contract-art6');
   if (el5) el5.textContent = art5;
   if (el6) el6.textContent = art6.trim();
+}
+
+// ── OCCUPANTS ──
+var adultsCount = 1;
+var childrenCount = 0;
+
+function changeCount(type, delta) {
+  if (type === 'adults') {
+    adultsCount = Math.max(1, adultsCount + delta);
+    document.getElementById('adultsDisplay').textContent = adultsCount;
+    updateGuestCount();
+    updateCompanions();
+  } else {
+    childrenCount = Math.max(0, childrenCount + delta);
+    document.getElementById('childrenDisplay').textContent = childrenCount;
+    updateChildrenAges();
+    updateGuestCount();
+  }
+}
+
+function updateGuestCount() {
+  var parts = [];
+  parts.push(adultsCount + ' adulte' + (adultsCount > 1 ? 's' : ''));
+  if (childrenCount > 0) parts.push(childrenCount + ' enfant' + (childrenCount > 1 ? 's' : ''));
+  document.getElementById('guestCount').value = parts.join(', ');
+}
+
+function updateChildrenAges() {
+  var container = document.getElementById('childrenAges');
+  if (!container) return;
+  container.innerHTML = '';
+  if (childrenCount === 0) { container.style.display = 'none'; return; }
+  container.style.display = 'flex';
+  for (var i = 0; i < childrenCount; i++) {
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:0.7rem;';
+    div.innerHTML = '<label style="font-size:0.82rem;color:var(--text2);white-space:nowrap;">Enfant ' + (i+1) + ' :</label>' +
+      '<input type="number" id="childAge' + i + '" min="0" max="17" placeholder="Âge" style="width:80px;border:1.5px solid var(--border2);border-radius:8px;padding:0.4rem 0.7rem;font-family:Nunito Sans,sans-serif;font-size:0.9rem;">';
+    container.appendChild(div);
+  }
+}
+
+function getChildrenAges() {
+  var ages = [];
+  for (var i = 0; i < childrenCount; i++) {
+    var el = document.getElementById('childAge' + i);
+    ages.push(el ? (el.value || '?') : '?');
+  }
+  return ages;
+}
+
+function updateCompanions() {
+  var section = document.getElementById('companionsSection');
+  if (!section) return;
+  var extras = adultsCount - 1;
+  if (extras <= 0) { section.style.display = 'none'; section.innerHTML = ''; return; }
+  section.style.display = 'block';
+  var html = '<div style="font-family:Nunito,sans-serif;font-size:0.92rem;font-weight:700;color:var(--text);margin-bottom:0.8rem;">👥 Accompagnants adultes</div>';
+  for (var i = 0; i < extras; i++) {
+    html += '<div class="card" style="margin-bottom:0.8rem;padding:1rem;">' +
+      '<div style="font-size:0.82rem;font-weight:700;color:var(--accent);margin-bottom:0.8rem;">Adulte ' + (i+2) + '</div>' +
+      '<div class="form-row">' +
+        '<div class="form-group"><label>Prénom</label><input type="text" id="compFirstName' + i + '" placeholder="Prénom"></div>' +
+        '<div class="form-group"><label>Nom</label><input type="text" id="compLastName' + i + '" placeholder="Nom"></div>' +
+      '</div>' +
+      '<div class="form-row">' +
+        '<div class="form-group"><label>N° CIN / Passeport</label><input type="text" id="compDoc' + i + '" placeholder="AB123456" style="font-weight:600;letter-spacing:0.05em;"></div>' +
+        '<div class="form-group"><label>Type</label><select id="compDocType' + i + '" style="appearance:auto;"><option value="cin">CIN</option><option value="passport">Passeport</option></select></div>' +
+      '</div>' +
+    '</div>';
+  }
+  section.innerHTML = html;
+}
+
+function getCompanions() {
+  var companions = [];
+  var extras = adultsCount - 1;
+  for (var i = 0; i < extras; i++) {
+    companions.push({
+      firstName: document.getElementById('compFirstName' + i) ? document.getElementById('compFirstName' + i).value.trim() : '',
+      lastName:  document.getElementById('compLastName' + i)  ? document.getElementById('compLastName' + i).value.trim()  : '',
+      docNumber: document.getElementById('compDoc' + i)       ? document.getElementById('compDoc' + i).value.trim()       : '',
+      docType:   document.getElementById('compDocType' + i)   ? document.getElementById('compDocType' + i).value          : 'cin',
+    });
+  }
+  return companions;
 }
 
 // ── NAVIGATION ──
@@ -2504,6 +2606,10 @@ async function submitForm() {
     dates: `${fmt(startDate)} → ${fmt(endDate)}`,
     arrival_time: document.getElementById('arrivalTime').value,
     guest_count: document.getElementById('guestCount').value,
+    adults_count: adultsCount,
+    children_count: childrenCount,
+    children_ages: getChildrenAges().join(', '),
+    companions: JSON.stringify(getCompanions()),
     nights,
     doc_status: docSkipped ? 'pending' : 'provided',
     lock_code: lockCode,
@@ -2829,7 +2935,9 @@ async function _runPDFGeneration(btn, silent) {
   // ── Séjour ──
   sectionTitle('Détails du séjour');
   infoRowDual('Date d\'arrivée', fmtDate(startDate), 'Date de départ', fmtDate(endDate), false);
-  infoRowDual('Durée', nights + ' nuit' + (nights > 1 ? 's' : ''), 'Voyageurs', guestCount, true);
+  const guestSummary = adultsCount + ' adulte' + (adultsCount > 1 ? 's' : '') +
+    (childrenCount > 0 ? ', ' + childrenCount + ' enfant' + (childrenCount > 1 ? 's' : '') : '');
+  infoRowDual('Durée', nights + ' nuit' + (nights > 1 ? 's' : ''), 'Voyageurs', guestSummary, true);
   infoRow('Heure d\'arrivée prévue', arrivalTime || '—', { full: true, shade: false });
 
   // ── Code serrure ──
@@ -2879,6 +2987,31 @@ async function _runPDFGeneration(btn, silent) {
   }
 
   // ── Section PIECE D'IDENTITE + PHOTO côte à côte ──
+  // ── Section accompagnants dans le PDF ──
+  const companions = getCompanions();
+  const childAges = getChildrenAges();
+  if (companions.length > 0 || childrenCount > 0) {
+    sectionTitle('Occupants du logement');
+    if (companions.length > 0) {
+      companions.forEach(function(c, i) {
+        if (c.firstName || c.lastName || c.docNumber) {
+          infoRowDual(
+            'Adulte ' + (i+2) + ' — ' + (c.docType === 'passport' ? 'Passeport' : 'CIN'),
+            c.docNumber || '—',
+            'Nom complet',
+            ((c.firstName || '') + ' ' + (c.lastName || '')).trim() || '—',
+            i % 2 === 0
+          );
+        }
+      });
+    }
+    if (childrenCount > 0) {
+      const agesStr = childAges.length > 0 ? childAges.join(', ') + ' ans' : '—';
+      infoRow(childrenCount + ' enfant' + (childrenCount > 1 ? 's' : '') + ' — Ages', agesStr, { full: true, shade: true });
+    }
+    y += 3;
+  }
+
   sectionTitle('Piece d\'identite & Photo du voyageur');
   checkY(75);
 

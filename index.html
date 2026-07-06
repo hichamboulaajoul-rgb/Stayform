@@ -2992,7 +2992,7 @@ async function renderGuests(mode) {
   wrap.innerHTML = '<div class="empty-state">' + '<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">  <circle cx="40" cy="40" r="30" stroke="#E8D8C4" stroke-width="6"/>  <path d="M40 10 A30 30 0 0 1 70 40" stroke="#2D4A3E" stroke-width="6" stroke-linecap="round">    <animateTransform attributeName="transform" type="rotate" from="0 40 40" to="360 40 40" dur="1s" repeatCount="indefinite"/>  </path></svg>' + '<p>Chargement...</p></div>';
   
   let query = client.from('guests')
-    .select('id,name,email,phone,nationality,doc_number,dates,arrival_time,guest_count,nights,doc_status,lock_code,status,signed,created_at,property_name,property_id')
+    .select('id,name,email,phone,nationality,doc_number,dates,arrival_time,guest_count,nights,doc_status,lock_code,status,signed,created_at,property_name,property_id,companions,children_count,children_ages')
     .eq('host_id', currentUser.id)
     .order('created_at', { ascending: false });
   if (mode === 'recent') query = query.limit(5);
@@ -3426,6 +3426,28 @@ function printFichePolice(guestId, signatureDataUrl) {
         '</div>' +
       '</div>' +
     '</div>' +
+
+    // ── Accompagnants adultes ──
+    (function() {
+      var companionsData = [];
+      try { if (g.companions) companionsData = typeof g.companions === 'string' ? JSON.parse(g.companions) : g.companions; } catch(e) {}
+      if (!companionsData || companionsData.length === 0) return '';
+      var rows = companionsData.filter(function(c){ return c.firstName || c.lastName || c.docNumber; }).map(function(c, i) {
+        return '<div class="field full">' +
+          '<div class="label"><span>Adulte ' + (i+2) + ' — ' + (c.docType === 'passport' ? 'Passeport' : 'CIN') + '</span><span class="ar">مرافق ' + (i+2) + '</span></div>' +
+          '<div class="value" style="display:flex;gap:2rem;">' +
+            '<span>' + ((c.firstName||'') + ' ' + (c.lastName||'')).trim() + '</span>' +
+            '<span style="color:#888;">' + (c.docNumber||'—') + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      if (!rows) return '';
+      return '<div class="section">' +
+        '<div class="section-title"><span>Accompagnants</span><span class="ar">المرافقون</span></div>' +
+        '<div class="grid">' + rows + '</div>' +
+        (g.children_count > 0 ? '<div class="field full" style="margin-top:0.5rem;"><div class="label"><span>Enfants</span><span class="ar">الأطفال</span></div><div class="value">' + g.children_count + ' enfant(s)' + (g.children_ages ? ' · ' + g.children_ages + ' ans' : '') + '</div></div>' : '') +
+      '</div>';
+    })() +
 
     '<div class="sign-section" style="margin-top:24px;">' +
       '<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:#888;font-weight:700;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:4px;display:flex;justify-content:space-between;">' +
@@ -4249,8 +4271,7 @@ async function savePropertyManual() {
     checkout_time: document.getElementById('propCheckout3').value.trim() || '11:00',
     wifi_name: document.getElementById('propWifi3').value.trim(),
     wifi_password: document.getElementById('propWifiPass3').value.trim(),
-    rules: document.getElementById('propRules3').value.trim(),
-    cover_emoji: document.getElementById('propEmoji3').value || '🏠',
+    cover_emoji: document.getElementById('propEmoji3') ? document.getElementById('propEmoji3').value || '🏠' : '🏠',
   };
   const { error } = await client.from('properties').insert(data);
   if (error) { console.error('Manual save error:', error); showToast('Erreur: ' + error.message, '#C13515'); return; }

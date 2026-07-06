@@ -255,12 +255,33 @@ async function loadWelcome() {
     </div>`;
   }
 
-  // ── Code d'accès ──
-  if (prop.lock_code_template || params.get('code')) {
-    const code = params.get('code') || '';
-    if (code) {
-      const codeFmt = code.slice(0,3) + ' ' + code.slice(3,5) + ' ' + code.slice(5);
-      html += `<div class="card">
+  // ── WiFi EN PREMIER ──
+  if (prop.wifi_name) {
+    const wifiPass = prop.wifi_password || '';
+    html += `<div class="card">
+      <div class="card-header">
+        <div class="card-icon blue">📶</div>
+        <div><div class="card-title">Connexion WiFi</div><div class="card-sub">Réseau disponible dans le logement</div></div>
+      </div>
+      <div class="card-body">
+        <div class="wifi-box">
+          <div class="wifi-icon">📶</div>
+          <div style="flex:1;">
+            <div class="wifi-name">Réseau</div>
+            <div class="wifi-value">${prop.wifi_name}</div>
+            ${wifiPass ? '<div class="wifi-pass">🔒 ' + wifiPass + '</div>' : ''}
+          </div>
+          ${wifiPass ? '<button class="btn-copy" onclick="copyText(\'' + wifiPass + '\', \'Mot de passe WiFi\')">📋</button>' : ''}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── Code d'accès APRÈS WiFi ──
+  if (params.get('code')) {
+    const code = params.get('code');
+    const codeFmt = code.slice(0,3) + ' ' + code.slice(3,5) + ' ' + code.slice(5);
+    html += `<div class="card">
         <div class="card-header">
           <div class="card-icon gold">🔑</div>
           <div><div class="card-title">Accès au logement</div><div class="card-sub">Code pour entrer</div></div>
@@ -274,31 +295,9 @@ async function loadWelcome() {
             </div>
             <button class="btn-copy" onclick="copyText('${code}', 'Code')">📋 Copier</button>
           </div>
-          ${prop.address ? `<div style="margin-top:0.9rem;font-size:0.82rem;color:var(--text3);">📍 ${prop.address}</div>` : ''}
+          ${prop.address ? '<div style="margin-top:0.9rem;font-size:0.82rem;color:var(--text3);">📍 ' + prop.address + '</div>' : ''}
         </div>
       </div>`;
-    }
-  }
-
-  // ── WiFi ──
-  if (prop.wifi_name) {
-    html += `<div class="card">
-      <div class="card-header">
-        <div class="card-icon blue">📶</div>
-        <div><div class="card-title">Connexion WiFi</div><div class="card-sub">Réseau disponible dans le logement</div></div>
-      </div>
-      <div class="card-body">
-        <div class="wifi-box">
-          <div class="wifi-icon">📶</div>
-          <div style="flex:1;">
-            <div class="wifi-name">Réseau</div>
-            <div class="wifi-value">${prop.wifi_name}</div>
-            ${prop.wifi_password ? `<div class="wifi-pass">🔒 ${prop.wifi_password}</div>` : ''}
-          </div>
-          ${prop.wifi_password ? `<button class="btn-copy" onclick="copyText('${prop.wifi_password}', 'Mot de passe WiFi')">📋</button>` : ''}
-        </div>
-      </div>
-    </div>`;
   }
 
   // ── Règles dynamiques ──
