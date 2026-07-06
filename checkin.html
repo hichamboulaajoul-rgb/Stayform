@@ -2519,7 +2519,7 @@ async function sendCheckinEmails(guestData, hostData, pdfBase64) {
         'Authorization': `Bearer ${SUPABASE_KEY}`
       },
       body: JSON.stringify({
-        guestEmail: guestData.email,
+        guestEmail: null,
         guestName: guestData.name,
         hostEmail: hostData.email || window._hostEmail || null,
         hostName: window._hostName || hostData.name,
