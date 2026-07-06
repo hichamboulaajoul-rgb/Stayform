@@ -4263,15 +4263,19 @@ async function savePropertyManual() {
   if (!currentUser) { showToast('Vous devez être connecté', '#C13515'); return; }
   const name = document.getElementById('propName3').value.trim();
   if (!name) { showToast('Le nom est obligatoire', '#C13515'); return; }
+  function getVal(id, def) {
+    var el = document.getElementById(id);
+    return el ? (el.value || '').trim() || (def || '') : (def || '');
+  }
   const data = {
     host_id: currentUser.id,
     name,
-    address: document.getElementById('propAddress3').value.trim(),
-    checkin_time: document.getElementById('propCheckin3').value.trim() || '15:00',
-    checkout_time: document.getElementById('propCheckout3').value.trim() || '11:00',
-    wifi_name: document.getElementById('propWifi3').value.trim(),
-    wifi_password: document.getElementById('propWifiPass3').value.trim(),
-    cover_emoji: document.getElementById('propEmoji3') ? document.getElementById('propEmoji3').value || '🏠' : '🏠',
+    address:       getVal('propAddress3'),
+    checkin_time:  getVal('propCheckin3', '15:00'),
+    checkout_time: getVal('propCheckout3', '11:00'),
+    wifi_name:     getVal('propWifi3'),
+    wifi_password: getVal('propWifiPass3'),
+    cover_emoji:   getVal('propEmoji3', '🏠') || '🏠',
   };
   const { error } = await client.from('properties').insert(data);
   if (error) { console.error('Manual save error:', error); showToast('Erreur: ' + error.message, '#C13515'); return; }
