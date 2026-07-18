@@ -469,7 +469,7 @@ footer p {
 <div class="hero">
   <div class="badge">Tarifs simples · Sans surprise</div>
   <h1>Le bon plan<br>pour chaque <span>hôte</span></h1>
-  <p>Commencez gratuitement. Passez en abonnement annuel ou achetez des contrats via un revendeur. Sans engagement.</p>
+  <p>Commencez gratuitement. Passez en abonnement annuel. Sans engagement.</p>
   <div style="display:inline-flex;align-items:center;gap:0.6rem;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:0.4rem 1rem;margin-bottom:2.5rem;">
     <span style="font-size:0.85rem;font-weight:700;color:var(--riad-green);">Facturation annuelle</span>
     <span style="background:#EEF5F1;color:var(--riad-green);font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:4px;">Paiement unique</span>
@@ -489,7 +489,7 @@ footer p {
     </button>
     <div class="features">
       <div class="feat"><span class="feat-check">✓</span> <strong>3 contrats/mois</strong></div>
-      <div class="feat"><span class="feat-check">✓</span> 1 logement</div>
+      <div class="feat"><span class="feat-check">✓</span> <strong>3 logements</strong></div>
       <div class="feat"><span class="feat-check">✓</span> Contrat PDF</div>
       <div class="feat"><span class="feat-check">✓</span> Lien check-in 3h</div>
       <div class="feat"><span class="feat-check">✓</span> Code serrure auto</div>
@@ -499,53 +499,13 @@ footer p {
     </div>
   </div>
 
-  <!-- STARTER -->
-  <div class="plan-card">
-    <div class="plan-name">Starter</div>
-    <div class="plan-price">590<sub> DH/an</sub></div>
-    <div class="plan-desc">Hôte occasionnel · 1-2 logements<br><span style="font-size:0.72rem;color:var(--text3);">soit 49 DH/mois</span></div>
-    <button class="plan-btn secondary" onclick="payYouCan('starter', 590)">
-      📱 Commander via WhatsApp →
-    </button>
-    <div class="features">
-      <div class="feat"><span class="feat-check">✓</span> 30 contrats/mois</div>
-      <div class="feat"><span class="feat-check">✓</span> <strong>2 logements</strong></div>
-      <div class="feat"><span class="feat-check">✓</span> PDF premium</div>
-      <div class="feat"><span class="feat-check">✓</span> Lien check-in 3h</div>
-      <div class="feat"><span class="feat-check">✓</span> Code serrure auto</div>
-      <div class="feat"><span class="feat-cross">✗</span> Vérification CIN</div>
-      <div class="feat"><span class="feat-check">✓</span> Notifications email</div>
-      <div class="feat"><span class="feat-cross">✗</span> Support prioritaire</div>
-    </div>
-  </div>
-
   <!-- PRO -->
   <div class="plan-card popular">
     <div class="popular-badge">⭐ LE PLUS POPULAIRE</div>
     <div class="plan-name">Pro</div>
-    <div class="plan-price">990<sub> DH/an</sub></div>
-    <div class="plan-desc">Hôte actif · 5 logements<br><span style="font-size:0.72rem;color:var(--text3);">soit 82 DH/mois</span></div>
-    <button class="plan-btn primary" onclick="payYouCan('pro', 990)">
-      📱 Commander via WhatsApp →
-    </button>
-    <div class="features">
-      <div class="feat"><span class="feat-check">✓</span> <strong>Contrats illimités</strong></div>
-      <div class="feat"><span class="feat-check">✓</span> <strong>5 logements</strong></div>
-      <div class="feat"><span class="feat-check">✓</span> PDF premium</div>
-      <div class="feat"><span class="feat-check">✓</span> Lien check-in 3h</div>
-      <div class="feat"><span class="feat-check">✓</span> Code serrure auto</div>
-      <div class="feat"><span class="feat-check">✓</span> <strong>Vérification CIN</strong></div>
-      <div class="feat"><span class="feat-check">✓</span> Notifications email</div>
-      <div class="feat"><span class="feat-cross">✗</span> Multi-hôtes</div>
-    </div>
-  </div>
-
-  <!-- BUSINESS -->
-  <div class="plan-card">
-    <div class="plan-name">Business</div>
-    <div class="plan-price">1 990<sub> DH/an</sub></div>
-    <div class="plan-desc">Agences &amp; conciergeries<br><span style="font-size:0.72rem;color:var(--text3);">soit 166 DH/mois</span></div>
-    <button class="plan-btn outline" onclick="payYouCan('business', 1990)">
+    <div class="plan-price">1 200<sub> DH/an</sub></div>
+    <div class="plan-desc">Pour tous les hôtes, du plus petit au plus grand<br><span style="font-size:0.72rem;color:var(--text3);">soit 100 DH/mois</span></div>
+    <button class="plan-btn primary" onclick="payYouCan('pro', 1200)">
       📱 Commander via WhatsApp →
     </button>
     <div class="features">
@@ -554,15 +514,16 @@ footer p {
       <div class="feat"><span class="feat-check">✓</span> PDF premium</div>
       <div class="feat"><span class="feat-check">✓</span> Lien check-in 3h</div>
       <div class="feat"><span class="feat-check">✓</span> Code serrure auto</div>
-      <div class="feat"><span class="feat-check">✓</span> Vérification CIN</div>
+      <div class="feat"><span class="feat-check">✓</span> <strong>Vérification CIN</strong></div>
       <div class="feat"><span class="feat-check">✓</span> Notifications email</div>
-      <div class="feat"><span class="feat-check">✓</span> <strong>Multi-hôtes équipe</strong></div>
+      <div class="feat"><span class="feat-check">✓</span> Support prioritaire</div>
     </div>
   </div>
 
 </div>
 
-<!-- SECTION REVENDEUR -->
+<!-- SECTION REVENDEUR -- HIDDEN -->
+<!--
 <div style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:4rem 1.5rem;margin-top:2rem;">
   <div style="max-width:900px;margin:0 auto;">
 
@@ -666,41 +627,39 @@ footer p {
     <table class="compare-table">
       <thead>
         <tr>
-          <th style="text-align:left;width:35%;">Fonctionnalité</th>
+          <th style="text-align:left;width:50%;">Fonctionnalité</th>
           <th>Gratuit</th>
-          <th>Starter</th>
           <th class="plan-col">Pro</th>
-          <th>Business</th>
         </tr>
       </thead>
       <tbody>
-        <tr class="category-row"><td colspan="5">Check-in & Contrat</td></tr>
-        <tr><td>Contrats</td><td>3/mois</td><td>30/mois ⚡</td><td style="color:var(--riad-green);font-weight:700;">Illimités</td><td style="color:var(--riad-green);font-weight:700;">Illimités</td></tr>
-        <tr><td>Contrat PDF</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
-        <tr><td>Signature électronique</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
-        <tr><td>Lien check-in 3h</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
-        <tr><td>Code serrure automatique</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr class="category-row"><td colspan="3">Check-in & Contrat</td></tr>
+        <tr><td>Contrats</td><td>3/mois</td><td style="color:var(--riad-green);font-weight:700;">Illimités</td></tr>
+        <tr><td>Contrat PDF</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Signature électronique</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Lien check-in 3h</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Code serrure automatique</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
 
-        <tr class="category-row"><td colspan="5">Logements</td></tr>
-        <tr><td>Nombre de logements</td><td>1</td><td style="color:var(--riad-green);font-weight:700;">2</td><td style="color:var(--riad-green);font-weight:700;">5</td><td style="color:var(--riad-green);font-weight:700;">Illimités</td></tr>
-        <tr><td>Import depuis Airbnb</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
-        <tr><td>Infos WiFi & règles</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr class="category-row"><td colspan="3">Logements</td></tr>
+        <tr><td>Nombre de logements</td><td>3</td><td style="color:var(--riad-green);font-weight:700;">Illimités</td></tr>
+        <tr><td>Import depuis Airbnb</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Infos WiFi & règles</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
 
-        <tr class="category-row"><td colspan="5">Identité & Sécurité</td></tr>
-        <tr><td>Vérification CIN (caméra)</td><td><span class="cross-icon">✗</span></td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
-        <tr><td>Google Vision OCR</td><td><span class="cross-icon">✗</span></td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
-        <tr><td>Lien à usage unique</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr class="category-row"><td colspan="3">Identité & Sécurité</td></tr>
+        <tr><td>Vérification CIN (caméra)</td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Google Vision OCR</td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Lien à usage unique</td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
 
-        <tr class="category-row"><td colspan="5">Notifications & Support</td></tr>
-        <tr><td>Email au guest (PDF joint)</td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
-        <tr><td>Notification à l'hôte</td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
-        <tr><td>Multi-hôtes (équipe)</td><td><span class="cross-icon">✗</span></td><td><span class="cross-icon">✗</span></td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td></tr>
-        <tr><td>Support prioritaire</td><td><span class="cross-icon">✗</span></td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr class="category-row"><td colspan="3">Notifications & Support</td></tr>
+        <tr><td>Email au guest (PDF joint)</td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Notification à l'hôte</td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td></tr>
+        <tr><td>Support prioritaire</td><td><span class="cross-icon">✗</span></td><td><span class="check-icon">✓</span></td></tr>
       </tbody>
     </table>
   </div>
 </div>
 
+-->
 <!-- FAQ -->
 <div class="faq-section">
   <h2>Questions fréquentes</h2>
@@ -726,8 +685,8 @@ footer p {
       <div class="faq-a">Oui. Google Vision OCR supporte la CIN marocaine, les passeports et les titres de séjour. Pour les passeports, le guest peut importer une photo depuis sa galerie.</div>
     </div>
     <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Je gère plus de 5 logements, que faire ? <span class="faq-arrow">▼</span></div>
-      <div class="faq-a">Le plan Agence à 299 DH/mois vous donne des logements illimités, la gestion multi-hôtes pour votre équipe, et un support dédié. Contactez-nous sur WhatsApp.</div>
+      <div class="faq-q">Y a-t-il une limite au nombre de logements en Pro ? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Non, le plan Pro vous donne des logements et des contrats illimités, que vous gériez 1 ou 50 appartements.</div>
     </div>
   </div>
 </div>
@@ -852,8 +811,8 @@ function setModal(p, plan) {
 }
 
 var WHATSAPP_NUM = '212694962765';
-var PLAN_PRICES_P = { starter: 590, pro: 990, business: 1990 };
-var PLAN_LABELS_P = { starter: 'Starter', pro: 'Pro', business: 'Business' };
+var PLAN_PRICES_P = { pro: 1200 };
+var PLAN_LABELS_P = { pro: 'Pro' };
 
 function payYouCan(plan, amount) {
   var label = PLAN_LABELS_P[plan] || plan;
@@ -884,7 +843,7 @@ function contactAgency() {
 
 function proceedPayment() {
   var plan = window._selectedPlan || 'pro';
-  payYouCan(plan, PLAN_PRICES_P[plan] || 990);
+  payYouCan(plan, PLAN_PRICES_P[plan] || 1200);
 }
 
 // Fermer modal en cliquant sur overlay
