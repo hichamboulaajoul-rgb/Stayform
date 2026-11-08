@@ -18,7 +18,7 @@ contrat de location en ligne et reçoit un dossier PDF complet.
 
 ## Stack
 
-- HTML, CSS et JavaScript sans étape de build, hébergés sur GitHub Pages (`CNAME` → stayform.link)
+- HTML, CSS et JavaScript sans étape de build, déployés par Netlify (le fichier `CNAME` est un reste de GitHub Pages)
 - [Supabase](https://supabase.com) : base Postgres, authentification et Edge Functions
   (`verify-identity`, `send-checkin-email`, `scrape-airbnb`, `fetch-ical`, `send-upgrade-nudge`)
 - jsPDF pour le dossier PDF, Chart.js pour le tableau de bord
@@ -51,4 +51,4 @@ pull request.
 
 ## Déploiement
 
-Tout ce qui est sur `main` est publié par GitHub Pages.
+Netlify publie `main` et crée un aperçu pour chaque pull request.
