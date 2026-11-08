@@ -75,3 +75,30 @@ test('payment success URL does not grant a plan from the browser', async ({ page
   });
   expect(writes).toEqual([]);
 });
+
+// Airbnb renvoie parfois une page « Redirection vers www.airbnb.fr » au lieu de l'annonce.
+// L'import ne doit jamais utiliser ce titre comme nom : il bascule sur le formulaire manuel
+// en gardant le lien.
+for (const scenario of [
+  { label: 'old edge function (success with redirect title)', status: 200, body: { success: true, data: { name: 'Redirection vers www.airbnb.fr', amenities: [], rules: [] } } },
+  { label: 'fixed edge function (airbnb_unreadable)', status: 502, body: { success: false, code: 'airbnb_unreadable', error: 'x' } },
+]) {
+  test(`Airbnb import falls back to manual form: ${scenario.label}`, async ({ page }) => {
+    const errors = collectErrors(page);
+    await stubSupabase(page);
+    await page.route(/functions\/v1\/scrape-airbnb/, (route) =>
+      route.fulfill({ status: scenario.status, contentType: 'application/json', body: JSON.stringify(scenario.body) }));
+    await page.goto('/index.html');
+    await page.evaluate(() => {
+      document.getElementById('propertyModal').classList.add('open');
+      document.getElementById('propStep1').style.display = 'block';
+      document.getElementById('propAirbnb').value = 'https://www.airbnb.fr/rooms/45531030?source=x';
+    });
+    await page.evaluate(() => _importFromAirbnb());
+    await expect(page.locator('#propStep3')).toBeVisible();
+    await expect(page.locator('#propStep2')).toBeHidden();
+    await expect(page.locator('#propName3')).toHaveValue('');
+    expect(await page.evaluate(() => _pendingAirbnbUrl)).toBe('https://www.airbnb.com/rooms/45531030');
+    expect(errors).toEqual([]);
+  });
+}
