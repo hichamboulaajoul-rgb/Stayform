@@ -5607,5 +5607,67 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.addEventListener('visibilitychange', function () { if (!document.hidden) render(); });
 })();
 </script>
+<!-- ══════════════════════════════
+     SUIVI D'ACTIVITÉ (visible uniquement dans admin.html)
+     Enregistre une ouverture de session par onglet et chaque section du tableau de bord visitée.
+     L'écriture passe par la fonction log_activity() côté Supabase, qui ne peut écrire que pour
+     l'hôte connecté. Une erreur ici ne bloque jamais le tableau de bord.
+══════════════════════════════ -->
+<script>
+(function () {
+  var lastPage = null, lastAt = 0;
+
+  function log(event, page) {
+    try {
+      if (typeof currentUser === 'undefined' || !currentUser) return;
+      var client = (typeof sb !== 'undefined' && sb && sb.rpc) ? sb : (typeof getSb === 'function' ? getSb() : null);
+      if (!client) return;
+      client.rpc('log_activity', {
+        p_event: event,
+        p_page: page || null,
+        p_user_agent: (navigator.userAgent || '').slice(0, 300)
+      }).then(function () {}, function () {});
+    } catch (e) {}
+  }
+
+  function logPage(id) {
+    var now = Date.now();
+    // Ignore les double-clics sur la même section
+    if (id === lastPage && now - lastAt < 30000) return;
+    lastPage = id; lastAt = now;
+    log('page_view', id);
+  }
+
+  function wrap(name, after) {
+    var orig = window[name];
+    if (typeof orig !== 'function') return;
+    window[name] = function () {
+      var args = arguments;
+      var r = orig.apply(this, args);
+      Promise.resolve(r).then(function () { try { after.apply(null, args); } catch (e) {} }, function () {});
+      return r;
+    };
+  }
+
+  wrap('loadDashboard', function () {
+    if (typeof currentUser === 'undefined' || !currentUser) return;
+    var key = 'sf_activity_session_' + currentUser.id;
+    var already = false;
+    try { already = sessionStorage.getItem(key) === '1'; sessionStorage.setItem(key, '1'); } catch (e) {}
+    if (!already) log('login');
+    logPage('overview');
+  });
+  wrap('showSection', function (id) { if (id) logPage(String(id)); });
+  // Après une déconnexion, la prochaine connexion dans cet onglet compte à nouveau
+  wrap('handleLogout', function () {
+    try {
+      Object.keys(sessionStorage).forEach(function (k) {
+        if (k.indexOf('sf_activity_session_') === 0) sessionStorage.removeItem(k);
+      });
+    } catch (e) {}
+    lastPage = null;
+  });
+})();
+</script>
 </body>
 </html>

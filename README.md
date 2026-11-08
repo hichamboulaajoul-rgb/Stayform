@@ -14,7 +14,7 @@ contrat de location en ligne et reçoit un dossier PDF complet.
 | `checkin.html` | Parcours de check-in du voyageur (dates, identité, signature, PDF) |
 | `welcome.html` | Page d'accueil envoyée au voyageur après le check-in |
 | `pricing.html` | Tarifs |
-| `admin.html` | Panneau d'administration (plans, crédits revendeurs) |
+| `admin.html` | Panneau d'administration (plans, crédits revendeurs, activité des hôtes) |
 
 ## Stack
 
