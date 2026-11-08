@@ -1,0 +1,12 @@
+{
+  "name": "stayform",
+  "private": true,
+  "description": "Stayform static site. No build step: the HTML files are served as-is by GitHub Pages.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@supabase/supabase-js": "2.39.0"
+  }
+}

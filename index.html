@@ -3694,14 +3694,18 @@ async function checkPaymentReturn() {
   }
 }
 
+// Plans are activated server-side only (admin panel or a payment webhook using the
+// service role). The browser just re-reads the profile to pick up the new plan.
 async function activatePremium() {
-  const { error } = await sb.from('profiles').update({ plan: 'paid' }).eq('id', currentUser.id);
-  if (error) { alert('Erreur activation. Veuillez réessayer.'); return; }
-  currentProfile.plan = 'paid';
   closeUpgradeModal();
-  document.getElementById('sidebarPlan').textContent = '⚡ Plan Illimité';
-  updatePlanUI();
-  showToast('⚡ Plan illimité activé !', '#E8A87C');
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if (profile && profile.plan && profile.plan !== 'free') {
+    currentProfile = profile;
+    updatePlanUI();
+    showToast('⚡ Plan activé !', '#E8A87C');
+  } else {
+    showToast('⏳ Paiement reçu, activation en cours de vérification.', '#E8A87C');
+  }
 }
 
 // ══════════════════════════════

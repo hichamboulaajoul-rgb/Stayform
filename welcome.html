@@ -215,7 +215,7 @@ async function loadWelcome() {
   // Charger les données
   const [propRes, hostRes, guestRes] = await Promise.all([
     sb.from('properties_public').select('*').eq('id', propId).single(),
-    sb.from('profiles').select('name').eq('id', hostId).single(),
+    sb.from('profiles_public').select('name').eq('id', hostId).single(),
     guestId ? sb.from('guests').select('name,dates,nights,arrival_time,guest_count').eq('id', guestId).single() : Promise.resolve({ data: null })
   ]);
 
