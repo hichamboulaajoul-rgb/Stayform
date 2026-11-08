@@ -4,39 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stayform Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --green:#2D4A3E;--green2:#4A7C65;--gold:#D4A853;
-  --bg:#FAF6F1;--surface:#fff;--border:#EAE0D5;
+  --green:#16241E;--green2:#2F5446;--gold:#C9A227;
+  --bg:#F6F0E4;--surface:#fff;--border:#EAE0D5;
   --text:#1C120A;--text2:#6B5848;--text3:#B09A88;
   --danger:#C13515;--success:#2D7A45;
 }
-body{background:var(--bg);font-family:'Nunito Sans',sans-serif;color:var(--text);min-height:100vh;}
+body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-height:100vh;}
 
 /* ── LOGIN ── */
 #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem;}
 .login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2.5rem;max-width:380px;width:100%;text-align:center;}
-.login-logo{font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:800;color:var(--green);margin-bottom:0.3rem;}
+.login-logo{font-family:'Inter',sans-serif;font-size:1.4rem;font-weight:800;color:var(--green);margin-bottom:0.3rem;}
 .login-sub{font-size:0.82rem;color:var(--text3);margin-bottom:2rem;}
 .admin-badge{background:var(--green);color:var(--gold);font-size:0.7rem;font-weight:700;padding:0.2rem 0.8rem;border-radius:20px;letter-spacing:0.08em;text-transform:uppercase;display:inline-block;margin-bottom:1.5rem;}
 .field{margin-bottom:1rem;text-align:left;}
 .field label{font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.06em;}
-.field input{width:100%;border:1px solid var(--border);border-radius:8px;padding:0.7rem 0.9rem;font-family:'Nunito Sans',sans-serif;font-size:0.9rem;color:var(--text);background:var(--bg);}
+.field input{width:100%;border:1px solid var(--border);border-radius:8px;padding:0.7rem 0.9rem;font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--text);background:var(--bg);}
 .field input:focus{outline:none;border-color:var(--green);}
-.btn-login{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:0.85rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;margin-top:0.5rem;}
+.btn-login{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:0.85rem;font-family:'Inter',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;margin-top:0.5rem;}
 .btn-login:hover{background:var(--green2);}
 .login-error{background:#FFF0F0;color:var(--danger);border:1px solid #FFCDD2;border-radius:8px;padding:0.7rem;font-size:0.82rem;margin-top:0.8rem;display:none;}
 
 /* ── ADMIN DASHBOARD ── */
 #adminScreen{display:none;}
 .admin-nav{background:var(--green);padding:0.8rem 2rem;display:flex;align-items:center;justify-content:space-between;}
-.admin-nav-logo{font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;color:#fff;}
+.admin-nav-logo{font-family:'Inter',sans-serif;font-size:1rem;font-weight:800;color:#fff;}
 .admin-nav-logo span{color:var(--gold);}
 .admin-nav-right{display:flex;align-items:center;gap:1rem;}
 .admin-user{font-size:0.8rem;color:rgba(255,255,255,0.7);}
-.btn-logout{background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:6px;padding:0.35rem 0.8rem;font-size:0.78rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;}
+.btn-logout{background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:6px;padding:0.35rem 0.8rem;font-size:0.78rem;cursor:pointer;font-family:'Inter',sans-serif;}
 
 .admin-content{max-width:1200px;margin:0 auto;padding:2rem 1.5rem;}
 
@@ -44,14 +44,14 @@ body{background:var(--bg);font-family:'Nunito Sans',sans-serif;color:var(--text)
 .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;}
 .stat-label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:0.3rem;}
-.stat-val{font-family:'Nunito',sans-serif;font-size:1.8rem;font-weight:800;color:var(--text);}
+.stat-val{font-family:'Inter',sans-serif;font-size:1.8rem;font-weight:800;color:var(--text);}
 .stat-sub{font-size:0.72rem;color:var(--text3);margin-top:2px;}
 
 /* Search & filters */
 .toolbar{display:flex;gap:0.8rem;margin-bottom:1.5rem;align-items:center;flex-wrap:wrap;}
-.search-input{flex:1;min-width:200px;border:1px solid var(--border);border-radius:8px;padding:0.6rem 1rem;font-family:'Nunito Sans',sans-serif;font-size:0.88rem;background:var(--surface);}
+.search-input{flex:1;min-width:200px;border:1px solid var(--border);border-radius:8px;padding:0.6rem 1rem;font-family:'Inter',sans-serif;font-size:0.88rem;background:var(--surface);}
 .search-input:focus{outline:none;border-color:var(--green);}
-.filter-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.6rem 1rem;font-size:0.82rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;color:var(--text2);}
+.filter-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.6rem 1rem;font-size:0.82rem;cursor:pointer;font-family:'Inter',sans-serif;color:var(--text2);}
 .filter-btn.active{background:var(--green);color:#fff;border-color:var(--green);}
 
 /* Table */
@@ -66,54 +66,55 @@ body{background:var(--bg);font-family:'Nunito Sans',sans-serif;color:var(--text)
 .badge{display:inline-block;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:20px;}
 .badge-active{background:#EEF5F1;color:var(--success);}
 .badge-inactive{background:#F5F0EB;color:var(--text3);}
-.badge-paid{background:rgba(45,74,62,0.1);color:var(--green);}
+.badge-paid{background:rgba(22,36,30,0.1);color:var(--green);}
 .badge-free{background:#F5F0EB;color:var(--text3);}
 
 /* Action buttons */
-.btn-action{border:none;border-radius:6px;padding:0.3rem 0.7rem;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;}
+.btn-action{border:none;border-radius:6px;padding:0.3rem 0.7rem;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
 .btn-activate{background:var(--green);color:#fff;}
-.btn-add-credits{background:#EEF5F1;color:var(--green);border:1px solid rgba(45,74,62,0.2);}
+.btn-add-credits{background:#EEF5F1;color:var(--green);border:1px solid rgba(22,36,30,0.2);}
 .btn-deactivate{background:#FFF0F0;color:var(--danger);border:1px solid rgba(193,53,21,0.2);}
 .btn-view{background:var(--bg);color:var(--text2);border:1px solid var(--border);}
 .actions-cell{display:flex;gap:0.4rem;flex-wrap:wrap;}
 
 /* Credits badge */
-.credits-badge{font-family:'Nunito',sans-serif;font-weight:700;color:var(--green);font-size:0.95rem;}
+.credits-badge{font-family:'Inter',sans-serif;font-weight:700;color:var(--green);font-size:0.95rem;}
 
 /* Modal */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:1.5rem;}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--surface);border-radius:16px;padding:2rem;max-width:440px;width:100%;position:relative;}
-.modal-title{font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:0.3rem;}
+.modal-title{font-family:'Inter',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:0.3rem;}
 .modal-sub{font-size:0.82rem;color:var(--text3);margin-bottom:1.5rem;}
 .modal-close{position:absolute;top:1rem;right:1rem;background:var(--bg);border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem;}
 .form-group{margin-bottom:1rem;}
 .form-label{font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text2);display:block;margin-bottom:0.3rem;}
-.form-input,.form-select{width:100%;border:1px solid var(--border);border-radius:8px;padding:0.65rem 0.9rem;font-family:'Nunito Sans',sans-serif;font-size:0.88rem;color:var(--text);background:var(--surface);}
+.form-input,.form-select{width:100%;border:1px solid var(--border);border-radius:8px;padding:0.65rem 0.9rem;font-family:'Inter',sans-serif;font-size:0.88rem;color:var(--text);background:var(--surface);}
 .form-input:focus,.form-select:focus{outline:none;border-color:var(--green);}
-.btn-submit{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:0.8rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;margin-top:0.5rem;}
+.btn-submit{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:0.8rem;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;margin-top:0.5rem;}
 .toast{position:fixed;bottom:2rem;right:2rem;background:var(--green);color:#fff;padding:0.8rem 1.2rem;border-radius:10px;font-size:0.88rem;font-weight:500;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;}
 .toast.show{opacity:1;}
 /* Onglets + activité */
 .view-tabs{display:flex;gap:0.4rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);}
-.view-tab{background:none;border:none;border-bottom:2px solid transparent;padding:0.6rem 1rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text3);cursor:pointer;margin-bottom:-1px;}
+.view-tab{background:none;border:none;border-bottom:2px solid transparent;padding:0.6rem 1rem;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text3);cursor:pointer;margin-bottom:-1px;}
 .view-tab.active{color:var(--green);border-bottom-color:var(--green);}
-.act-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;color:var(--text);margin:1.5rem 0 0.7rem;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;}
+.act-title{font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;color:var(--text);margin:1.5rem 0 0.7rem;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;}
 .act-chip{display:inline-block;font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:20px;background:#F5F0EB;color:var(--text2);}
 .act-chip.login{background:#EEF5F1;color:var(--success);}
 .act-row-click{cursor:pointer;}
-.act-filter{font-size:0.78rem;color:var(--text2);font-weight:400;font-family:'Nunito Sans',sans-serif;}
+.act-filter{font-size:0.78rem;color:var(--text2);font-weight:400;font-family:'Inter',sans-serif;}
 .act-filter button{background:none;border:none;color:var(--danger);cursor:pointer;font-size:0.78rem;text-decoration:underline;}
 .table-wrap{overflow-x:auto;border-radius:12px;}
 @media(max-width:760px){.stats-bar{grid-template-columns:repeat(2,1fr);}.admin-content{padding:1.2rem 0.8rem;}}
 </style>
+<link rel="stylesheet" href="brand.css">
 </head>
 <body>
 
 <!-- ── LOGIN ── -->
 <div id="loginScreen">
   <div class="login-card">
-    <div class="login-logo">stay<span style="color:var(--green2);">form</span></div>
+    <div class="login-logo"><span class="sf-mark">S</span>stayform</div>
     <div class="login-sub">Tableau de bord administrateur</div>
     <div class="admin-badge">🔐 Accès restreint</div>
     <div class="field">
@@ -132,7 +133,7 @@ body{background:var(--bg);font-family:'Nunito Sans',sans-serif;color:var(--text)
 <!-- ── ADMIN DASHBOARD ── -->
 <div id="adminScreen">
   <div class="admin-nav">
-    <div class="admin-nav-logo">stay<span>form</span> <span style="font-size:0.7rem;opacity:0.6;font-weight:400;">· Admin</span></div>
+    <div class="admin-nav-logo"><span class="sf-mark">S</span>stayform <span style="font-size:0.7rem;opacity:0.6;font-weight:400;">· Admin</span></div>
     <div class="admin-nav-right">
       <span class="admin-user" id="adminUserEmail">—</span>
       <button class="btn-logout" onclick="adminLogout()">Déconnexion</button>
@@ -173,7 +174,7 @@ body{background:var(--bg);font-family:'Nunito Sans',sans-serif;color:var(--text)
 
     <!-- Plans expirant bientôt -->
     <div id="expiringSection" style="display:none;background:#FFF8E1;border:1px solid #FFE082;border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.5rem;">
-      <div style="font-family:'Nunito',sans-serif;font-weight:700;color:#7A5000;margin-bottom:0.8rem;">⚠️ Plans expirant dans les 10 prochains jours</div>
+      <div style="font-family:'Inter',sans-serif;font-weight:700;color:#7A5000;margin-bottom:0.8rem;">⚠️ Plans expirant dans les 10 prochains jours</div>
       <div id="expiringList"></div>
     </div>
 
@@ -184,10 +185,11 @@ body{background:var(--bg);font-family:'Nunito Sans',sans-serif;color:var(--text)
       <button class="filter-btn" id="filter-resellers" onclick="setFilter('resellers')">Revendeurs</button>
       <button class="filter-btn" id="filter-paid" onclick="setFilter('paid')">Payants</button>
       <button class="filter-btn" id="filter-free" onclick="setFilter('free')">Gratuits</button>
-      <button onclick="loadUsers()" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:0.6rem 1rem;font-size:0.82rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:600;">↻ Actualiser</button>
+      <button onclick="loadUsers()" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:0.6rem 1rem;font-size:0.82rem;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;">↻ Actualiser</button>
     </div>
 
     <!-- Table -->
+    <div class="table-wrap">
     <table class="admin-table" id="usersTable">
       <thead>
         <tr>
@@ -206,6 +208,7 @@ body{background:var(--bg);font-family:'Nunito Sans',sans-serif;color:var(--text)
         <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text3);">Chargement...</td></tr>
       </tbody>
     </table>
+    </div>
     </div><!-- /view-users -->
 
     <!-- ── ACTIVITÉ DES HÔTES ── -->
@@ -216,7 +219,7 @@ body{background:var(--bg);font-family:'Nunito Sans',sans-serif;color:var(--text)
         <button class="filter-btn active" id="period-7" onclick="setActivityPeriod(7)">7 jours</button>
         <button class="filter-btn" id="period-30" onclick="setActivityPeriod(30)">30 jours</button>
         <button class="filter-btn" id="period-90" onclick="setActivityPeriod(90)">90 jours</button>
-        <button onclick="loadActivity()" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:0.6rem 1rem;font-size:0.82rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:600;">↻ Actualiser</button>
+        <button onclick="loadActivity()" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:0.6rem 1rem;font-size:0.82rem;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;">↻ Actualiser</button>
       </div>
 
       <div class="stats-bar">

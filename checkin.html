@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Check-in · Votre Séjour</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 .lang-selector {
   display: flex; gap: 0.3rem; margin-left: auto;
@@ -14,10 +14,10 @@
   border-radius: 6px; padding: 0.25rem 0.5rem;
   font-size: 0.72rem; font-weight: 600;
   cursor: pointer; color: var(--mid);
-  transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s; font-family: 'Inter', sans-serif;
 }
 .lang-btn.active { background: var(--terracotta); color: white; border-color: var(--terracotta); }
-body.rtl { direction: rtl; font-family: 'Noto Sans Arabic', 'DM Sans', sans-serif; }
+body.rtl { direction: rtl; font-family: 'Noto Sans Arabic', 'Inter', sans-serif; }
 body.rtl .step-label { margin-left: 0; margin-right: 0.5rem; }
 body.rtl .btn-group { flex-direction: row-reverse; }
 body.rtl .form-row { direction: rtl; }
@@ -44,7 +44,7 @@ function setLang(lang) {
   if (lang === 'ar') {
     document.documentElement.setAttribute('dir', 'rtl');
     document.body.classList.add('rtl');
-    document.body.style.fontFamily = "'Noto Sans Arabic', 'DM Sans', sans-serif";
+    document.body.style.fontFamily = "'Noto Sans Arabic', 'Inter', sans-serif";
   } else {
     document.documentElement.setAttribute('dir', 'ltr');
     document.body.classList.remove('rtl');
@@ -73,31 +73,31 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <style>
   :root {
-    --cream: #FAF6F1;
+    --cream: #F6F0E4;
     --warm: #EAE0D5;
     --sand: #B09A88;
-    --terracotta: #2D4A3E;
+    --terracotta: #16241E;
     --terracotta-light: #EEF5F1;
     --deep: #1C120A;
-    --mid: #4A7C65;
+    --mid: #2F5446;
     --light-mid: #6B8B78;
     --success: #2D7A45;
     --white: #FFFFFF;
-    --shadow: rgba(45,74,62,0.1);
-    --gold: #D4A853;
-    --riad-green: #2D4A3E;
-    --riad-green2: #4A7C65;
+    --shadow: rgba(22,36,30,0.1);
+    --gold: #C9A227;
+    --riad-green: #16241E;
+    --riad-green2: #2F5446;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     background: var(--cream);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     color: var(--deep);
     min-height: 100vh;
     background-image: 
-      radial-gradient(ellipse at 10% 20%, rgba(192,112,80,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 10% 20%, rgba(22,36,30,0.06) 0%, transparent 50%),
       radial-gradient(ellipse at 90% 80%, rgba(201,184,164,0.15) 0%, transparent 50%);
   }
 
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   .logo-mark svg { transform: rotate(45deg); }
   .header-text h1 {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Fraunces', serif;
     font-size: 1.4rem;
     font-weight: 500;
     letter-spacing: 0.02em;
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
     border-color: var(--terracotta);
     background: var(--terracotta);
     color: white;
-    box-shadow: 0 0 0 4px rgba(192,112,80,0.15);
+    box-shadow: 0 0 0 4px rgba(22,36,30,0.15);
   }
   .step-circle.done {
     border-color: var(--success);
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   .page-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Fraunces', serif;
     font-size: 2.2rem;
     font-weight: 400;
     color: var(--deep);
@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
     border: 1.5px solid var(--warm);
     border-radius: 10px;
     background: var(--cream);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 0.95rem;
     color: var(--deep);
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   input:focus, select:focus {
     border-color: var(--terracotta);
-    box-shadow: 0 0 0 3px rgba(192,112,80,0.1);
+    box-shadow: 0 0 0 3px rgba(22,36,30,0.1);
     background: var(--white);
   }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
     margin-bottom: 1.2rem;
   }
   .cal-header h3 {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Fraunces', serif;
     font-size: 1.2rem;
     font-weight: 500;
   }
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
     font-weight: 600;
   }
   .cal-day.in-range .cal-day-inner {
-    background: rgba(192,112,80,0.15);
+    background: rgba(22,36,30,0.15);
     border-radius: 0;
   }
   .cal-day.selected-start .cal-day-inner { border-radius: 8px 0 0 8px; }
@@ -399,7 +399,7 @@ document.addEventListener('DOMContentLoaded', function() {
     margin-bottom: 2px;
   }
   .date-box strong {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Fraunces', serif;
     font-size: 1.05rem;
     color: var(--deep);
     font-weight: 500;
@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
   .date-box.filled { border-color: var(--terracotta); }
   .date-arrow { color: var(--sand); font-size: 1.2rem; text-align: center; }
   .nights-badge {
-    background: rgba(192,112,80,0.12);
+    background: rgba(22,36,30,0.12);
     color: var(--terracotta);
     padding: 0.3rem 0.8rem;
     border-radius: 20px;
@@ -428,7 +428,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   .upload-zone.dragover {
     border-color: var(--terracotta);
-    background: rgba(192,112,80,0.04);
+    background: rgba(22,36,30,0.04);
   }
   .upload-zone input[type="file"] { display: none; }
   .upload-icon {
@@ -440,7 +440,7 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 1.4rem;
   }
   .upload-zone h4 {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Fraunces', serif;
     font-size: 1.1rem;
     font-weight: 500;
     margin-bottom: 0.3rem;
@@ -457,10 +457,10 @@ document.addEventListener('DOMContentLoaded', function() {
     font-weight: 500;
     cursor: pointer;
     transition: background 0.2s;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     border: none;
   }
-  .upload-btn:hover { background: #B06040; }
+  .upload-btn:hover { background: #24423A; }
   .upload-types {
     display: flex;
     justify-content: center;
@@ -496,7 +496,7 @@ document.addEventListener('DOMContentLoaded', function() {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 0.3rem; font-size: 1.6rem; color: var(--terracotta);
   }
-  .preview-item .doc-icon span { font-size: 0.65rem; color: var(--mid); font-family: 'DM Sans'; }
+  .preview-item .doc-icon span { font-size: 0.65rem; color: var(--mid); font-family: 'Inter'; }
   .preview-item .remove-btn {
     position: absolute; top: 4px; right: 4px;
     width: 20px; height: 20px;
@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function() {
     margin-bottom: 1.5rem;
   }
   .contract-scroll h4 {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Fraunces', serif;
     font-size: 1rem;
     color: var(--deep);
     margin: 1rem 0 0.4rem;
@@ -558,9 +558,9 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 0.75rem; color: var(--terracotta);
     cursor: pointer; padding: 0.2rem 0.5rem;
     border-radius: 4px; transition: background 0.15s;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
   }
-  .sig-clear:hover { background: rgba(192,112,80,0.1); }
+  .sig-clear:hover { background: rgba(22,36,30,0.1); }
   canvas#sigCanvas {
     display: block;
     width: 100%;
@@ -624,7 +624,7 @@ document.addEventListener('DOMContentLoaded', function() {
     margin-bottom: 0.3rem;
   }
   .summary-item strong {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Fraunces', serif;
     font-size: 1.1rem;
     color: var(--deep);
     font-weight: 500;
@@ -652,7 +652,7 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 10px;
     border: none;
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 0.9rem;
     font-weight: 500;
     transition: all 0.2s;
@@ -661,11 +661,11 @@ document.addEventListener('DOMContentLoaded', function() {
   .btn-primary {
     background: var(--terracotta);
     color: white;
-    box-shadow: 0 4px 15px rgba(192,112,80,0.3);
+    box-shadow: 0 4px 15px rgba(22,36,30,0.3);
   }
   .btn-primary:hover {
-    background: #B06040;
-    box-shadow: 0 6px 20px rgba(192,112,80,0.4);
+    background: #24423A;
+    box-shadow: 0 6px 20px rgba(22,36,30,0.25);
     transform: translateY(-1px);
   }
   .btn-primary:disabled {
@@ -689,8 +689,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   .info-banner {
-    background: rgba(192,112,80,0.08);
-    border: 1px solid rgba(192,112,80,0.2);
+    background: rgba(22,36,30,0.08);
+    border: 1px solid rgba(22,36,30,0.2);
     border-radius: 10px;
     padding: 0.85rem 1rem;
     display: flex;
@@ -719,15 +719,12 @@ document.addEventListener('DOMContentLoaded', function() {
     .page-title { font-size: 1.8rem; }
   }
 </style>
+<link rel="stylesheet" href="brand.css">
 </head>
 <body>
 
 <header>
-  <div class="logo-mark">
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <path d="M10 3L13 9H17L14 13L15 18L10 15L5 18L6 13L3 9H7L10 3Z" fill="white" stroke="white" stroke-linejoin="round"/>
-    </svg>
-  </div>
+  <div class="logo-mark sf-mark">S</div>
   <div class="header-text">
     <h1 id="hdr-title">Check-in en ligne</h1>
     <p id="hostNameDisplay">Bienvenue dans votre logement</p>
@@ -804,7 +801,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <label>👤 Adultes <span style="font-size:0.75rem;color:var(--text3);font-weight:400;">(18 ans et plus)</span></label>
         <div style="display:flex;align-items:center;gap:1rem;">
           <button type="button" onclick="changeCount('adults', -1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);background:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;">−</button>
-          <span id="adultsDisplay" style="font-size:1.3rem;font-weight:800;font-family:'Nunito',sans-serif;min-width:2rem;text-align:center;">1</span>
+          <span id="adultsDisplay" style="font-size:1.3rem;font-weight:800;font-family:'Inter',sans-serif;min-width:2rem;text-align:center;">1</span>
           <button type="button" onclick="changeCount('adults', 1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);background:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;">+</button>
         </div>
       </div>
@@ -814,7 +811,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <label>🧒 Enfants <span style="font-size:0.75rem;color:var(--text3);font-weight:400;">(moins de 18 ans)</span></label>
         <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.8rem;">
           <button type="button" onclick="changeCount('children', -1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);background:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;">−</button>
-          <span id="childrenDisplay" style="font-size:1.3rem;font-weight:800;font-family:'Nunito',sans-serif;min-width:2rem;text-align:center;">0</span>
+          <span id="childrenDisplay" style="font-size:1.3rem;font-weight:800;font-family:'Inter',sans-serif;min-width:2rem;text-align:center;">0</span>
           <button type="button" onclick="changeCount('children', 1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);background:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;">+</button>
         </div>
         <div id="childrenAges" style="display:none;display:flex;flex-direction:column;gap:0.5rem;"></div>
@@ -836,9 +833,9 @@ document.addEventListener('DOMContentLoaded', function() {
     <p class="page-subtitle" data-i18n="t_coords_sub">Informations du voyageur principal de la réservation.</p>
 
     <!-- Message sensibilisation identité -->
-    <div id="identityNotice" style="background:#EEF5F1;border:1px solid rgba(45,74,62,0.2);border-radius:10px;padding:0.8rem 1rem;margin-bottom:1.2rem;display:flex;align-items:flex-start;gap:0.7rem;">
+    <div id="identityNotice" style="background:#EEF5F1;border:1px solid rgba(22,36,30,0.2);border-radius:10px;padding:0.8rem 1rem;margin-bottom:1.2rem;display:flex;align-items:flex-start;gap:0.7rem;">
       <span style="font-size:1.1rem;flex-shrink:0;margin-top:1px;">🪪</span>
-      <div style="font-size:0.82rem;color:#2D4A3E;line-height:1.6;" id="identityNoticeText">
+      <div style="font-size:0.82rem;color:#16241E;line-height:1.6;" id="identityNoticeText">
         <strong>Saisissez vos informations exactement comme sur votre CIN ou passeport.</strong>
         Ces données seront vérifiées à l'étape suivante par scan de votre document.
       </div>
@@ -911,9 +908,9 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="card">
 
       <!-- Bannière confidentialité -->
-      <div style="background:#EEF5F1;border:1px solid rgba(45,74,62,0.2);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;display:flex;gap:0.8rem;align-items:flex-start;">
+      <div style="background:#EEF5F1;border:1px solid rgba(22,36,30,0.2);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;display:flex;gap:0.8rem;align-items:flex-start;">
         <span style="font-size:1.2rem;flex-shrink:0;">🛡️</span>
-        <div style="font-size:0.8rem;color:#2D4A3E;line-height:1.7;">
+        <div style="font-size:0.8rem;color:#16241E;line-height:1.7;">
           <strong>Vos données sont protégées</strong><br>
           Votre CIN est utilisée <u>uniquement</u> pour vérifier votre identité. Elle apparaît dans votre contrat PDF uniquement — <strong>non stockée</strong> sur nos serveurs.
         </div>
@@ -938,7 +935,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div style="font-size:2.5rem;margin-bottom:0.8rem;">📷</div>
             <div style="font-size:0.95rem;font-weight:600;color:var(--deep);margin-bottom:0.4rem;">Scanner votre CIN</div>
             <div style="font-size:0.8rem;color:var(--light-mid);margin-bottom:1.2rem;line-height:1.6;">Placez le recto de votre carte devant la caméra.<br>La détection est automatique.</div>
-            <button onclick="startCINScanner()" style="background:var(--riad-green);color:#fff;border:none;border-radius:10px;padding:0.75rem 1.8rem;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;width:100%;">
+            <button onclick="startCINScanner()" style="background:var(--riad-green);color:#fff;border:none;border-radius:10px;padding:0.75rem 1.8rem;font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;width:100%;">
               📸 Ouvrir la caméra
             </button>
             <div style="margin-top:0.8rem;">
@@ -959,17 +956,17 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- Overlay de guidage -->
             <div style="position:absolute;inset:0;pointer-events:none;">
               <!-- Cadre de guidage CIN (format 85.6×54mm → ratio ~1.58) -->
-              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88%;height:60%;border:2px solid rgba(212,168,83,0.9);border-radius:6px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);">
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88%;height:60%;border:2px solid rgba(201,162,39,0.9);border-radius:6px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);">
                 <!-- Coins marqueurs -->
-                <div style="position:absolute;top:-3px;left:-3px;width:24px;height:24px;border-top:4px solid #D4A853;border-left:4px solid #D4A853;border-radius:3px 0 0 0;"></div>
-                <div style="position:absolute;top:-3px;right:-3px;width:24px;height:24px;border-top:4px solid #D4A853;border-right:4px solid #D4A853;border-radius:0 3px 0 0;"></div>
-                <div style="position:absolute;bottom:-3px;left:-3px;width:24px;height:24px;border-bottom:4px solid #D4A853;border-left:4px solid #D4A853;border-radius:0 0 0 3px;"></div>
-                <div style="position:absolute;bottom:-3px;right:-3px;width:24px;height:24px;border-bottom:4px solid #D4A853;border-right:4px solid #D4A853;border-radius:0 0 3px 0;"></div>
+                <div style="position:absolute;top:-3px;left:-3px;width:24px;height:24px;border-top:4px solid #C9A227;border-left:4px solid #C9A227;border-radius:3px 0 0 0;"></div>
+                <div style="position:absolute;top:-3px;right:-3px;width:24px;height:24px;border-top:4px solid #C9A227;border-right:4px solid #C9A227;border-radius:0 3px 0 0;"></div>
+                <div style="position:absolute;bottom:-3px;left:-3px;width:24px;height:24px;border-bottom:4px solid #C9A227;border-left:4px solid #C9A227;border-radius:0 0 0 3px;"></div>
+                <div style="position:absolute;bottom:-3px;right:-3px;width:24px;height:24px;border-bottom:4px solid #C9A227;border-right:4px solid #C9A227;border-radius:0 0 3px 0;"></div>
                 <!-- Texte guide centré -->
                 <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,0.5);font-size:0.7rem;white-space:nowrap;pointer-events:none;">Placez la CIN — numéro visible</div>
               </div>
               <!-- Ligne de scan animée -->
-              <div id="scanLine" style="position:absolute;left:7.5%;right:7.5%;top:22%;height:2px;background:rgba(212,168,83,0.7);animation:scanMove 2s ease-in-out infinite;"></div>
+              <div id="scanLine" style="position:absolute;left:7.5%;right:7.5%;top:22%;height:2px;background:rgba(201,162,39,0.7);animation:scanMove 2s ease-in-out infinite;"></div>
             </div>
             <!-- Statut scan -->
             <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);padding:0.8rem;text-align:center;">
@@ -984,10 +981,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         <!-- État : Succès -->
         <div id="scanSuccess" style="display:none;">
-          <div style="background:#EEF5F1;border:2px solid #2D4A3E;border-radius:14px;padding:1.5rem;text-align:center;">
+          <div style="background:#EEF5F1;border:2px solid #16241E;border-radius:14px;padding:1.5rem;text-align:center;">
             <div style="font-size:2.5rem;margin-bottom:0.6rem;">✅</div>
-            <div id="scanSuccessTitle" style="font-size:1rem;font-weight:700;color:#2D4A3E;margin-bottom:0.3rem;">Document valide — Identité vérifiée</div>
-            <div id="scanSuccessDetails" style="font-size:0.82rem;color:#4A7C65;margin-bottom:1rem;line-height:1.6;"></div>
+            <div id="scanSuccessTitle" style="font-size:1rem;font-weight:700;color:#16241E;margin-bottom:0.3rem;">Document valide — Identité vérifiée</div>
+            <div id="scanSuccessDetails" style="font-size:0.82rem;color:#2F5446;margin-bottom:1rem;line-height:1.6;"></div>
             <!-- Aperçu photo capturée -->
             <img id="cinCaptured" style="max-width:100%;border-radius:8px;border:1px solid var(--border);margin-bottom:0.8rem;display:none;" alt="CIN capturée">
             <button onclick="resetScanner()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:0.4rem 1rem;font-size:0.78rem;color:var(--light-mid);cursor:pointer;">
@@ -1040,7 +1037,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
 
       <!-- Consentement CIN -->
-      <div class="checkbox-row" onclick="toggleCheck('check4', event)" style="margin-top:1.2rem;background:#EEF5F1;border:1px solid rgba(45,74,62,0.15);border-radius:8px;padding:0.8rem;">
+      <div class="checkbox-row" onclick="toggleCheck('check4', event)" style="margin-top:1.2rem;background:#EEF5F1;border:1px solid rgba(22,36,30,0.15);border-radius:8px;padding:0.8rem;">
         <input type="checkbox" id="check4">
         <span style="font-size:0.82rem;">🛡️ Je consens à l'utilisation de ma pièce d'identité <strong>uniquement</strong> à des fins de vérification d'identité pour cette location. Elle sera incluse dans mon contrat PDF uniquement et <strong>non stockée</strong> sur les serveurs de Stayform.</span>
       </div>
@@ -1051,7 +1048,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <!-- Bouton passer l'étape -->
       <div id="skipBanner" style="display:none;background:#FFF8EE;border:1px solid #F0D9A0;border-radius:10px;padding:1rem 1.2rem;margin-bottom:1rem;text-align:center;">
         <div style="font-size:0.82rem;color:#8B6914;margin-bottom:0.8rem;">Vous pouvez passer cette étape, mais votre document sera marqué comme non fourni dans le contrat.</div>
-        <button onclick="skipDocuments()" style="background:#D4A853;color:#1A2E4A;border:none;border-radius:8px;padding:0.6rem 1.4rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;" data-i18n="skip_step">Passer cette étape →</button>
+        <button onclick="skipDocuments()" style="background:#C9A227;color:#16241E;border:none;border-radius:8px;padding:0.6rem 1.4rem;font-family:'Inter',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;" data-i18n="skip_step">Passer cette étape →</button>
       </div>
 
       <div class="btn-group">
@@ -1121,14 +1118,14 @@ document.addEventListener('DOMContentLoaded', function() {
       <hr class="section-divider">
 
       <!-- CODE SERRURE -->
-      <div style="background:linear-gradient(135deg,rgba(192,112,80,0.08),rgba(192,112,80,0.03));border:1.5px solid rgba(192,112,80,0.2);border-radius:14px;padding:1.2rem;margin-bottom:1.5rem;">
+      <div style="background:linear-gradient(135deg,rgba(22,36,30,0.08),rgba(22,36,30,0.03));border:1.5px solid rgba(22,36,30,0.2);border-radius:14px;padding:1.2rem;margin-bottom:1.5rem;">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.8rem;">
           <div>
             <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--light-mid);margin-bottom:0.3rem;">🔑 Code d'accès au logement</div>
-            <div id="lockCodeDisplay" style="font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:600;color:var(--terracotta);letter-spacing:0.2em">— — —</div>
+            <div id="lockCodeDisplay" style="font-family:'Fraunces',serif;font-size:2.2rem;font-weight:600;color:var(--terracotta);letter-spacing:0.2em">— — —</div>
             <div style="font-size:0.72rem;color:var(--sand);margin-top:0.2rem">Serrure numérique · 7 chiffres</div>
           </div>
-          <button type="button" onclick="generateLockCode()" style="background:var(--terracotta);color:white;border:none;border-radius:10px;padding:0.65rem 1.2rem;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">
+          <button type="button" onclick="generateLockCode()" style="background:var(--terracotta);color:white;border:none;border-radius:10px;padding:0.65rem 1.2rem;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;">
             🎲 Générer
           </button>
         </div>
@@ -1149,7 +1146,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <span class="sig-placeholder" id="sigPlaceholder">Signez avec votre doigt ou votre souris</span>
         </div>
       </div>
-      <div id="sigError" style="display:none;color:var(--terracotta);font-size:0.78rem;margin-top:0.4rem;padding:0.4rem 0.6rem;background:rgba(192,112,80,0.08);border-radius:6px;">
+      <div id="sigError" style="display:none;color:var(--terracotta);font-size:0.78rem;margin-top:0.4rem;padding:0.4rem 0.6rem;background:rgba(22,36,30,0.08);border-radius:6px;">
         ⚠ La signature est obligatoire pour valider le contrat.
       </div>
 
@@ -1442,7 +1439,7 @@ function updateChildrenAges() {
     var div = document.createElement('div');
     div.style.cssText = 'display:flex;align-items:center;gap:0.7rem;';
     div.innerHTML = '<label style="font-size:0.82rem;color:var(--text2);white-space:nowrap;">Enfant ' + (i+1) + ' :</label>' +
-      '<input type="number" id="childAge' + i + '" min="0" max="17" placeholder="Âge" style="width:80px;border:1.5px solid var(--border2);border-radius:8px;padding:0.4rem 0.7rem;font-family:Nunito Sans,sans-serif;font-size:0.9rem;">';
+      '<input type="number" id="childAge' + i + '" min="0" max="17" placeholder="Âge" style="width:80px;border:1.5px solid var(--border2);border-radius:8px;padding:0.4rem 0.7rem;font-family:Inter,sans-serif;font-size:0.9rem;">';
     container.appendChild(div);
   }
 }
@@ -1462,7 +1459,7 @@ function updateCompanions() {
   var extras = adultsCount - 1;
   if (extras <= 0) { section.style.display = 'none'; section.innerHTML = ''; return; }
   section.style.display = 'block';
-  var html = '<div style="font-family:Nunito,sans-serif;font-size:0.92rem;font-weight:700;color:var(--text);margin-bottom:0.8rem;">👥 Accompagnants adultes</div>';
+  var html = '<div style="font-family:Inter,sans-serif;font-size:0.92rem;font-weight:700;color:var(--text);margin-bottom:0.8rem;">👥 Accompagnants adultes</div>';
   for (var i = 0; i < extras; i++) {
     html += '<div class="card" style="margin-bottom:0.8rem;padding:1rem;">' +
       '<div style="font-size:0.82rem;font-weight:700;color:var(--accent);margin-bottom:0.8rem;">Adulte ' + (i+2) + '</div>' +
@@ -2151,7 +2148,7 @@ function showPropertyInfoBanner(prop) {
   
   const banner = document.createElement('div');
   banner.id = 'propInfoBanner';
-  banner.style.cssText = 'background:linear-gradient(135deg,#FFF8F5,#FFF0EC);border:1px solid rgba(192,112,80,0.2);border-radius:14px;padding:1.2rem 1.5rem;margin:1rem 2.5rem 0;';
+  banner.style.cssText = 'background:linear-gradient(135deg,#FFF8F5,#FFF0EC);border:1px solid rgba(22,36,30,0.2);border-radius:14px;padding:1.2rem 1.5rem;margin:1rem 2.5rem 0;';
   banner.innerHTML = `
     <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--terracotta);margin-bottom:0.7rem;">
       ℹ️ Informations de votre logement
@@ -2181,7 +2178,7 @@ function showPropertyInfoBanner(prop) {
   if (infos.length === 0) return;
   const banner = document.createElement('div');
   banner.id = 'propInfoBanner';
-  banner.style.cssText = 'background:linear-gradient(135deg,#FFF8F5,#FFF0EC);border:1px solid rgba(192,112,80,0.2);border-radius:14px;padding:1.2rem 1.5rem;margin:1rem 0 0;';
+  banner.style.cssText = 'background:linear-gradient(135deg,#FFF8F5,#FFF0EC);border:1px solid rgba(22,36,30,0.2);border-radius:14px;padding:1.2rem 1.5rem;margin:1rem 0 0;';
   banner.innerHTML = `
     <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--terracotta);margin-bottom:0.7rem;">ℹ️ Informations du logement</div>
     <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
@@ -2258,20 +2255,20 @@ function showExpiredPage(reason) {
   if (overlay) overlay.style.display = 'none';
   const isUnauthorized = reason.includes('non autorisé') || reason.includes('nécessite');
   document.body.innerHTML = `
-    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#F7F3EE;font-family:'DM Sans',sans-serif;padding:2rem;">
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#F7F3EE;font-family:'Inter',sans-serif;padding:2rem;">
       <div style="text-align:center;max-width:420px;">
-        <div style="width:70px;height:70px;background:${isUnauthorized ? '#FFF0F2' : 'rgba(192,112,80,0.1)'};border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem;">
+        <div style="width:70px;height:70px;background:${isUnauthorized ? '#FFF0F2' : 'rgba(22,36,30,0.1)'};border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem;">
           ${isUnauthorized ? '🔒' : '⏰'}
         </div>
-        <h1 style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:#2C2420;margin-bottom:0.8rem;">
+        <h1 style="font-family:'Fraunces',serif;font-size:2rem;color:#2C2420;margin-bottom:0.8rem;">
           ${isUnauthorized ? 'Accès refusé' : 'Lien expiré'}
         </h1>
         <p style="color:#6B5448;font-size:0.95rem;line-height:1.7;margin-bottom:1.5rem;">${reason}</p>
-        <div style="background:rgba(192,112,80,0.08);border:1px solid rgba(192,112,80,0.2);border-radius:12px;padding:1.2rem;">
+        <div style="background:rgba(22,36,30,0.08);border:1px solid rgba(22,36,30,0.2);border-radius:12px;padding:1.2rem;">
           <div style="font-size:0.82rem;color:#9E8476;line-height:1.6;">
             ${isUnauthorized 
-              ? '🏠 Cette page est réservée aux guests ayant reçu un lien de check-in de leur hôte via <strong style="color:#C07050">Stayform</strong>.'
-              : '⏱ Les liens de check-in sont valables <strong style="color:#C07050">3 heures</strong> pour votre sécurité. Contactez votre hôte pour un nouveau lien.'
+              ? '🏠 Cette page est réservée aux guests ayant reçu un lien de check-in de leur hôte via <strong style="color:#B5573D">Stayform</strong>.'
+              : '⏱ Les liens de check-in sont valables <strong style="color:#B5573D">3 heures</strong> pour votre sécurité. Contactez votre hôte pour un nouveau lien.'
             }
           </div>
         </div>
@@ -2282,7 +2279,7 @@ function showExpiredPage(reason) {
 function startCheckinCountdown(expiry) {
   const badge = document.createElement('div');
   badge.id = 'tokenTimer';
-  badge.style.cssText = 'position:fixed;bottom:1rem;right:1rem;background:rgba(44,36,32,0.85);color:#F0EDE8;padding:0.4rem 0.8rem;border-radius:20px;font-size:0.72rem;z-index:200;backdrop-filter:blur(4px);font-family:"DM Sans",sans-serif;';
+  badge.style.cssText = 'position:fixed;bottom:1rem;right:1rem;background:rgba(44,36,32,0.85);color:#F0EDE8;padding:0.4rem 0.8rem;border-radius:20px;font-size:0.72rem;z-index:200;backdrop-filter:blur(4px);font-family:"Inter",sans-serif;';
   document.body.appendChild(badge);
   function tick() {
     const rem = expiry - Date.now();
@@ -2399,11 +2396,11 @@ function initDemoContract() {
 
   var screen = document.createElement('div');
   screen.id = 'demoScreen';
-  screen.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#F7F3EE;overflow-y:auto;font-family:"DM Sans",sans-serif;padding:24px 16px;';
+  screen.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#F7F3EE;overflow-y:auto;font-family:"Inter",sans-serif;padding:24px 16px;';
   screen.innerHTML =
     '<div style="max-width:460px;margin:0 auto;">' +
       '<div style="display:inline-block;background:#FFF0E8;color:#C13515;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:14px;">Exemple · aucun contrat utilisé</div>' +
-      '<h1 style="font-family:\'Cormorant Garamond\',serif;font-size:2rem;line-height:1.15;color:#1C120A;margin:0 0 10px;">Voici le contrat que signeront vos voyageurs</h1>' +
+      '<h1 style="font-family:\'Fraunces\',serif;font-size:2rem;line-height:1.15;color:#1C120A;margin:0 0 10px;">Voici le contrat que signeront vos voyageurs</h1>' +
       '<p style="color:#6B5848;font-size:0.95rem;line-height:1.6;margin:0 0 20px;">Nous avons rempli le parcours avec un voyageur fictif pour vous montrer le résultat. Vos vrais voyageurs le font en 3 minutes depuis leur téléphone : dates, pièce d\'identité, signature.</p>' +
       '<div style="background:#fff;border:1px solid #EAE0D5;border-radius:14px;padding:16px;margin-bottom:18px;font-size:0.88rem;color:#3A2A1E;">' +
         '<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #F1EAE2;"><span style="color:#9E8476;">Logement</span><strong id="demoProp" style="text-align:right;"></strong></div>' +
@@ -2412,8 +2409,8 @@ function initDemoContract() {
         '<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;"><span style="color:#9E8476;">Séjour</span><strong style="text-align:right;">' + fmt(startDate) + ' → ' + fmt(endDate) + ' · ' + nights + ' nuits</strong></div>' +
       '</div>' +
       '<div id="demoMissing" style="display:none;background:#FFF8E1;border:1px solid #FFE082;border-radius:10px;padding:10px 12px;font-size:0.82rem;color:#7A5000;line-height:1.5;margin-bottom:16px;">Votre N° CNIE n\'est pas encore renseigné : il manquera dans le contrat. Ajoutez-le dans <strong>Template de contrat → Bailleur</strong>.</div>' +
-      '<button id="demoPdfBtn" style="width:100%;background:#2D4A3E;color:#fff;border:none;border-radius:10px;padding:15px;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:10px;">📄 Télécharger l\'exemple de contrat (PDF)</button>' +
-      '<a href="index.html" style="display:block;text-align:center;border:1px solid #D9CBBE;border-radius:10px;padding:13px;color:#2D4A3E;font-weight:600;text-decoration:none;font-size:0.92rem;">← Retour au tableau de bord</a>' +
+      '<button id="demoPdfBtn" style="width:100%;background:#16241E;color:#fff;border:none;border-radius:10px;padding:15px;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:10px;">📄 Télécharger l\'exemple de contrat (PDF)</button>' +
+      '<a href="index.html" style="display:block;text-align:center;border:1px solid #D9CBBE;border-radius:10px;padding:13px;color:#16241E;font-weight:600;text-decoration:none;font-size:0.92rem;">← Retour au tableau de bord</a>' +
     '</div>';
   document.body.appendChild(screen);
   document.getElementById('demoProp').textContent = pd.name || '—';
@@ -2772,7 +2769,7 @@ async function submitForm() {
     <div class="summary-item"><small>Arrivée</small><strong>${fmt(startDate)}</strong></div>
     <div class="summary-item"><small>Départ</small><strong>${fmt(endDate)}</strong></div>
     <div class="summary-item"><small>Durée</small><strong>${nights} nuit${nights>1?'s':''}</strong></div>
-    <div class="summary-item"><small>Pièce identité</small><strong style="color:${docSkipped?'#C07050':'var(--success)'}">${docSkipped?'⚠ En attente':'✓ Fournie'}</strong></div>
+    <div class="summary-item"><small>Pièce identité</small><strong style="color:${docSkipped?'#B5573D':'var(--success)'}">${docSkipped?'⚠ En attente':'✓ Fournie'}</strong></div>
   `;
   currentStep = 5;
   document.querySelectorAll('.page').forEach((p,i) => p.classList.toggle('active', i+1 === 5));
@@ -3519,7 +3516,7 @@ function _mainSetLang(lang) {
     document.documentElement.setAttribute('dir', 'rtl');
     document.documentElement.setAttribute('lang', 'ar');
     document.body.classList.add('rtl');
-    document.body.style.fontFamily = "'Noto Sans Arabic', 'DM Sans', sans-serif";
+    document.body.style.fontFamily = "'Noto Sans Arabic', 'Inter', sans-serif";
   } else {
     document.documentElement.setAttribute('dir', 'ltr');
     document.documentElement.setAttribute('lang', lang);
@@ -3621,6 +3618,41 @@ window.setLang = function(lang) {
   if (saved !== 'fr') setTimeout(function() { setLang(saved); }, 200);
 })();
 
+</script>
+<script>
+// Explique au voyageur pourquoi le bouton « Continuer » est grisé.
+(function () {
+  var hints = {
+    btn1: { fr: 'Choisissez vos dates d\'arrivée et de départ pour continuer.', en: 'Pick your arrival and departure dates to continue.', ar: 'اختر تاريخي الوصول والمغادرة للمتابعة.' },
+    btn3: { fr: 'Vérifiez votre pièce d\'identité pour continuer.', en: 'Verify your ID document to continue.', ar: 'تحقق من وثيقة هويتك للمتابعة.' },
+    btnSubmit: { fr: 'Cochez les cases et signez pour valider.', en: 'Tick the boxes and sign to confirm.', ar: 'ضع علامة على الخانات ووقّع للتأكيد.' }
+  };
+  function lang() { return window._lang || 'fr'; }
+  function sync(btn) {
+    var hint = document.getElementById(btn.id + 'Hint');
+    if (!hint) {
+      hint = document.createElement('p');
+      hint.id = btn.id + 'Hint';
+      hint.className = 'sf-btn-hint';
+      hint.setAttribute('aria-live', 'polite');
+      btn.closest('.btn-group').insertAdjacentElement('afterend', hint);
+    }
+    hint.textContent = btn.disabled ? hints[btn.id][lang()] || hints[btn.id].fr : '';
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    Object.keys(hints).forEach(function (id) {
+      var btn = document.getElementById(id);
+      if (!btn || !btn.closest('.btn-group')) return;
+      sync(btn);
+      new MutationObserver(function () { sync(btn); }).observe(btn, { attributes: true, attributeFilter: ['disabled'] });
+    });
+    document.querySelectorAll('.lang-btn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        Object.keys(hints).forEach(function (id) { var btn = document.getElementById(id); if (btn && btn.closest('.btn-group')) sync(btn); });
+      });
+    });
+  });
+})();
 </script>
 </body>
 </html>
