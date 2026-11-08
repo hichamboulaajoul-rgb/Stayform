@@ -8,7 +8,7 @@
 //   { action: "send", user_ids: [...] }    admin : envoie l'e-mail aux hôtes choisis (100 max)
 //   { action: "unsubscribe", token }       public : appelé par desinscription.html
 //
-// Déploiement : verify_jwt = false (la page de désinscription est publique) ;
+// Déploiement : verify_jwt peut rester activé (la page de désinscription envoie la clé anon) ;
 // les actions admin vérifient elles-mêmes le jeton et profiles.role = 'admin'.
 // Secrets utilisés : RESEND_API_KEY (déjà présent pour send-checkin-email),
 // SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY (fournis par Supabase).
