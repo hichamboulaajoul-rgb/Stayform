@@ -739,7 +739,7 @@ function safe(str) {
 }
 
 function showSection(id) {
-  var sections = ['overview','property-detail','properties','guests','contrats','settings','reseller'];
+  var sections = ['overview','property-detail','properties','guests','contrats','settings','reseller','guide'];
   var current = sections.find(function(s) {
     var el = document.getElementById('section-' + s);
     return el && el.style.display !== 'none' && el.style.display !== '';
@@ -759,12 +759,13 @@ function showSection(id) {
     }
   });
   document.querySelectorAll('.nav-item').forEach(function(el, i) {
-    el.classList.toggle('active', ['overview','properties','guests','reseller','settings'][i] === id);
+    el.classList.toggle('active', ['overview','properties','guests','reseller','settings','guide'][i] === id);
   });
   if (id === 'guests') { renderGuests('all'); }
   if (id === 'properties') { loadProperties(); }
   if (id === 'reseller') { if (typeof loadResellerData === 'function') loadResellerData(); }
   if (id === 'reseller') { loadResellerData(); }
+  if (id === 'guide' && typeof renderGuide === 'function') { renderGuide(); }
   if (window.innerWidth < 768) {
     var sb2 = document.getElementById('sidebar');
     if (sb2) sb2.classList.remove('open');
@@ -1534,6 +1535,9 @@ function showToast(msg, color) {
       <div class="nav-item" onclick="showSection('settings')">
         <span class="icon">⚙️</span> Paramètres
       </div>
+      <div class="nav-item" onclick="showSection('guide')">
+        <span class="icon">🧭</span> Guide pas à pas
+      </div>
 
       <div class="sidebar-footer">
         <div class="user-pill">
@@ -2157,6 +2161,9 @@ function showToast(msg, color) {
       </div>
 
       <!-- SETTINGS SECTION -->
+      <!-- GUIDE SECTION (rempli par renderGuide, script onboarding en bas de page) -->
+      <div id="section-guide" style="display:none"></div>
+
       <div id="section-settings" style="display:none">
         <div class="topbar fade-in">
           <div>
@@ -5214,14 +5221,26 @@ window.addEventListener('DOMContentLoaded', async () => {
 .onb-modal li { display:flex; gap:0.6rem; align-items:center; font-size:0.86rem; color:var(--text); background:#FAF6F1; border-radius:8px; padding:0.55rem 0.7rem; }
 .onb-modal li i { font-style:normal; width:22px; height:22px; border-radius:50%; background:#2D4A3E; color:#fff; font-size:0.72rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .onb-cta { width:100%; background:#2D4A3E; color:#fff; border:none; border-radius:10px; padding:0.85rem; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.95rem; cursor:pointer; }
+.guide-step { margin-bottom:1rem; }
+.guide-step.is-done { opacity:0.75; }
+.guide-step-head { display:flex; align-items:center; gap:0.8rem; margin-bottom:0.7rem; }
+.guide-step-icon { width:42px; height:42px; border-radius:12px; background:#F2F7F4; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+.guide-step-k { font-size:0.72rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--text3); }
+.guide-step-t { font-family:'Nunito',sans-serif; font-size:1.05rem; font-weight:800; color:var(--text); }
+.guide-how { margin:0 0 0.9rem 1.2rem; padding:0; display:flex; flex-direction:column; gap:0.35rem; font-size:0.86rem; color:var(--text2); line-height:1.5; }
+.guide-show { padding:0.6rem 1rem; }
+.guide-help { display:flex; align-items:center; gap:0.9rem; flex-wrap:wrap; }
+.onb-fab { position:fixed; right:16px; bottom:16px; z-index:450; display:flex; align-items:center; gap:0.45rem; background:#2D4A3E; color:#fff; border:none; border-radius:999px; padding:0.6rem 1rem 0.6rem 0.65rem; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.85rem; cursor:pointer; box-shadow:0 6px 20px rgba(45,74,62,0.3); }
+.onb-fab span { width:24px; height:24px; border-radius:50%; background:#fff; color:#2D4A3E; display:flex; align-items:center; justify-content:center; font-weight:800; }
+@media (max-width:520px) { .onb-fab { padding:0.6rem; } .onb-fab { font-size:0; gap:0; } .onb-fab span { font-size:0.9rem; } }
 .onb-later { margin-top:0.5rem; background:none; border:none; color:var(--text3); font-size:0.8rem; cursor:pointer; font-family:inherit; padding:0.4rem; }
 </style>
 
 <script>
 (function () {
   var STEPS = [
-    { key: 'property', title: 'Ajoutez votre logement', hint: 'Collez votre lien Airbnb, ou ajoutez-le à la main', go: 'Ajouter' },
-    { key: 'contract', title: 'Complétez votre contrat', hint: 'Votre N° CNIE, téléphone et règles de la maison', go: 'Compléter' },
+    { key: 'property', title: 'Ajoutez votre hébergement', hint: 'Collez votre lien Airbnb, ou ajoutez-le à la main', go: 'Ajouter' },
+    { key: 'contract', title: 'Configurez vos règles', hint: 'Depuis votre hébergement : vos infos (CNIE, téléphone) et vos règles', go: 'Configurer' },
     { key: 'link',     title: 'Générez votre lien de check-in', hint: 'Le lien à envoyer à votre voyageur sur WhatsApp', go: 'Générer' },
     { key: 'preview',  title: 'Voyez votre premier contrat', hint: 'Un exemple PDF avec un voyageur fictif, sans utiliser de contrat', go: 'Voir' },
   ];
@@ -5236,6 +5255,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     try { localStorage.setItem('sf_onb_' + uid(), JSON.stringify(s)); } catch (e) {}
     return s;
   }
+  var SNOOZE_MS = 3 * 86400000;
+  function isSnoozed(s) { return (s.hiddenUntil || 0) > Date.now(); }
   function props() { return (typeof currentProperties !== 'undefined' && currentProperties) || []; }
   function statNum(id) { var el = document.getElementById(id); return el ? (parseInt(el.textContent, 10) || 0) : 0; }
 
@@ -5263,7 +5284,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       if (s.shown && !s.celebrated) { saveState({ celebrated: true }); celebrate(); }
       return;
     }
-    if (s.hidden) { card.style.display = 'none'; return; }
+    if (isSnoozed(s)) { card.style.display = 'none'; return; }
 
     var currentIdx = STEPS.findIndex(function (st) { return !p[st.key]; });
     card.innerHTML =
@@ -5284,7 +5305,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   document.addEventListener('click', function (e) {
     var hide = e.target.closest && e.target.closest('[data-onb-hide]');
-    if (hide) { saveState({ hidden: true }); render(); showToast('Guide masqué. Retrouvez-le dans Paramètres → « Revoir le guide ».'); return; }
+    if (hide) { saveState({ hiddenUntil: Date.now() + SNOOZE_MS }); render(); showToast('Guide masqué pour 3 jours. Il reste disponible dans le menu « Guide pas à pas ».'); return; }
     var step = e.target.closest && e.target.closest('[data-onb-step]');
     if (step && !step.classList.contains('done')) runStep(step.getAttribute('data-onb-step'));
   });
@@ -5369,8 +5390,15 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (key === 'contract') {
       await openFirstProperty();
       if (typeof switchContractTab === 'function') switchContractTab('bailleur');
-      spotlight('#ct-host-cin', 'Étape 2 sur 4',
-        'Ajoutez votre N° CNIE et votre téléphone, puis cliquez sur « 💾 Enregistrer » en haut de la carte. Vos règles sont dans l\'onglet « Règlement ».');
+      var hasCin = typeof currentProfile !== 'undefined' && currentProfile && currentProfile.cin;
+      if (hasCin && typeof switchContractTab === 'function') switchContractTab('reglement');
+      if (hasCin) {
+        spotlight('#ctab-reglement', 'Étape 2 sur 4',
+          'Cochez vos règles (fumer, animaux, fêtes, heures calmes) et ajoutez vos instructions, puis cliquez sur « 💾 Enregistrer » en haut de la carte.');
+      } else {
+        spotlight('#ct-host-cin', 'Étape 2 sur 4',
+          'Ajoutez votre N° CNIE et votre téléphone. Ensuite, onglet « Règlement » pour vos règles, puis « 💾 Enregistrer » en haut de la carte.');
+      }
       return;
     }
     if (key === 'link') {
@@ -5413,13 +5441,21 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.body.appendChild(bg);
     return bg;
   }
-  function welcome() {
+  function welcome(returning) {
     var first = (currentProfile && currentProfile.name || '').split(' ')[0];
+    var p = progress();
+    var left = STEPS.filter(function (st) { return !p[st.key]; }).length;
+    var intro = left === STEPS.length
+      ? 'Préparez votre premier contrat de location en <strong>4 étapes, environ 3 minutes</strong>. On vous montre où cliquer.'
+      : 'Plus que <strong>' + left + ' étape' + (left > 1 ? 's' : '') + '</strong> pour que vos voyageurs signent leur contrat en ligne. On vous montre où cliquer.';
     var bg = modal(
       '<div style="font-size:2.4rem">👋</div>' +
-      '<h2>Bienvenue' + (first ? ', <span data-n></span>' : '') + ' !</h2>' +
-      '<p>Préparez votre premier contrat de location en <strong>4 étapes, environ 3 minutes</strong>. On vous montre où cliquer.</p>' +
-      '<ol>' + STEPS.map(function (st, i) { return '<li><i>' + (i + 1) + '</i>' + st.title + '</li>'; }).join('') + '</ol>' +
+      '<h2>' + (returning ? 'Bon retour' : 'Bienvenue') + (first ? ', <span data-n></span>' : '') + ' !</h2>' +
+      '<p>' + intro + '</p>' +
+      '<ol>' + STEPS.map(function (st, i) {
+        return '<li' + (p[st.key] ? ' style="opacity:0.55;text-decoration:line-through"' : '') + '><i' +
+          (p[st.key] ? ' style="background:#5A9A6A"' : '') + '>' + (p[st.key] ? '✓' : (i + 1)) + '</i>' + st.title + '</li>';
+      }).join('') + '</ol>' +
       '<button class="onb-cta" type="button" data-start>Commencer →</button>' +
       '<button class="onb-later" type="button" data-later>Plus tard</button>');
     var n = bg.querySelector('[data-n]'); if (n) n.textContent = first;
@@ -5447,19 +5483,107 @@ window.addEventListener('DOMContentLoaded', async () => {
     var p = progress();
     var allDone = STEPS.every(function (st) { return p[st.key]; });
     var s = loadState();
-    // L'accueil ne s'affiche qu'une fois, et pas aux hôtes déjà actifs
-    if (!allDone && !s.welcomed && !s.hidden && statNum('statTotal') === 0) {
-      saveState({ welcomed: true });
-      setTimeout(welcome, 500);
+    // Tant que le guide n'est pas terminé, l'accueil revient une fois par jour
+    // (nouveaux comptes comme clients existants), sauf si le guide a été masqué.
+    var today = new Date().toISOString().slice(0, 10);
+    if (!allDone && s.lastWelcome !== today && !isSnoozed(s)) {
+      var returning = !!s.lastWelcome;
+      saveState({ lastWelcome: today });
+      setTimeout(function () { welcome(returning); }, 500);
     }
   }
 
+  // ── Page « Guide pas à pas » (toujours accessible depuis le menu) ──
+  var GUIDE = {
+    property: {
+      icon: '🏠',
+      how: [
+        'Allez dans <b>Mes hébergements</b> puis <b>+ Ajouter un hébergement</b>.',
+        'Dans l\'app Airbnb, ouvrez votre annonce, touchez <b>Partager</b> puis <b>Copier le lien</b>.',
+        'Collez le lien et cliquez sur <b>Importer depuis Airbnb</b>, puis <b>Confirmer et enregistrer</b>.',
+        'Pas d\'annonce Airbnb ? Cliquez sur <b>Ajouter manuellement sans Airbnb</b>.',
+      ],
+    },
+    contract: {
+      icon: '📋',
+      how: [
+        'Ouvrez votre hébergement depuis <b>Mes hébergements</b>.',
+        'Carte <b>Template de contrat</b>, onglet <b>Bailleur</b> : votre nom, téléphone et N° CNIE.',
+        'Onglet <b>Règlement</b> : fumer, animaux, fêtes, heures calmes, instructions (code boîte à clés, poubelles…).',
+        'Onglet <b>Conditions</b> (facultatif) : un article en plus. Puis cliquez sur <b>💾 Enregistrer</b>.',
+      ],
+    },
+    link: {
+      icon: '🔗',
+      how: [
+        'Dans la fiche de votre hébergement, cliquez sur <b>🔗 Nouveau lien</b>.',
+        'Envoyez-le à votre voyageur avec le bouton <b>WhatsApp</b> ou <b>Copier</b>.',
+        'Le lien est valable <b>3 heures</b> et pour <b>un seul voyageur</b> : créez-en un nouveau pour chaque séjour.',
+      ],
+    },
+    preview: {
+      icon: '📄',
+      how: [
+        'Ouvrez l\'exemple : c\'est votre contrat avec vos règles et un voyageur fictif.',
+        'Il ne compte pas dans vos contrats.',
+        'Votre vrai voyageur choisit ses dates, scanne sa pièce d\'identité et signe. Vous retrouvez son contrat PDF dans <b>Mes guests</b>.',
+      ],
+    },
+  };
+  function renderGuide() {
+    var el = document.getElementById('section-guide');
+    if (!el) return;
+    var p = progress();
+    var doneCount = STEPS.filter(function (st) { return p[st.key]; }).length;
+    el.innerHTML =
+      '<div class="topbar fade-in"><div><div class="topbar-title">🧭 Guide pas à pas</div>' +
+      '<div class="topbar-sub">Hébergement → règles → lien : tout pour que vos voyageurs signent en ligne</div></div></div>' +
+      '<div class="onb-card"><div class="onb-sub" style="margin-bottom:0.5rem">' + doneCount + ' étape' + (doneCount > 1 ? 's' : '') + ' sur 4 terminée' + (doneCount > 1 ? 's' : '') + '</div>' +
+      '<div class="onb-bar" style="margin-bottom:0"><div class="onb-bar-fill" style="width:' + Math.max(4, doneCount * 25) + '%"></div></div></div>' +
+      STEPS.map(function (st, i) {
+        var g = GUIDE[st.key];
+        return '<div class="section-card guide-step' + (p[st.key] ? ' is-done' : '') + '">' +
+          '<div class="guide-step-head"><div class="guide-step-icon">' + g.icon + '</div><div style="flex:1;min-width:0">' +
+          '<div class="guide-step-k">Étape ' + (i + 1) + (p[st.key] ? ' · <span style="color:#2D7A45">✓ faite</span>' : '') + '</div>' +
+          '<div class="guide-step-t">' + st.title + '</div></div></div>' +
+          '<ol class="guide-how">' + g.how.map(function (h) { return '<li>' + h + '</li>'; }).join('') + '</ol>' +
+          '<button class="onb-go guide-show" type="button" data-guide-show="' + st.key + '">' + (st.key === 'preview' ? '📄 Voir l\'exemple' : '👉 Montrez-moi') + '</button>' +
+          '</div>';
+      }).join('') +
+      '<div class="section-card guide-help"><div style="font-size:1.6rem">💬</div><div style="flex:1;min-width:200px">' +
+      '<div class="guide-step-t" style="font-size:0.95rem">Toujours bloqué ?</div>' +
+      '<div class="onb-sub">Écrivez-nous sur WhatsApp, on vous aide à configurer votre compte.</div></div>' +
+      '<button class="onb-go" type="button" data-guide-help style="background:#25D366">WhatsApp</button></div>';
+  }
+  window.renderGuide = renderGuide;
+  document.addEventListener('click', function (e) {
+    var show = e.target.closest && e.target.closest('[data-guide-show]');
+    if (show) { runStep(show.getAttribute('data-guide-show')); return; }
+    if (e.target.closest && e.target.closest('[data-guide-help]')) {
+      var who = (typeof currentProfile !== 'undefined' && currentProfile && currentProfile.name) || '';
+      window.open('https://wa.me/212694962765?text=' + encodeURIComponent('Bonjour, j\'ai besoin d\'aide pour configurer Stayform.' + (who ? ' (' + who + ')' : '')), '_blank');
+    }
+    if (e.target.closest && e.target.closest('#onbHelpFab')) showSection('guide');
+  });
+
+  // Bouton d'aide flottant, visible sur tout le tableau de bord
+  (function () {
+    var dash = document.getElementById('dashScreen');
+    if (!dash) return;
+    var fab = document.createElement('button');
+    fab.id = 'onbHelpFab';
+    fab.type = 'button';
+    fab.className = 'onb-fab';
+    fab.innerHTML = '<span>?</span> Besoin d\'aide';
+    fab.setAttribute('aria-label', 'Ouvrir le guide pas à pas');
+    dash.appendChild(fab);
+  })();
+
   // Revoir le guide depuis les paramètres
   window.restartOnboarding = function () {
-    saveState({ hidden: false });
-    showSection('overview');
+    saveState({ hiddenUntil: 0 });
     render();
-    setTimeout(welcome, 200);
+    showSection('guide');
   };
 
   // ── Rafraîchir la carte après les actions de l'hôte ──
@@ -5473,7 +5597,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     };
   }
   wrap('loadDashboard', afterDashboardLoad);
-  ['loadProperties', 'saveContractTemplate', '_generatePropertyLink', 'updateStats'].forEach(function (n) { wrap(n, render); });
+  function renderAll() {
+    render();
+    var g = document.getElementById('section-guide');
+    if (g && g.style.display === 'block') renderGuide();
+  }
+  ['loadProperties', 'saveContractTemplate', '_generatePropertyLink', 'updateStats'].forEach(function (n) { wrap(n, renderAll); });
   // Retour depuis l'onglet de l'exemple
   document.addEventListener('visibilitychange', function () { if (!document.hidden) render(); });
 })();
