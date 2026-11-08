@@ -28,7 +28,7 @@ create view public.admin_profiles as select id, name, email, plan from public.pr
 create view public.expiring_plans as select id, name, email, plan, plan_expires_at from public.profiles where plan <> 'free';
 grant select, insert, update, delete on all tables in schema public to anon, authenticated;
 
-create function public.admin_activate_plan(p_user_id uuid, p_plan text, p_months integer) returns void language plpgsql security definer as $$
+create function public.admin_activate_plan(p_user_id uuid, p_plan text, p_months integer default 12) returns void language plpgsql security definer as $$
 begin update public.profiles set plan = p_plan, plan_activated_at = now(), plan_expires_at = now() + (p_months || ' months')::interval where id = p_user_id; end $$;
 create function public.admin_activate_reseller(p_user_id uuid, p_credits integer, p_pack text) returns void language plpgsql security definer as $$ begin end $$;
 create function public.admin_add_credits(p_user_id uuid, p_credits integer) returns void language plpgsql security definer as $$ begin end $$;

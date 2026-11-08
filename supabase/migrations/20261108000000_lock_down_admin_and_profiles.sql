@@ -31,7 +31,7 @@ revoke all on function public.is_admin() from public, anon;
 grant execute on function public.is_admin() to authenticated, service_role;
 
 -- 2. Admin RPCs: require an admin caller -----------------------------------------
-create or replace function public.admin_activate_plan(p_user_id uuid, p_plan text, p_months integer)
+create or replace function public.admin_activate_plan(p_user_id uuid, p_plan text, p_months integer default 12)
 returns void language plpgsql security definer set search_path = public as $$
 begin
   if not public.is_admin() then raise exception 'not authorized' using errcode = '42501'; end if;
