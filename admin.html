@@ -98,6 +98,10 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-h
 .view-tabs{display:flex;gap:0.4rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);}
 .view-tab{background:none;border:none;border-bottom:2px solid transparent;padding:0.6rem 1rem;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text3);cursor:pointer;margin-bottom:-1px;}
 .view-tab.active{color:var(--green);border-bottom-color:var(--green);}
+.relance-intro{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem;}
+.relance-intro p{font-size:0.85rem;color:var(--text2);line-height:1.6;margin-top:0.4rem;}
+.relance-row.is-off td{opacity:0.55;}
+.relance-row input{width:17px;height:17px;accent-color:var(--green);cursor:pointer;}
 .act-title{font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;color:var(--text);margin:1.5rem 0 0.7rem;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;}
 .act-chip{display:inline-block;font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:20px;background:#F5F0EB;color:var(--text2);}
 .act-chip.login{background:#EEF5F1;color:var(--success);}
@@ -145,6 +149,7 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-h
     <div class="view-tabs">
       <button class="view-tab active" id="tab-users" onclick="showView('users')">👥 Utilisateurs</button>
       <button class="view-tab" id="tab-activity" onclick="showView('activity')">📈 Activité</button>
+      <button class="view-tab" id="tab-relances" onclick="showView('relances')">✉️ Relances</button>
     </div>
 
     <div id="view-users">
@@ -283,6 +288,46 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-h
       </div>
     </div><!-- /view-activity -->
 
+    <!-- ── RELANCE DES HÔTES SANS CONTRAT ── -->
+    <div id="view-relances" style="display:none;">
+      <div class="relance-intro">
+        <div class="act-title" style="margin-top:0;">Hôtes inscrits sans aucun contrat</div>
+        <p>Envoyez-leur un e-mail qui explique les 3 étapes pour créer leur premier contrat. Les réponses arrivent sur <strong id="relanceReplyTo">votre adresse</strong>. Chaque e-mail contient un lien de désinscription ; les hôtes désinscrits n'apparaissent plus ici. Un hôte ne peut pas être relancé deux fois en moins de <span id="relanceWait">7</span> jours.</p>
+      </div>
+      <div class="toolbar">
+        <button class="filter-btn" onclick="relanceSelectAll(true)">Tout cocher</button>
+        <button class="filter-btn" onclick="relanceSelectAll(false)">Tout décocher</button>
+        <button class="filter-btn" onclick="openRelancePreview()">👁 Aperçu de l'e-mail</button>
+        <button onclick="loadRelances()" class="filter-btn">↻ Actualiser</button>
+        <button id="relanceSendBtn" onclick="sendRelances()" style="margin-left:auto;background:var(--green);color:#fff;border:none;border-radius:8px;padding:0.6rem 1rem;font-size:0.82rem;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700;">Envoyer à 0 hôte</button>
+      </div>
+      <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th style="width:36px;"></th>
+            <th>Hôte</th>
+            <th>Inscrit le</th>
+            <th>Dernière relance</th>
+          </tr>
+        </thead>
+        <tbody id="relanceBody">
+          <tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text3);">Chargement...</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div><!-- /view-relances -->
+
+  </div>
+</div>
+
+<!-- Modal Aperçu relance -->
+<div class="modal-overlay" id="relancePreviewModal">
+  <div class="modal" style="max-width:640px;width:100%;">
+    <button class="modal-close" onclick="closeModal('relancePreviewModal')">✕</button>
+    <div class="modal-title">Aperçu de l'e-mail</div>
+    <div class="modal-sub" id="relancePreviewMeta">—</div>
+    <iframe id="relancePreviewFrame" title="Aperçu de l'e-mail" style="width:100%;height:60vh;border:1px solid var(--border);border-radius:10px;background:#F3ECDD;"></iframe>
   </div>
 </div>
 
@@ -736,9 +781,116 @@ function userById(id) { return allUsers.find(u => u.id === id) || null; }
 function showView(v) {
   document.getElementById('view-users').style.display = v === 'users' ? 'block' : 'none';
   document.getElementById('view-activity').style.display = v === 'activity' ? 'block' : 'none';
+  document.getElementById('view-relances').style.display = v === 'relances' ? 'block' : 'none';
   document.getElementById('tab-users').classList.toggle('active', v === 'users');
   document.getElementById('tab-activity').classList.toggle('active', v === 'activity');
+  document.getElementById('tab-relances').classList.toggle('active', v === 'relances');
   if (v === 'activity' && !activityLoaded) loadActivity();
+  if (v === 'relances' && !relanceData) loadRelances();
+}
+
+// ── RELANCES (hôtes sans contrat) ──
+const RELANCE_FN = SUPABASE_URL + '/functions/v1/relance-hotes';
+let relanceData = null;
+let relanceSelected = new Set();
+
+async function callRelance(payload) {
+  const { data: { session } } = await sb.auth.getSession();
+  const res = await fetch(RELANCE_FN, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session ? session.access_token : ''), 'apikey': SUPABASE_KEY },
+    body: JSON.stringify(payload)
+  });
+  let out = {};
+  try { out = await res.json(); } catch (e) {}
+  if (!res.ok) throw new Error(out.error || ('Erreur ' + res.status + (res.status === 404 ? ' : la fonction relance-hotes n\'est pas encore déployée' : '')));
+  return out;
+}
+
+function relanceRecent(c) {
+  return !!c.last_sent && (Date.now() - new Date(c.last_sent)) < (relanceData.wait_days || 7) * 86400000;
+}
+
+async function loadRelances() {
+  const tbody = document.getElementById('relanceBody');
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text3);">Chargement...</td></tr>';
+  try {
+    relanceData = await callRelance({ action: 'preview' });
+  } catch (e) {
+    relanceData = null;
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--danger);">' + esc(e.message) + '</td></tr>';
+    updateRelanceBtn();
+    return;
+  }
+  document.getElementById('relanceReplyTo').textContent = relanceData.reply_to || 'votre adresse';
+  document.getElementById('relanceWait').textContent = relanceData.wait_days || 7;
+  relanceSelected = new Set(relanceData.candidates.filter(c => !relanceRecent(c)).map(c => c.id));
+  renderRelances();
+}
+
+function renderRelances() {
+  const tbody = document.getElementById('relanceBody');
+  const list = relanceData ? relanceData.candidates : [];
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text3);">Aucun hôte sans contrat à relancer 🎉</td></tr>';
+  } else {
+    tbody.innerHTML = list.map(c => {
+      const recent = relanceRecent(c);
+      return '<tr class="relance-row' + (recent ? ' is-off' : '') + '">' +
+        '<td><input type="checkbox" ' + (relanceSelected.has(c.id) ? 'checked ' : '') + (recent ? 'disabled title="Relancé récemment" ' : '') +
+          'onchange="toggleRelance(\'' + esc(c.id) + '\', this.checked)"></td>' +
+        '<td><div style="font-weight:600;color:var(--text);">' + esc(c.name || '—') + '</div><div style="font-size:0.78rem;color:var(--text3);">' + esc(c.email) + '</div></td>' +
+        '<td>' + (c.created_at ? new Date(c.created_at).toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'}) : '—') + '</td>' +
+        '<td>' + (c.last_sent ? esc(fmtDateTime(c.last_sent)) + ' <span style="color:var(--text3);font-size:0.75rem;">' + esc(timeAgo(c.last_sent)) + '</span>' : '<span style="color:var(--text3);">Jamais</span>') + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+  updateRelanceBtn();
+}
+
+function toggleRelance(id, on) {
+  if (on) relanceSelected.add(id); else relanceSelected.delete(id);
+  updateRelanceBtn();
+}
+
+function relanceSelectAll(on) {
+  if (!relanceData) return;
+  relanceSelected = new Set(on ? relanceData.candidates.filter(c => !relanceRecent(c)).map(c => c.id) : []);
+  renderRelances();
+}
+
+function updateRelanceBtn() {
+  const n = relanceSelected.size;
+  const btn = document.getElementById('relanceSendBtn');
+  btn.textContent = 'Envoyer à ' + n + ' hôte' + (n > 1 ? 's' : '');
+  btn.disabled = n === 0;
+  btn.style.opacity = n === 0 ? '0.5' : '1';
+}
+
+function openRelancePreview() {
+  if (!relanceData) { showToast('Chargez d\'abord la liste', 'var(--danger)'); return; }
+  const s = relanceData.sample;
+  document.getElementById('relancePreviewMeta').textContent =
+    'De : ' + relanceData.from + ' · Réponses à : ' + (relanceData.reply_to || '—') + ' · Objet : ' + s.subject;
+  document.getElementById('relancePreviewFrame').srcdoc = s.html;
+  document.getElementById('relancePreviewModal').classList.add('open');
+}
+
+async function sendRelances() {
+  const ids = Array.from(relanceSelected);
+  if (!ids.length) return;
+  const max = (relanceData && relanceData.max) || 100;
+  if (ids.length > max) { showToast('Maximum ' + max + ' hôtes par envoi', 'var(--danger)'); return; }
+  if (!confirm('Envoyer l\'e-mail de relance à ' + ids.length + ' hôte' + (ids.length > 1 ? 's' : '') + ' ?\n\nCet envoi ne peut pas être annulé.')) return;
+  const btn = document.getElementById('relanceSendBtn');
+  btn.disabled = true; btn.textContent = 'Envoi en cours...';
+  try {
+    const r = await callRelance({ action: 'send', user_ids: ids });
+    showToast('✓ ' + r.sent + ' e-mail' + (r.sent > 1 ? 's' : '') + ' envoyé' + (r.sent > 1 ? 's' : '') + (r.skipped ? ' · ' + r.skipped + ' ignoré(s)' : ''));
+  } catch (e) {
+    showToast(e.message, 'var(--danger)');
+  }
+  await loadRelances();
 }
 
 function setActivityPeriod(days) {
