@@ -3979,6 +3979,27 @@ function renderProperties() {
   currentProperties.forEach(p => restorePropertyLink(p.id));
 }
 
+// Titres de pages qu'Airbnb renvoie à la place de l'annonce (redirection, blocage...)
+var NOT_A_LISTING_NAME = /^(redirection vers|redirecting to|weiterleitung|redirigiendo|access denied|attention required|just a moment|airbnb\s*[:|-]|airbnb$)/i;
+function isNotAListingName(name) {
+  return !name || NOT_A_LISTING_NAME.test(String(name).trim());
+}
+var _pendingAirbnbUrl = null;
+
+// L'import a échoué : on passe au formulaire manuel en gardant le lien Airbnb
+function fallbackToManualImport(url, message) {
+  _importedPropData = null;
+  _pendingAirbnbUrl = url;
+  var status = document.getElementById('importStatus');
+  var btn = document.getElementById('importBtn');
+  if (status) status.style.display = 'none';
+  if (btn) { btn.disabled = false; btn.textContent = '⬇ Importer depuis Airbnb'; btn.style.background = 'var(--accent)'; }
+  switchToManualForm();
+  var nameEl = document.getElementById('propName3');
+  if (nameEl) { nameEl.value = ''; nameEl.focus(); }
+  showToast(message || "Airbnb n'a pas pu être lu — complétez le nom et la ville, le lien est gardé", '#B7791F');
+}
+
 async function _importFromAirbnb() {
   var rawUrl = document.getElementById('propAirbnb').value.trim();
   if (!rawUrl) { showToast('Collez un lien Airbnb dans le champ', '#C13515'); return; }
@@ -4004,13 +4025,20 @@ async function _importFromAirbnb() {
     });
     const result = await res.json();
 
-    if (!res.ok || !result.success) {
+    if (res.status === 429) {
       status.style.background = '#FFF0F0'; status.style.color = '#C13515';
-      status.textContent = '❌ ' + (result.error || 'Erreur lors de la lecture');
+      status.textContent = '❌ ' + (result.error || 'Trop de requêtes');
       btn.disabled = false; btn.textContent = '⬇ Importer'; return;
+    }
+    if (!res.ok || !result.success || !result.data || isNotAListingName(result.data.name)) {
+      console.warn('Airbnb import unusable:', res.status, result);
+      fallbackToManualImport(url);
+      return;
     }
 
     const d = result.data;
+    d.amenities = d.amenities || [];
+    d.rules = d.rules || [];
 
     // ── Stocker toutes les données importées ──
     _importedPropData = d;
@@ -4096,9 +4124,7 @@ async function _importFromAirbnb() {
 
   } catch(e) {
     console.error('Import error:', e);
-    status.style.background = '#FFF0F0'; status.style.color = '#C13515';
-    status.textContent = '❌ Erreur réseau. Réessayez.';
-    btn.disabled = false; btn.textContent = '⬇ Importer';
+    fallbackToManualImport(url, "Import Airbnb impossible pour l'instant — complétez le nom et la ville, le lien est gardé");
   }
 }
 
@@ -4115,6 +4141,7 @@ function _openAddProperty(propId) {
   }
   editingPropertyId = propId || null;
   _importedPropData = null;
+  _pendingAirbnbUrl = null;
   const modal = document.getElementById('propertyModal');
   if (!modal) return;
 
@@ -4180,9 +4207,9 @@ async function _saveProperty() {
     ? document.getElementById('propName').value.trim()
     : (imp.name || document.getElementById('propName').value.trim());
 
-  if (!name) { 
+  if (!name || isNotAListingName(name)) { 
     btn.disabled = false; btn.textContent = '✓ Confirmer et enregistrer';
-    showToast('Le nom est introuvable', '#C13515'); 
+    showToast(name ? 'Donnez un vrai nom à votre logement' : 'Le nom est introuvable', '#C13515'); 
     return; 
   }
 
@@ -4247,6 +4274,7 @@ async function savePropertyManual() {
   if (!currentUser) { showToast('Vous devez être connecté', '#C13515'); return; }
   const name = document.getElementById('propName3').value.trim();
   if (!name) { showToast('Le nom est obligatoire', '#C13515'); return; }
+  if (isNotAListingName(name)) { showToast('Donnez un vrai nom à votre logement', '#C13515'); return; }
   function getVal(id, def) {
     var el = document.getElementById(id);
     return el ? (el.value || '').trim() || (def || '') : (def || '');
@@ -4261,9 +4289,11 @@ async function savePropertyManual() {
     wifi_password: getVal('propWifiPass3'),
     cover_emoji:   getVal('propEmoji3', '🏠') || '🏠',
   };
+  if (_pendingAirbnbUrl) data.airbnb_url = _pendingAirbnbUrl;
   const { error } = await client.from('properties').insert(data);
   if (error) { console.error('Manual save error:', error); showToast('Erreur: ' + error.message, '#C13515'); return; }
   console.log('Property manually saved!');
+  _pendingAirbnbUrl = null;
   closePropertyModal();
   await loadProperties();
   showToast('✓ Hébergement ajouté !', '#008A05');
