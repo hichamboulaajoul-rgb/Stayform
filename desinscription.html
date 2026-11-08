@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Stayform — Désinscription</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; background: #F3ECDD; font-family: 'Inter', system-ui, sans-serif; color: #16241E; }
+.card { width: 100%; max-width: 440px; background: #fff; border-radius: 16px; padding: 2rem 1.6rem; text-align: center; box-shadow: 0 10px 30px rgba(22,36,30,0.08); }
+h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 1.5rem; margin: 1rem 0 0.6rem; }
+p { color: #5B6B63; line-height: 1.6; font-size: 0.95rem; }
+.btn { display: inline-block; margin-top: 1.4rem; background: #24423A; color: #fff; border: none; border-radius: 10px; padding: 0.8rem 1.4rem; font: 700 0.95rem 'Inter', sans-serif; text-decoration: none; cursor: pointer; }
+.btn[disabled] { opacity: 0.6; cursor: default; }
+.link { display: block; margin-top: 1rem; color: #24423A; font-size: 0.85rem; }
+</style>
+<link rel="stylesheet" href="brand.css">
+</head>
+<body>
+<main class="card" id="card">
+  <span class="sf-mark" style="margin:0">S</span>
+  <h1>Ne plus recevoir nos e-mails</h1>
+  <p>Vous ne recevrez plus d'e-mails de relance de Stayform. Votre compte et vos contrats ne changent pas.</p>
+  <button class="btn" id="go" onclick="unsubscribe()">Confirmer la désinscription</button>
+  <a class="link" href="https://stayform.link">Retour à Stayform</a>
+</main>
+<script>
+const FN_URL = 'https://syvpyvkgauyfqghwiqsl.supabase.co/functions/v1/relance-hotes';
+const token = new URLSearchParams(location.search).get('t') || '';
+
+function show(title, text) {
+  document.getElementById('card').innerHTML =
+    '<span class="sf-mark" style="margin:0">S</span><h1></h1><p></p>' +
+    '<a class="btn" href="https://stayform.link">Retour à Stayform</a>';
+  document.querySelector('#card h1').textContent = title;
+  document.querySelector('#card p').textContent = text;
+}
+
+if (!token) show('Lien incomplet', "Ce lien de désinscription n'est pas valide. Répondez simplement à l'e-mail reçu et nous vous retirerons de la liste.");
+
+async function unsubscribe() {
+  const btn = document.getElementById('go');
+  btn.disabled = true; btn.textContent = 'Un instant...';
+  try {
+    const res = await fetch(FN_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'unsubscribe', token }) });
+    if (!res.ok) throw new Error();
+    show("C'est fait", "Vous ne recevrez plus ces e-mails. Si vous avez besoin d'aide pour votre premier contrat, écrivez-nous sur WhatsApp au +212 694 962 765.");
+  } catch (e) {
+    show('Impossible de vous désinscrire', "Le lien semble invalide ou expiré. Répondez simplement à l'e-mail reçu et nous vous retirerons de la liste.");
+  }
+}
+</script>
+</body>
+</html>
