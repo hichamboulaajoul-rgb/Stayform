@@ -28,6 +28,8 @@ p { color: #5B6B63; line-height: 1.6; font-size: 0.95rem; }
 </main>
 <script>
 const FN_URL = 'https://syvpyvkgauyfqghwiqsl.supabase.co/functions/v1/relance-hotes';
+// Clé publique (anon) : permet l'appel même si « Verify JWT » est activé sur la fonction.
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5dnB5dmtnYXV5ZnFnaHdpcXNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTYzMDcsImV4cCI6MjA4ODk5MjMwN30.Iu0s8WeJcFrZUXkYRHbQBUvZMOMdsvgip_wnEVtXRO4';
 const token = new URLSearchParams(location.search).get('t') || '';
 
 function show(title, text) {
@@ -44,7 +46,7 @@ async function unsubscribe() {
   const btn = document.getElementById('go');
   btn.disabled = true; btn.textContent = 'Un instant...';
   try {
-    const res = await fetch(FN_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'unsubscribe', token }) });
+    const res = await fetch(FN_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ANON_KEY, 'apikey': ANON_KEY }, body: JSON.stringify({ action: 'unsubscribe', token }) });
     if (!res.ok) throw new Error();
     show("C'est fait", "Vous ne recevrez plus ces e-mails. Si vous avez besoin d'aide pour votre premier contrat, écrivez-nous sur WhatsApp au +212 694 962 765.");
   } catch (e) {
