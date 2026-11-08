@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bienvenue — Stayform</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --green: #2D4A3E; --green2: #4A7C65;
-  --gold: #D4A853; --bg: #FAF6F1;
+  --green: #16241E; --green2: #2F5446;
+  --gold: #C9A227; --bg: #F6F0E4;
   --surface: #fff; --border: #EAE0D5;
   --text: #1C120A; --text2: #6B5848; --text3: #B09A88;
 }
-body { background: var(--bg); font-family: 'Nunito Sans', sans-serif; color: var(--text); min-height: 100vh; }
+body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); min-height: 100vh; }
 
 /* HEADER */
 .header {
@@ -21,10 +21,10 @@ body { background: var(--bg); font-family: 'Nunito Sans', sans-serif; color: var
   padding: 1.4rem 1.5rem;
   display: flex; align-items: center; justify-content: space-between;
 }
-.logo { font-family: 'Nunito', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; }
+.logo { font-family: 'Inter', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; }
 .logo span { color: var(--gold); }
 .header-badge {
-  background: rgba(212,168,83,0.15); border: 1px solid rgba(212,168,83,0.4);
+  background: rgba(201,162,39,0.15); border: 1px solid rgba(201,162,39,0.4);
   color: var(--gold); font-size: 0.72rem; font-weight: 700;
   padding: 0.3rem 0.8rem; border-radius: 20px; letter-spacing: 0.05em;
 }
@@ -41,13 +41,13 @@ body { background: var(--bg); font-family: 'Nunito Sans', sans-serif; color: var
 }
 .hero-emoji { font-size: 2.8rem; margin-bottom: 0.8rem; }
 .hero h1 {
-  font-family: 'Nunito', sans-serif; font-size: 1.6rem; font-weight: 800;
+  font-family: 'Inter', sans-serif; font-size: 1.6rem; font-weight: 800;
   color: #fff; margin-bottom: 0.4rem; line-height: 1.2;
 }
 .hero p { font-size: 0.9rem; color: rgba(255,255,255,0.7); }
 .hero .prop-name {
   display: inline-block; margin-top: 1rem;
-  background: rgba(212,168,83,0.2); border: 1px solid rgba(212,168,83,0.4);
+  background: rgba(201,162,39,0.2); border: 1px solid rgba(201,162,39,0.4);
   color: var(--gold); font-size: 0.82rem; font-weight: 600;
   padding: 0.4rem 1rem; border-radius: 20px;
 }
@@ -71,11 +71,11 @@ body { background: var(--bg); font-family: 'Nunito Sans', sans-serif; color: var
   display: flex; align-items: center; justify-content: center;
   font-size: 1.2rem; flex-shrink: 0;
 }
-.card-icon.green { background: rgba(45,74,62,0.1); }
-.card-icon.gold  { background: rgba(212,168,83,0.15); }
+.card-icon.green { background: rgba(22,36,30,0.1); }
+.card-icon.gold  { background: rgba(201,162,39,0.15); }
 .card-icon.blue  { background: rgba(59,130,246,0.1); }
 .card-icon.red   { background: rgba(239,68,68,0.1); }
-.card-title { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.92rem; color: var(--text); }
+.card-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.92rem; color: var(--text); }
 .card-sub   { font-size: 0.72rem; color: var(--text3); margin-top: 1px; }
 .card-body  { padding: 1.2rem; }
 
@@ -83,7 +83,7 @@ body { background: var(--bg); font-family: 'Nunito Sans', sans-serif; color: var
 .info-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
 .info-row:last-child { border-bottom: none; }
 .info-label { font-size: 0.75rem; color: var(--text3); }
-.info-value { font-size: 0.88rem; font-weight: 700; color: var(--text); font-family: 'Nunito', sans-serif; }
+.info-value { font-size: 0.88rem; font-weight: 700; color: var(--text); font-family: 'Inter', sans-serif; }
 
 /* CODE BOX */
 .code-box {
@@ -92,7 +92,7 @@ body { background: var(--bg); font-family: 'Nunito Sans', sans-serif; color: var
   display: flex; align-items: center; justify-content: space-between;
 }
 .code-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
-.code-value { font-size: 1.8rem; font-weight: 800; color: #fff; font-family: 'Nunito', sans-serif; letter-spacing: 0.1em; }
+.code-value { font-size: 1.8rem; font-weight: 800; color: #fff; font-family: 'Inter', sans-serif; letter-spacing: 0.1em; }
 .code-type  { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
 
 /* WIFI BOX */
@@ -102,7 +102,7 @@ body { background: var(--bg); font-family: 'Nunito Sans', sans-serif; color: var
 }
 .wifi-icon { font-size: 1.8rem; }
 .wifi-name  { font-size: 0.78rem; color: var(--text3); margin-bottom: 2px; }
-.wifi-value { font-size: 1rem; font-weight: 700; color: #1A3028; font-family: 'Nunito', sans-serif; }
+.wifi-value { font-size: 1rem; font-weight: 700; color: #1A3028; font-family: 'Inter', sans-serif; }
 .wifi-pass  { font-size: 0.82rem; color: #4466CC; margin-top: 4px; font-family: monospace; letter-spacing: 0.05em; }
 
 /* COPY BTN */
@@ -110,7 +110,7 @@ body { background: var(--bg); font-family: 'Nunito Sans', sans-serif; color: var
   background: #fff; border: 1.5px solid var(--border);
   border-radius: 8px; padding: 0.5rem 0.9rem;
   font-size: 0.75rem; font-weight: 600; cursor: pointer;
-  color: var(--text2); font-family: 'Nunito', sans-serif;
+  color: var(--text2); font-family: 'Inter', sans-serif;
   transition: all 0.15s; white-space: nowrap;
 }
 .btn-copy:hover { background: var(--green); color: #fff; border-color: var(--green); }
@@ -127,7 +127,7 @@ body { background: var(--bg); font-family: 'Nunito Sans', sans-serif; color: var
 /* MESSAGE HOTE */
 .host-msg {
   background: linear-gradient(135deg, #FBF7EE 0%, #F5EDD8 100%);
-  border: 1px solid rgba(212,168,83,0.3);
+  border: 1px solid rgba(201,162,39,0.3);
   border-radius: 12px; padding: 1.2rem;
   font-size: 0.85rem; color: var(--text2); line-height: 1.7;
   font-style: italic; position: relative;
@@ -146,7 +146,7 @@ body { background: var(--bg); font-family: 'Nunito Sans', sans-serif; color: var
 /* TOAST */
 .toast {
   position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
-  background: #1A2E4A; color: #fff; padding: 0.7rem 1.4rem;
+  background: #16241E; color: #fff; padding: 0.7rem 1.4rem;
   border-radius: 20px; font-size: 0.82rem; font-weight: 600;
   opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999;
 }
@@ -159,11 +159,12 @@ body { background: var(--bg); font-family: 'Nunito Sans', sans-serif; color: var
 .card:nth-child(4) { animation-delay: 0.15s; }
 .card:nth-child(5) { animation-delay: 0.2s; }
 </style>
+<link rel="stylesheet" href="brand.css">
 </head>
 <body>
 
 <div class="header">
-  <div class="logo">Stay<span>form</span></div>
+  <div class="logo"><span class="sf-mark">S</span>stayform</div>
   <div class="header-badge">✓ CHECK-IN VALIDÉ</div>
 </div>
 
@@ -352,7 +353,7 @@ async function loadWelcome() {
     </div>
     <div class="card-body" style="text-align:center;padding:1.5rem;">
       <div style="font-size:0.85rem;color:var(--text3);margin-bottom:1rem;">Une question ? Votre hôte est disponible pour vous aider.</div>
-      ${params.get('wa') ? `<a href="https://wa.me/${params.get('wa')}" style="display:inline-flex;align-items:center;gap:0.5rem;background:#25D366;color:#fff;border:none;border-radius:10px;padding:0.8rem 1.5rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;text-decoration:none;">💬 WhatsApp</a>` : ''}
+      ${params.get('wa') ? `<a href="https://wa.me/${params.get('wa')}" style="display:inline-flex;align-items:center;gap:0.5rem;background:#25D366;color:#fff;border:none;border-radius:10px;padding:0.8rem 1.5rem;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;text-decoration:none;">💬 WhatsApp</a>` : ''}
     </div>
   </div>`;
 

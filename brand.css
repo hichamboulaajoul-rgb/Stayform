@@ -1,0 +1,154 @@
+/* ─────────────────────────────────────────────────────────────
+   Stayform — charte commune à toutes les pages
+   Chargée en dernier dans <head> : elle harmonise les polices,
+   le logo et les boutons, et corrige l'affichage mobile.
+   Couleurs : vert sapin #16241E, vert #24423A, or #C9A227,
+   crème #F3ECDD, terracotta #B5573D.
+   Polices : Fraunces (titres) et Inter (texte).
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  --sf-ink: #16241E;
+  --sf-green: #24423A;
+  --sf-gold: #C9A227;
+  --sf-cream: #F3ECDD;
+  --sf-terra: #B5573D;
+  --sf-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sf-serif: 'Fraunces', Georgia, serif;
+}
+
+body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+/* ── Logo « S » ─────────────────────────────────────────────── */
+.sf-mark,
+.sidebar-logo-mark,
+.auth-logo-mark,
+.nav-logo-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; flex-shrink: 0;
+  background: var(--sf-ink); color: var(--sf-gold);
+  border-radius: 8px; transform: none;
+  font-family: var(--sf-serif); font-size: 1.05rem; font-weight: 600; line-height: 1;
+}
+.auth-logo-mark { width: 48px; height: 48px; border-radius: 12px; font-size: 1.5rem; }
+.sf-mark { margin-right: 0.55rem; vertical-align: middle; }
+header .logo-mark.sf-mark { width: 40px; height: 40px; border-radius: 10px; font-size: 1.3rem; margin-right: 0; }
+.welcome-dark .sf-mark, .admin-nav-logo .sf-mark, .footer-logo .sf-mark,
+.logo .sf-mark { background: var(--sf-gold); color: var(--sf-ink); }
+
+.sidebar-logo h2, .auth-logo h1, .nav-logo-text, .footer-logo, .logo,
+.login-logo, .admin-nav-logo {
+  font-family: var(--sf-serif) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+}
+.login-logo, .admin-nav-logo, .footer-logo, .logo { display: inline-flex; align-items: center; }
+.sidebar-logo h2, .auth-logo h1, .nav-logo-text, .login-logo { color: var(--sf-ink) !important; }
+
+/* ── Titres en Fraunces ─────────────────────────────────────── */
+.topbar-title, .section-title, .hero h1, .compare-inner h2, .faq-section h2,
+.footer-cta h2, .card-title, .modal-title, .plan-info h3, .act-title,
+.header-text h1, .step-title, .onb-card h3 {
+  font-family: var(--sf-serif) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+}
+.topbar-title { font-size: 1.75rem; }
+
+/* ── Boutons : une seule famille ────────────────────────────── */
+.btn-upgrade, .btn-primary, .btn-nav {
+  background: var(--sf-ink);
+  color: #fff;
+  border-radius: 9px;
+}
+.btn-upgrade:hover, .btn-nav:hover { background: var(--sf-green); }
+
+/* ── Tableau de bord ────────────────────────────────────────── */
+.limit-banner {
+  background: #FBF6E6;
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  border-left: 4px solid var(--sf-gold);
+}
+.limit-banner p, .limit-banner strong { color: #7A5A00; }
+
+.guest-toolbar { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.guest-toolbar input, .guest-toolbar select {
+  border: 1px solid var(--border, #EAE0D5); border-radius: 9px; background: #fff;
+  padding: 0.6rem 0.8rem; font-family: var(--sf-sans); font-size: 0.88rem; color: var(--sf-ink);
+}
+.guest-toolbar input { flex: 1 1 240px; min-width: 0; }
+.guest-toolbar input:focus, .guest-toolbar select:focus { outline: 2px solid rgba(22, 36, 30, 0.18); border-color: var(--sf-ink); }
+.guest-filter-empty { padding: 2rem 1rem; text-align: center; color: var(--text3, #8A8A82); font-size: 0.9rem; }
+.guest-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1rem; }
+.guest-card { border: 1px solid var(--border, #EAE0D5); border-radius: 12px; padding: 1.2rem; background: #fff; min-width: 0; }
+.guest-card-name { font-weight: 700; font-size: 1rem; color: var(--text, #16241E); }
+.guest-card-prop { font-size: 0.75rem; color: var(--sf-green); font-weight: 600; margin-top: 2px; }
+
+/* ── Check-in : message sous un bouton grisé ────────────────── */
+.sf-btn-hint { margin: 0.6rem 0 0; font-size: 0.8rem; color: var(--sand, #8A8A82); text-align: right; }
+.sf-btn-hint:empty { display: none; }
+body.rtl .sf-btn-hint { text-align: left; }
+
+/* ── Tablette et mobile ─────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Évite le zoom automatique de Safari iOS sur les champs */
+  input, select, textarea { font-size: 16px !important; }
+
+  /* Page d'accueil */
+  .lp-nav { padding: 0.8rem 1rem !important; }
+  .lp-nav button { white-space: nowrap; }
+  .lp-hero { padding: 3rem 1.25rem 3.5rem !important; }
+  .lp-hero-grid { grid-template-columns: 1fr !important; gap: 2.5rem !important; }
+  .lp-hero-title { font-size: 2.4rem !important; }
+  .lp-strip { grid-template-columns: 1fr !important; gap: 0 !important; padding: 0.5rem 1.25rem 2rem !important; }
+  .lp-strip > div { border-right: none !important; border-bottom: 1px solid rgba(22, 36, 30, 0.1); padding: 1.1rem 0.5rem !important; }
+  .lp-strip > div:last-child { border-bottom: none; }
+  .lp-steps { grid-template-columns: 1fr !important; gap: 2rem !important; max-width: 340px; margin: 0 auto; }
+
+  /* Tableau de bord */
+  .topbar { flex-wrap: wrap; gap: 0.9rem; }
+  .topbar > div:first-child { min-width: 0; }
+  .topbar-title { font-size: 1.5rem; }
+  .topbar .btn-upgrade { width: 100%; justify-content: center; }
+  .sidebar:not(.open) { box-shadow: none; }
+  .stats-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 0.6rem !important; }
+  .stat-card { padding: 0.9rem 0.8rem !important; min-width: 0; }
+  .stat-label { font-size: 0.62rem !important; }
+  .stat-value { font-size: 1.6rem !important; }
+  .guest-grid { grid-template-columns: 1fr; }
+  #propertiesGrid > * { min-width: 0; max-width: 100%; }
+
+  /* Tarifs */
+  .plans-wrap { grid-template-columns: 1fr !important; max-width: 460px; }
+}
+
+@media (max-width: 480px) {
+  .lp-hero-title { font-size: 2.15rem !important; }
+  .lp-hero-grid button { width: 100%; }
+  .stat-sub, .stat-trend { font-size: 0.68rem !important; }
+}
+
+/* Tarifs : garder le bouton « Commencer » visible sur mobile */
+@media (max-width: 720px) {
+  .nav-links { display: flex !important; }
+  .nav-links .nav-link { display: none; }
+}
+
+/* Check-in : en-tête compact sur téléphone */
+@media (max-width: 480px) {
+  .header-text h1 { font-size: 1.15rem !important; line-height: 1.2; }
+  .header-text p { font-size: 0.68rem; }
+}
+
+.admin-nav-logo > span:last-child { margin-left: 0.45rem; }
+
+/* Empêche un contenu long (e-mail, tableau) d'élargir la page */
+.main-content { min-width: 0; }
+#recentGuestsWrap { overflow-x: auto; }
+.guest-card div { overflow-wrap: anywhere; min-width: 0; }
+
+/* Arabe : garder une police arabe pour les titres */
+body.rtl .header-text h1, body.rtl .step-title, body.rtl .card-title { font-family: 'Noto Sans Arabic', var(--sf-sans) !important; }
+
+/* Menu du tableau de bord : élément actif aux couleurs de la marque */
+.nav-item.active { background: rgba(22, 36, 30, 0.07) !important; color: var(--sf-ink) !important; }

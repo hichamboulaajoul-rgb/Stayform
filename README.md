@@ -15,6 +15,7 @@ contrat de location en ligne et reçoit un dossier PDF complet.
 | `welcome.html` | Page d'accueil envoyée au voyageur après le check-in |
 | `pricing.html` | Tarifs |
 | `admin.html` | Panneau d'administration (plans, crédits revendeurs, activité des hôtes) |
+| `brand.css` | Charte commune chargée par toutes les pages (polices, logo, couleurs) et corrections mobile |
 
 ## Stack
 
@@ -45,7 +46,7 @@ npm test
 ```
 
 Les tests ouvrent chaque page dans Chromium (desktop et mobile) et vérifient qu'elle s'affiche
-sans erreur JavaScript. Les appels à Supabase sont simulés : les tests ne touchent jamais la
+sans erreur JavaScript, et qu'aucune page ne déborde horizontalement sur un téléphone de 390 px. Les appels à Supabase sont simulés : les tests ne touchent jamais la
 base de production. GitHub Actions lance ces tests et les tests de base de données à chaque
 pull request.
 
