@@ -94,6 +94,18 @@ body{background:var(--bg);font-family:'Nunito Sans',sans-serif;color:var(--text)
 .btn-submit{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:0.8rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;margin-top:0.5rem;}
 .toast{position:fixed;bottom:2rem;right:2rem;background:var(--green);color:#fff;padding:0.8rem 1.2rem;border-radius:10px;font-size:0.88rem;font-weight:500;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;}
 .toast.show{opacity:1;}
+/* Onglets + activité */
+.view-tabs{display:flex;gap:0.4rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);}
+.view-tab{background:none;border:none;border-bottom:2px solid transparent;padding:0.6rem 1rem;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text3);cursor:pointer;margin-bottom:-1px;}
+.view-tab.active{color:var(--green);border-bottom-color:var(--green);}
+.act-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;color:var(--text);margin:1.5rem 0 0.7rem;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;}
+.act-chip{display:inline-block;font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:20px;background:#F5F0EB;color:var(--text2);}
+.act-chip.login{background:#EEF5F1;color:var(--success);}
+.act-row-click{cursor:pointer;}
+.act-filter{font-size:0.78rem;color:var(--text2);font-weight:400;font-family:'Nunito Sans',sans-serif;}
+.act-filter button{background:none;border:none;color:var(--danger);cursor:pointer;font-size:0.78rem;text-decoration:underline;}
+.table-wrap{overflow-x:auto;border-radius:12px;}
+@media(max-width:760px){.stats-bar{grid-template-columns:repeat(2,1fr);}.admin-content{padding:1.2rem 0.8rem;}}
 </style>
 </head>
 <body>
@@ -129,6 +141,12 @@ body{background:var(--bg);font-family:'Nunito Sans',sans-serif;color:var(--text)
 
   <div class="admin-content">
 
+    <div class="view-tabs">
+      <button class="view-tab active" id="tab-users" onclick="showView('users')">👥 Utilisateurs</button>
+      <button class="view-tab" id="tab-activity" onclick="showView('activity')">📈 Activité</button>
+    </div>
+
+    <div id="view-users">
     <!-- Stats -->
     <div class="stats-bar">
       <div class="stat-card">
@@ -188,6 +206,79 @@ body{background:var(--bg);font-family:'Nunito Sans',sans-serif;color:var(--text)
         <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text3);">Chargement...</td></tr>
       </tbody>
     </table>
+    </div><!-- /view-users -->
+
+    <!-- ── ACTIVITÉ DES HÔTES ── -->
+    <div id="view-activity" style="display:none;">
+      <div class="toolbar">
+        <input class="search-input" id="activitySearch" placeholder="Filtrer par nom ou email..." oninput="renderActivity()">
+        <button class="filter-btn" id="period-1" onclick="setActivityPeriod(1)">24 h</button>
+        <button class="filter-btn active" id="period-7" onclick="setActivityPeriod(7)">7 jours</button>
+        <button class="filter-btn" id="period-30" onclick="setActivityPeriod(30)">30 jours</button>
+        <button class="filter-btn" id="period-90" onclick="setActivityPeriod(90)">90 jours</button>
+        <button onclick="loadActivity()" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:0.6rem 1rem;font-size:0.82rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:600;">↻ Actualiser</button>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-label">Hôtes actifs</div>
+          <div class="stat-val" id="actStatHosts" style="color:var(--green);">—</div>
+          <div class="stat-sub" id="actStatHostsSub">sur la période</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Connexions</div>
+          <div class="stat-val" id="actStatLogins">—</div>
+          <div class="stat-sub">ouvertures de session</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pages visitées</div>
+          <div class="stat-val" id="actStatViews">—</div>
+          <div class="stat-sub">sections du tableau de bord</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Page la plus visitée</div>
+          <div class="stat-val" id="actStatTop" style="font-size:1.15rem;padding-top:0.45rem;">—</div>
+          <div class="stat-sub" id="actStatTopSub">&nbsp;</div>
+        </div>
+      </div>
+
+      <div class="act-title">Par hôte <span class="act-filter">Cliquez sur un hôte pour voir son journal</span></div>
+      <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Hôte</th>
+            <th>Dernière connexion</th>
+            <th>Dernière activité</th>
+            <th>Connexions</th>
+            <th>Pages vues</th>
+            <th>Page favorite</th>
+          </tr>
+        </thead>
+        <tbody id="activityHostsBody">
+          <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text3);">Chargement...</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="act-title">Journal des connexions et pages visitées <span class="act-filter" id="activityLogFilter"></span></div>
+      <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Date et heure</th>
+            <th>Hôte</th>
+            <th>Événement</th>
+            <th>Page</th>
+            <th>Appareil</th>
+          </tr>
+        </thead>
+        <tbody id="activityLogBody">
+          <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text3);">Chargement...</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div><!-- /view-activity -->
 
   </div>
 </div>
@@ -601,6 +692,173 @@ async function deactivateReseller(userId, name) {
 
   showToast('✓ Revendeur désactivé.', 'var(--success)');
   await loadUsers();
+}
+
+// ── ACTIVITÉ DES HÔTES ──
+const PAGE_LABELS = {
+  'overview': 'Accueil', 'properties': 'Logements', 'property-detail': 'Fiche logement',
+  'guests': 'Voyageurs', 'contrats': 'Contrats', 'settings': 'Paramètres',
+  'reseller': 'Revendeur', 'guide': 'Guide'
+};
+let activityDays = 7;
+let activityEvents = [];
+let activityUserFilter = null;
+let activityLoaded = false;
+
+function esc(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function pageLabel(p) { return p ? (PAGE_LABELS[p] || p) : '—'; }
+function fmtDateTime(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleString('fr-FR', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+}
+function timeAgo(d) {
+  if (!d) return '';
+  const min = Math.round((Date.now() - new Date(d)) / 60000);
+  if (min < 1) return "à l'instant";
+  if (min < 60) return 'il y a ' + min + ' min';
+  const h = Math.round(min / 60);
+  if (h < 24) return 'il y a ' + h + ' h';
+  return 'il y a ' + Math.round(h / 24) + ' j';
+}
+function deviceLabel(ua) {
+  if (!ua) return '—';
+  if (/iPhone|Android.+Mobile|Mobile/i.test(ua)) return '📱 Mobile';
+  if (/iPad|Tablet|Android/i.test(ua)) return '📱 Tablette';
+  return '💻 Ordinateur';
+}
+function userById(id) { return allUsers.find(u => u.id === id) || null; }
+
+function showView(v) {
+  document.getElementById('view-users').style.display = v === 'users' ? 'block' : 'none';
+  document.getElementById('view-activity').style.display = v === 'activity' ? 'block' : 'none';
+  document.getElementById('tab-users').classList.toggle('active', v === 'users');
+  document.getElementById('tab-activity').classList.toggle('active', v === 'activity');
+  if (v === 'activity' && !activityLoaded) loadActivity();
+}
+
+function setActivityPeriod(days) {
+  activityDays = days;
+  [1, 7, 30, 90].forEach(d => document.getElementById('period-' + d).classList.toggle('active', d === days));
+  loadActivity();
+}
+
+async function loadActivity() {
+  const hostsBody = document.getElementById('activityHostsBody');
+  const logBody = document.getElementById('activityLogBody');
+  hostsBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text3);">Chargement...</td></tr>';
+  logBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text3);">Chargement...</td></tr>';
+
+  if (!allUsers.length) await loadUsers();
+  const since = new Date(Date.now() - activityDays * 86400000).toISOString();
+  const { data, error } = await sb.from('host_activity')
+    .select('user_id, event, page, user_agent, created_at')
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+    .limit(5000);
+
+  if (error) {
+    const missing = /host_activity|does not exist|schema cache/i.test(error.message || '');
+    const msg = missing
+      ? "Le suivi d'activité n'est pas encore installé : exécutez le fichier SQL <code>20261108100000_host_activity_log.sql</code> dans le SQL Editor de Supabase."
+      : 'Erreur : ' + esc(error.message);
+    hostsBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--danger);">' + msg + '</td></tr>';
+    logBody.innerHTML = '';
+    return;
+  }
+  activityEvents = data || [];
+  activityLoaded = true;
+  renderActivity();
+}
+
+function renderActivity() {
+  const search = (document.getElementById('activitySearch').value || '').toLowerCase();
+  const matchUser = id => {
+    if (!search) return true;
+    const u = userById(id);
+    return !!u && ((u.name || '').toLowerCase().includes(search) || (u.email || '').toLowerCase().includes(search));
+  };
+  const events = activityEvents.filter(e => matchUser(e.user_id));
+
+  // Agrégats par hôte
+  const byUser = new Map();
+  events.forEach(e => {
+    let s = byUser.get(e.user_id);
+    if (!s) { s = { id: e.user_id, lastLogin: null, lastSeen: null, logins: 0, views: 0, pages: {} }; byUser.set(e.user_id, s); }
+    if (!s.lastSeen || e.created_at > s.lastSeen) s.lastSeen = e.created_at;
+    if (e.event === 'login') { s.logins++; if (!s.lastLogin || e.created_at > s.lastLogin) s.lastLogin = e.created_at; }
+    if (e.event === 'page_view') { s.views++; if (e.page) s.pages[e.page] = (s.pages[e.page] || 0) + 1; }
+  });
+  const hosts = [...byUser.values()].sort((a, b) => (b.lastSeen || '').localeCompare(a.lastSeen || ''));
+  const topOf = pages => Object.entries(pages).sort((a, b) => b[1] - a[1])[0];
+
+  // Stats
+  const allPages = {};
+  events.forEach(e => { if (e.event === 'page_view' && e.page) allPages[e.page] = (allPages[e.page] || 0) + 1; });
+  const top = topOf(allPages);
+  document.getElementById('actStatHosts').textContent = hosts.length;
+  document.getElementById('actStatHostsSub').textContent = 'sur ' + (allUsers.length || '—') + ' inscrits';
+  document.getElementById('actStatLogins').textContent = events.filter(e => e.event === 'login').length;
+  document.getElementById('actStatViews').textContent = events.filter(e => e.event === 'page_view').length;
+  document.getElementById('actStatTop').textContent = top ? pageLabel(top[0]) : '—';
+  document.getElementById('actStatTopSub').textContent = top ? top[1] + ' visites' : ' ';
+
+  // Tableau par hôte
+  const hostsBody = document.getElementById('activityHostsBody');
+  if (!hosts.length) {
+    hostsBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text3);">Aucune activité sur cette période.</td></tr>';
+  } else {
+    hostsBody.innerHTML = '';
+    hosts.forEach(h => {
+      const u = userById(h.id);
+      const t = topOf(h.pages);
+      const tr = document.createElement('tr');
+      tr.className = 'act-row-click';
+      if (activityUserFilter === h.id) tr.style.background = '#EEF5F1';
+      tr.onclick = () => { activityUserFilter = activityUserFilter === h.id ? null : h.id; renderActivity(); };
+      tr.innerHTML =
+        '<td><div class="user-name">' + esc(u ? (u.name || '—') : 'Compte supprimé') + '</div><div class="user-email">' + esc(u ? (u.email || '') : h.id.slice(0, 8)) + '</div></td>' +
+        '<td>' + (h.lastLogin ? esc(fmtDateTime(h.lastLogin)) + '<br><span style="font-size:0.7rem;color:var(--text3);">' + esc(timeAgo(h.lastLogin)) + '</span>' : '<span style="color:var(--text3);">—</span>') + '</td>' +
+        '<td>' + esc(fmtDateTime(h.lastSeen)) + '<br><span style="font-size:0.7rem;color:var(--text3);">' + esc(timeAgo(h.lastSeen)) + '</span></td>' +
+        '<td style="font-weight:600;">' + h.logins + '</td>' +
+        '<td style="font-weight:600;">' + h.views + '</td>' +
+        '<td>' + (t ? '<span class="act-chip">' + esc(pageLabel(t[0])) + '</span> <span style="font-size:0.72rem;color:var(--text3);">×' + t[1] + '</span>' : '—') + '</td>';
+      hostsBody.appendChild(tr);
+    });
+  }
+
+  // Journal
+  const filterEl = document.getElementById('activityLogFilter');
+  let log = events;
+  if (activityUserFilter) {
+    log = log.filter(e => e.user_id === activityUserFilter);
+    const u = userById(activityUserFilter);
+    filterEl.innerHTML = '· ' + esc(u ? (u.name || u.email) : activityUserFilter.slice(0, 8)) + ' <button onclick="activityUserFilter=null;renderActivity()">tout afficher</button>';
+  } else {
+    filterEl.textContent = '';
+  }
+  const shown = log.slice(0, 300);
+  const logBody = document.getElementById('activityLogBody');
+  if (!shown.length) {
+    logBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text3);">Aucun événement.</td></tr>';
+    return;
+  }
+  logBody.innerHTML = shown.map(e => {
+    const u = userById(e.user_id);
+    const ev = e.event === 'login'
+      ? '<span class="act-chip login">🔑 Connexion</span>'
+      : '<span class="act-chip">👁 Page vue</span>';
+    return '<tr>' +
+      '<td style="white-space:nowrap;">' + esc(fmtDateTime(e.created_at)) + '</td>' +
+      '<td><span class="user-name" style="font-size:0.85rem;">' + esc(u ? (u.name || u.email || '—') : 'Compte supprimé') + '</span></td>' +
+      '<td>' + ev + '</td>' +
+      '<td>' + (e.event === 'page_view' ? esc(pageLabel(e.page)) : '<span style="color:var(--text3);">—</span>') + '</td>' +
+      '<td style="font-size:0.78rem;color:var(--text3);">' + esc(deviceLabel(e.user_agent)) + '</td>' +
+      '</tr>';
+  }).join('') + (log.length > shown.length
+    ? '<tr><td colspan="5" style="text-align:center;padding:1rem;color:var(--text3);font-size:0.78rem;">' + (log.length - shown.length) + ' événements plus anciens non affichés</td></tr>'
+    : '');
 }
 
 // ── UTILS ──

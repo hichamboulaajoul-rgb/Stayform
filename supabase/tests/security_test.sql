@@ -52,4 +52,22 @@ reset role;
 set role service_role;
 select pg_temp.expect_ok($$update public.profiles set plan='paid' where id='00000000-0000-0000-0000-00000000000c'$$, 'service_role sets plan');
 reset role;
+-- host activity log (20261108100000_host_activity_log.sql)
+set role anon; select set_config('request.jwt.claim.sub', '', false);
+select pg_temp.expect_fail($$select public.log_activity('login')$$, 'anon log_activity');
+select pg_temp.expect_fail($$select * from public.host_activity$$, 'anon read host_activity');
+reset role;
+set role authenticated; select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', false);
+select pg_temp.expect_ok($$select public.log_activity('login', null, 'test-agent')$$, 'host logs a login');
+select pg_temp.expect_ok($$select public.log_activity('page_view', 'guests')$$, 'host logs a page view');
+select pg_temp.expect_fail($$select public.log_activity('hack', 'x')$$, 'host logs an unknown event');
+select pg_temp.expect_fail($$insert into public.host_activity (user_id, event) values ('00000000-0000-0000-0000-00000000000c', 'login')$$, 'host inserts activity for someone else');
+select pg_temp.expect_fail($$delete from public.host_activity$$, 'host deletes activity');
+do $$ begin if (select count(*) from public.host_activity) <> 0 then raise exception 'FAIL host can read activity log'; end if;
+             raise notice 'ok: host cannot read the activity log'; end $$;
+reset role;
+set role authenticated; select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false);
+do $$ begin if (select count(*) from public.host_activity where user_id = '00000000-0000-0000-0000-00000000000b') <> 2 then raise exception 'FAIL admin cannot read activity log'; end if;
+             raise notice 'ok: admin reads the activity log'; end $$;
+reset role;
 \echo ALL SECURITY TESTS PASSED
