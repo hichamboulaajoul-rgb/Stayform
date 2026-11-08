@@ -2338,8 +2338,107 @@ async function checkHostLimit() {
   return { allowed: true, host };
 }
 
+// ══════════════════════════════════════════
+// MODE EXEMPLE (checkin.html?demo=1)
+// Ouvert depuis le tableau de bord : génère le contrat de l'hôte avec un voyageur
+// fictif. Aucun appel à Supabase, aucun contrat consommé.
+// ══════════════════════════════════════════
+function initDemoContract() {
+  window._demoMode = true;
+  var payload = {};
+  try {
+    payload = JSON.parse(localStorage.getItem('sf_demo_contract') || '{}') || {};
+  } catch (e) { payload = {}; }
+
+  var pd = payload.property || { name: 'Votre logement', address: 'Marrakech', checkin_time: '15:00', checkout_time: '11:00' };
+  window._propertyData = pd;
+  window._propertyName = pd.name;
+  window._hostName = payload.hostName || 'Votre nom';
+  window._hostCin = payload.hostCin || '';
+  window._hostPhone = payload.hostPhone || '';
+
+  // Voyageur fictif
+  var set = function(id, v) { var el = document.getElementById(id); if (el) el.value = v; };
+  set('firstName', 'Yasmine');
+  set('lastName', 'Alaoui');
+  set('email', 'yasmine.alaoui@exemple.ma');
+  set('phone', '+212 6 12 34 56 78');
+  set('nationality', 'Marocaine');
+  set('birthdate', '14/03/1992');
+  set('address', '25 avenue Hassan II, Casablanca');
+  set('docNumber', 'BK123456');
+  set('docTypeIdentity', 'cin');
+  set('guestCount', '2 adultes');
+
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  startDate = new Date(today.getTime() + 7 * 86400000);
+  endDate = new Date(today.getTime() + 10 * 86400000);
+
+  // Signature manuscrite fictive
+  try {
+    var c = document.createElement('canvas');
+    c.width = 480; c.height = 160;
+    var ctx = c.getContext('2d');
+    ctx.strokeStyle = '#1C120A'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(40, 110);
+    ctx.bezierCurveTo(70, 20, 110, 20, 100, 100);
+    ctx.bezierCurveTo(95, 140, 150, 60, 170, 80);
+    ctx.bezierCurveTo(190, 100, 200, 60, 230, 75);
+    ctx.bezierCurveTo(260, 90, 270, 50, 300, 70);
+    ctx.bezierCurveTo(330, 95, 360, 40, 420, 60);
+    ctx.stroke();
+    signatureDataURL = c.toDataURL('image/png');
+  } catch (e) {}
+
+  var overlay = document.getElementById('loadingOverlay');
+  if (overlay) overlay.style.display = 'none';
+
+  var nights = Math.round((endDate - startDate) / 86400000);
+  var fmt = function(d) { return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }); };
+
+  var screen = document.createElement('div');
+  screen.id = 'demoScreen';
+  screen.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#F7F3EE;overflow-y:auto;font-family:"DM Sans",sans-serif;padding:24px 16px;';
+  screen.innerHTML =
+    '<div style="max-width:460px;margin:0 auto;">' +
+      '<div style="display:inline-block;background:#FFF0E8;color:#C13515;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:14px;">Exemple · aucun contrat utilisé</div>' +
+      '<h1 style="font-family:\'Cormorant Garamond\',serif;font-size:2rem;line-height:1.15;color:#1C120A;margin:0 0 10px;">Voici le contrat que signeront vos voyageurs</h1>' +
+      '<p style="color:#6B5848;font-size:0.95rem;line-height:1.6;margin:0 0 20px;">Nous avons rempli le parcours avec un voyageur fictif pour vous montrer le résultat. Vos vrais voyageurs le font en 3 minutes depuis leur téléphone : dates, pièce d\'identité, signature.</p>' +
+      '<div style="background:#fff;border:1px solid #EAE0D5;border-radius:14px;padding:16px;margin-bottom:18px;font-size:0.88rem;color:#3A2A1E;">' +
+        '<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #F1EAE2;"><span style="color:#9E8476;">Logement</span><strong id="demoProp" style="text-align:right;"></strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #F1EAE2;"><span style="color:#9E8476;">Bailleur</span><strong id="demoHost" style="text-align:right;"></strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #F1EAE2;"><span style="color:#9E8476;">Voyageur (fictif)</span><strong style="text-align:right;">Yasmine Alaoui</strong></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;"><span style="color:#9E8476;">Séjour</span><strong style="text-align:right;">' + fmt(startDate) + ' → ' + fmt(endDate) + ' · ' + nights + ' nuits</strong></div>' +
+      '</div>' +
+      '<div id="demoMissing" style="display:none;background:#FFF8E1;border:1px solid #FFE082;border-radius:10px;padding:10px 12px;font-size:0.82rem;color:#7A5000;line-height:1.5;margin-bottom:16px;">Votre N° CNIE n\'est pas encore renseigné : il manquera dans le contrat. Ajoutez-le dans <strong>Template de contrat → Bailleur</strong>.</div>' +
+      '<button id="demoPdfBtn" style="width:100%;background:#2D4A3E;color:#fff;border:none;border-radius:10px;padding:15px;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:10px;">📄 Télécharger l\'exemple de contrat (PDF)</button>' +
+      '<a href="index.html" style="display:block;text-align:center;border:1px solid #D9CBBE;border-radius:10px;padding:13px;color:#2D4A3E;font-weight:600;text-decoration:none;font-size:0.92rem;">← Retour au tableau de bord</a>' +
+    '</div>';
+  document.body.appendChild(screen);
+  document.getElementById('demoProp').textContent = pd.name || '—';
+  document.getElementById('demoHost').textContent = window._hostName;
+  if (!window._hostCin) document.getElementById('demoMissing').style.display = 'block';
+
+  document.getElementById('demoPdfBtn').addEventListener('click', async function() {
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '⏳ Génération en cours...';
+    try {
+      await _runPDFGeneration(btn, false);
+    } catch (e) {
+      console.error('demo PDF error:', e);
+      btn.disabled = false;
+      btn.textContent = 'Réessayer';
+    }
+  });
+}
+
 // ── Vérification au chargement ──
 document.addEventListener('DOMContentLoaded', async function() {
+  // Mode exemple : l'hôte prévisualise son contrat avec un voyageur fictif (rien n'est enregistré)
+  if (urlParams.get('demo') === '1') { initDemoContract(); return; }
+
   checkTokenOnLoad();
 
   // Si pas de token valide, checkTokenOnLoad a déjà appelé showExpiredPage → stop
@@ -3242,6 +3341,24 @@ async function _runPDFGeneration(btn, silent) {
 
   // ── Footer derniere page ──
   addFooter();
+
+  // ── Filigrane « EXEMPLE » en mode aperçu hôte ──
+  if (window._demoMode) {
+    const pages = doc.getNumberOfPages();
+    for (let i = 1; i <= pages; i++) {
+      doc.setPage(i);
+      doc.saveGraphicsState();
+      doc.setGState(new doc.GState({ opacity: 0.12 }));
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(72);
+      doc.setTextColor(...WARN);
+      doc.text('EXEMPLE', W / 2, H / 2 + 10, { angle: 45, align: 'center' });
+      doc.restoreGraphicsState();
+    }
+    doc.save('Exemple_contrat_Stayform.pdf');
+    if (btn) { btn.textContent = '✓ Exemple téléchargé'; btn.disabled = false; }
+    return;
+  }
 
   // ── Save ou capture ──
   const safeLastName = lastName.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');

@@ -1560,6 +1560,9 @@ function showToast(msg, color) {
 
         </div>
 
+        <!-- GUIDE DE DÉMARRAGE (rempli par le script onboarding en bas de page) -->
+        <div id="onbCard" class="onb-card fade-in" style="display:none"></div>
+
         <!-- LIMIT WARNING -->
         <div class="limit-banner" id="limitBanner" style="display:none">
           <div style="flex:1;">
@@ -2175,6 +2178,14 @@ function showToast(msg, color) {
             <button onclick="saveSettings()" style="background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);border-radius:8px;padding:0.7rem 1.2rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;font-size:0.85rem;font-weight:500;width:fit-content;">
               Sauvegarder
             </button>
+          </div>
+        </div>
+        <div class="section-card fade-in">
+          <div class="section-title" style="margin-bottom:0.3rem">Guide de démarrage</div>
+          <div class="section-sub" style="margin-bottom:0.9rem">Revoir les 4 étapes pour préparer votre contrat, ou voir un exemple de contrat.</div>
+          <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+            <button onclick="restartOnboarding()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:0.65rem 1.1rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;">🚀 Revoir le guide</button>
+            <button onclick="openDemoContract()" style="background:none;border:1px solid var(--border);color:var(--accent);border-radius:8px;padding:0.65rem 1.1rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;">📄 Voir un exemple de contrat</button>
           </div>
         </div>
         <div class="section-card fade-in delay-1">
@@ -5126,6 +5137,316 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+</script>
+
+<!-- ══════════════════════════════
+     GUIDE DE DÉMARRAGE (onboarding hôte)
+     Carte « Démarrage » en 4 étapes + fenêtre d'accueil + surbrillance du bon bouton.
+     La progression est déduite des données (logement, CNIE, lien, contrat) ;
+     seuls l'aperçu du contrat et les préférences d'affichage sont gardés dans localStorage.
+══════════════════════════════ -->
+<style>
+.onb-card { background:#fff; border:1px solid var(--border); border-radius:14px; padding:1.2rem 1.3rem; margin-bottom:1rem; box-shadow:0 2px 10px rgba(45,74,62,0.06); }
+.onb-head { display:flex; align-items:flex-start; justify-content:space-between; gap:0.8rem; margin-bottom:0.9rem; }
+.onb-title { font-family:'Nunito',sans-serif; font-size:1.05rem; font-weight:800; color:var(--text); }
+.onb-sub { font-size:0.8rem; color:var(--text3); margin-top:2px; }
+.onb-hide { background:none; border:none; color:var(--text3); font-size:0.75rem; cursor:pointer; text-decoration:underline; padding:0.2rem; white-space:nowrap; font-family:inherit; }
+.onb-bar { height:8px; background:var(--surface2); border-radius:8px; overflow:hidden; margin-bottom:1rem; }
+.onb-bar-fill { height:100%; background:linear-gradient(90deg,#2D4A3E,#5A9A6A); border-radius:8px; transition:width 0.6s ease; }
+.onb-step { display:flex; align-items:center; gap:0.8rem; padding:0.75rem 0.8rem; border-radius:10px; border:1px solid transparent; cursor:pointer; transition:background 0.15s,border-color 0.15s; }
+.onb-step:hover { background:#FAF6F1; }
+.onb-step.current { background:#F2F7F4; border-color:#CFE3D6; }
+.onb-step.done { cursor:default; }
+.onb-step.done:hover { background:none; }
+.onb-num { width:28px; height:28px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.82rem; background:var(--surface2); color:var(--text3); }
+.onb-step.current .onb-num { background:#2D4A3E; color:#fff; }
+.onb-step.done .onb-num { background:#E6F4EA; color:#2D7A45; }
+.onb-txt { flex:1; min-width:0; }
+.onb-txt b { display:block; font-size:0.9rem; color:var(--text); font-weight:700; }
+.onb-step.done .onb-txt b { color:var(--text3); text-decoration:line-through; font-weight:600; }
+.onb-txt span { display:block; font-size:0.76rem; color:var(--text3); margin-top:1px; }
+.onb-go { flex-shrink:0; background:#2D4A3E; color:#fff; border:none; border-radius:8px; padding:0.45rem 0.85rem; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.8rem; cursor:pointer; white-space:nowrap; }
+.onb-step:not(.current) .onb-go { background:none; color:#2D4A3E; border:1px solid var(--border); }
+.onb-step.done .onb-go { display:none; }
+@media (max-width:520px) { .onb-txt span { display:none; } .onb-card { padding:1rem; } }
+
+.onb-spot { position:relative; z-index:10001 !important; box-shadow:0 0 0 4px rgba(90,154,106,0.55), 0 0 0 9999px rgba(20,30,25,0.35) !important; border-radius:10px; animation:onbPulse 1.6s ease-in-out infinite; }
+@keyframes onbPulse { 0%,100% { box-shadow:0 0 0 4px rgba(90,154,106,0.55), 0 0 0 9999px rgba(20,30,25,0.35); } 50% { box-shadow:0 0 0 9px rgba(90,154,106,0.25), 0 0 0 9999px rgba(20,30,25,0.35); } }
+.onb-tip { position:fixed; z-index:10002; max-width:min(300px, calc(100vw - 32px)); background:#1F3A2F; color:#fff; border-radius:12px; padding:0.8rem 0.95rem; font-size:0.85rem; line-height:1.45; box-shadow:0 8px 30px rgba(0,0,0,0.25); }
+.onb-tip b { display:block; font-family:'Nunito',sans-serif; font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; color:#A8D5B5; margin-bottom:3px; }
+.onb-tip button { margin-top:0.55rem; background:rgba(255,255,255,0.14); color:#fff; border:none; border-radius:6px; padding:0.3rem 0.7rem; font-size:0.75rem; cursor:pointer; font-family:inherit; }
+
+.onb-modal-bg { position:fixed; inset:0; z-index:10003; background:rgba(20,30,25,0.5); display:flex; align-items:center; justify-content:center; padding:16px; }
+.onb-modal { background:#fff; border-radius:18px; max-width:420px; width:100%; padding:1.8rem 1.5rem 1.4rem; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.25); max-height:calc(100vh - 32px); overflow-y:auto; }
+.onb-modal h2 { font-family:'Nunito',sans-serif; font-size:1.3rem; font-weight:800; color:var(--text); margin:0.6rem 0 0.4rem; }
+.onb-modal p { font-size:0.88rem; color:var(--text2); line-height:1.55; margin:0 0 1rem; }
+.onb-modal ol { text-align:left; margin:0 0 1.2rem; padding:0; list-style:none; display:flex; flex-direction:column; gap:0.45rem; }
+.onb-modal li { display:flex; gap:0.6rem; align-items:center; font-size:0.86rem; color:var(--text); background:#FAF6F1; border-radius:8px; padding:0.55rem 0.7rem; }
+.onb-modal li i { font-style:normal; width:22px; height:22px; border-radius:50%; background:#2D4A3E; color:#fff; font-size:0.72rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.onb-cta { width:100%; background:#2D4A3E; color:#fff; border:none; border-radius:10px; padding:0.85rem; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.95rem; cursor:pointer; }
+.onb-later { margin-top:0.5rem; background:none; border:none; color:var(--text3); font-size:0.8rem; cursor:pointer; font-family:inherit; padding:0.4rem; }
+</style>
+
+<script>
+(function () {
+  var STEPS = [
+    { key: 'property', title: 'Ajoutez votre logement', hint: 'Collez votre lien Airbnb, ou ajoutez-le à la main', go: 'Ajouter' },
+    { key: 'contract', title: 'Complétez votre contrat', hint: 'Votre N° CNIE, téléphone et règles de la maison', go: 'Compléter' },
+    { key: 'link',     title: 'Générez votre lien de check-in', hint: 'Le lien à envoyer à votre voyageur sur WhatsApp', go: 'Générer' },
+    { key: 'preview',  title: 'Voyez votre premier contrat', hint: 'Un exemple PDF avec un voyageur fictif, sans utiliser de contrat', go: 'Voir' },
+  ];
+
+  function uid() { return (typeof currentUser !== 'undefined' && currentUser && currentUser.id) || 'anon'; }
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem('sf_onb_' + uid()) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function saveState(patch) {
+    var s = loadState();
+    Object.keys(patch).forEach(function (k) { s[k] = patch[k]; });
+    try { localStorage.setItem('sf_onb_' + uid(), JSON.stringify(s)); } catch (e) {}
+    return s;
+  }
+  function props() { return (typeof currentProperties !== 'undefined' && currentProperties) || []; }
+  function statNum(id) { var el = document.getElementById(id); return el ? (parseInt(el.textContent, 10) || 0) : 0; }
+
+  function progress() {
+    var s = loadState();
+    var hasGuests = statNum('statTotal') > 0;
+    var hasLink = props().some(function (p) { try { return !!localStorage.getItem('sf_prop_link_' + p.id); } catch (e) { return false; } });
+    return {
+      property: props().length > 0,
+      contract: !!(typeof currentProfile !== 'undefined' && currentProfile && currentProfile.cin),
+      link: hasLink || hasGuests,
+      preview: !!s.previewed || statNum('statSigned') > 0,
+    };
+  }
+
+  function render() {
+    var card = document.getElementById('onbCard');
+    if (!card || typeof currentProfile === 'undefined' || !currentProfile) return;
+    var p = progress();
+    var doneCount = STEPS.filter(function (st) { return p[st.key]; }).length;
+    var s = loadState();
+
+    if (doneCount === STEPS.length) {
+      card.style.display = 'none';
+      if (s.shown && !s.celebrated) { saveState({ celebrated: true }); celebrate(); }
+      return;
+    }
+    if (s.hidden) { card.style.display = 'none'; return; }
+
+    var currentIdx = STEPS.findIndex(function (st) { return !p[st.key]; });
+    card.innerHTML =
+      '<div class="onb-head"><div><div class="onb-title">🚀 Votre premier contrat en 4 étapes</div>' +
+      '<div class="onb-sub">' + doneCount + ' sur 4 terminées · environ 3 minutes</div></div>' +
+      '<button class="onb-hide" type="button" data-onb-hide>Masquer</button></div>' +
+      '<div class="onb-bar"><div class="onb-bar-fill" style="width:' + Math.max(4, doneCount * 25) + '%"></div></div>' +
+      STEPS.map(function (st, i) {
+        var cls = p[st.key] ? 'done' : (i === currentIdx ? 'current' : '');
+        return '<div class="onb-step ' + cls + '" data-onb-step="' + st.key + '">' +
+          '<div class="onb-num">' + (p[st.key] ? '✓' : (i + 1)) + '</div>' +
+          '<div class="onb-txt"><b>' + st.title + '</b><span>' + st.hint + '</span></div>' +
+          '<button class="onb-go" type="button">' + st.go + ' →</button></div>';
+      }).join('');
+    card.style.display = 'block';
+    if (!s.shown) saveState({ shown: true });
+  }
+
+  document.addEventListener('click', function (e) {
+    var hide = e.target.closest && e.target.closest('[data-onb-hide]');
+    if (hide) { saveState({ hidden: true }); render(); showToast('Guide masqué. Retrouvez-le dans Paramètres → « Revoir le guide ».'); return; }
+    var step = e.target.closest && e.target.closest('[data-onb-step]');
+    if (step && !step.classList.contains('done')) runStep(step.getAttribute('data-onb-step'));
+  });
+
+  // ── Surbrillance d'un élément + bulle d'aide ──
+  var spotEl = null, tipEl = null, spotTimer = null;
+  function clearSpot() {
+    if (spotEl) spotEl.classList.remove('onb-spot');
+    if (tipEl) tipEl.remove();
+    spotEl = tipEl = null;
+    clearTimeout(spotTimer);
+    window.removeEventListener('scroll', placeTip, true);
+    window.removeEventListener('resize', placeTip);
+  }
+  function placeTip() {
+    if (!spotEl || !tipEl) return;
+    var r = spotEl.getBoundingClientRect();
+    var tw = tipEl.offsetWidth, th = tipEl.offsetHeight, vw = window.innerWidth, vh = window.innerHeight;
+    var top = r.bottom + 12;
+    if (top + th > vh - 8) top = r.top - th - 12;
+    if (top < 8) top = vh - th - 16; // élément trop grand : bulle en bas de l'écran
+    var left = Math.min(Math.max(16, r.left + r.width / 2 - tw / 2), vw - tw - 16);
+    tipEl.style.top = top + 'px';
+    tipEl.style.left = left + 'px';
+  }
+  function spotlight(selector, label, text) {
+    clearSpot();
+    var tries = 0;
+    (function attempt() {
+      var el = typeof selector === 'function' ? selector() : document.querySelector(selector);
+      if (!el || el.offsetParent === null) { if (++tries < 20) return setTimeout(attempt, 150); return; }
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      spotEl = el;
+      el.classList.add('onb-spot');
+      tipEl = document.createElement('div');
+      tipEl.className = 'onb-tip';
+      tipEl.innerHTML = '<b></b><div></div><button type="button">Compris</button>';
+      tipEl.querySelector('b').textContent = label;
+      tipEl.querySelector('div').textContent = text;
+      tipEl.querySelector('button').onclick = clearSpot;
+      document.body.appendChild(tipEl);
+      setTimeout(placeTip, 400);
+      placeTip();
+      window.addEventListener('scroll', placeTip, true);
+      window.addEventListener('resize', placeTip);
+      spotTimer = setTimeout(clearSpot, 15000);
+    })();
+  }
+  // Un clic dans l'élément en surbrillance (ou ailleurs) retire la surbrillance
+  document.addEventListener('pointerdown', function (e) {
+    if (!spotEl) return;
+    if (tipEl && tipEl.contains(e.target)) return;
+    setTimeout(clearSpot, 0);
+  }, true);
+
+  function firstPropertyId() {
+    if (typeof currentPropertyId !== 'undefined' && currentPropertyId && props().some(function (p) { return p.id === currentPropertyId; })) return currentPropertyId;
+    return props()[0] && props()[0].id;
+  }
+  async function openFirstProperty() {
+    var id = firstPropertyId();
+    if (!id) return false;
+    if (window.innerWidth <= 768 && typeof toggleSidebar === 'function') {
+      var sb2 = document.getElementById('sidebar');
+      if (sb2 && sb2.classList.contains('open')) toggleSidebar();
+    }
+    await openPropertyDetail(id);
+    return true;
+  }
+
+  async function runStep(key) {
+    if (key === 'property') {
+      showSection('properties');
+      openAddProperty();
+      spotlight('#propAirbnb', 'Étape 1 sur 4', 'Collez le lien de votre annonce Airbnb puis cliquez sur « Importer ». Pas d\'annonce ? Utilisez « Ajouter manuellement ».');
+      return;
+    }
+    if ((key === 'contract' || key === 'link') && !props().length) {
+      showToast('Commencez par ajouter votre logement 🏠');
+      return runStep('property');
+    }
+    if (key === 'contract') {
+      await openFirstProperty();
+      if (typeof switchContractTab === 'function') switchContractTab('bailleur');
+      spotlight('#ct-host-cin', 'Étape 2 sur 4',
+        'Ajoutez votre N° CNIE et votre téléphone, puis cliquez sur « 💾 Enregistrer » en haut de la carte. Vos règles sont dans l\'onglet « Règlement ».');
+      return;
+    }
+    if (key === 'link') {
+      await openFirstProperty();
+      spotlight(function () {
+        var noLink = document.getElementById('detailNoLinkCard');
+        if (noLink && noLink.offsetParent !== null) return noLink.querySelector('button');
+        var card = document.getElementById('detailLinkCard');
+        return card && card.offsetParent !== null ? card : null;
+      }, 'Étape 3 sur 4', 'Cliquez sur « Nouveau lien », puis envoyez-le à votre voyageur par WhatsApp. Le lien est valable 3 heures.');
+      return;
+    }
+    if (key === 'preview') openDemoContract();
+  }
+
+  // ── Aperçu du contrat (voyageur fictif, aucun contrat consommé) ──
+  function openDemoContract() {
+    var id = firstPropertyId();
+    var prop = props().find(function (p) { return p.id === id; }) || null;
+    var payload = {
+      hostName: (currentProfile && currentProfile.name) || '',
+      hostCin: (currentProfile && currentProfile.cin) || '',
+      hostPhone: (currentProfile && currentProfile.phone) || '',
+      property: prop,
+    };
+    try { localStorage.setItem('sf_demo_contract', JSON.stringify(payload)); } catch (e) {}
+    saveState({ previewed: true });
+    var w = window.open('checkin.html?demo=1', '_blank');
+    if (!w) window.location.href = 'checkin.html?demo=1';
+    setTimeout(render, 300);
+  }
+  window.openDemoContract = openDemoContract;
+
+  // ── Fenêtre d'accueil (première connexion) ──
+  function modal(html) {
+    var bg = document.createElement('div');
+    bg.className = 'onb-modal-bg';
+    bg.innerHTML = '<div class="onb-modal" role="dialog" aria-modal="true">' + html + '</div>';
+    bg.addEventListener('click', function (e) { if (e.target === bg) bg.remove(); });
+    document.body.appendChild(bg);
+    return bg;
+  }
+  function welcome() {
+    var first = (currentProfile && currentProfile.name || '').split(' ')[0];
+    var bg = modal(
+      '<div style="font-size:2.4rem">👋</div>' +
+      '<h2>Bienvenue' + (first ? ', <span data-n></span>' : '') + ' !</h2>' +
+      '<p>Préparez votre premier contrat de location en <strong>4 étapes, environ 3 minutes</strong>. On vous montre où cliquer.</p>' +
+      '<ol>' + STEPS.map(function (st, i) { return '<li><i>' + (i + 1) + '</i>' + st.title + '</li>'; }).join('') + '</ol>' +
+      '<button class="onb-cta" type="button" data-start>Commencer →</button>' +
+      '<button class="onb-later" type="button" data-later>Plus tard</button>');
+    var n = bg.querySelector('[data-n]'); if (n) n.textContent = first;
+    bg.querySelector('[data-start]').onclick = function () {
+      bg.remove();
+      var p = progress();
+      var next = STEPS.find(function (st) { return !p[st.key]; });
+      if (next) runStep(next.key);
+    };
+    bg.querySelector('[data-later]').onclick = function () { bg.remove(); };
+  }
+  function celebrate() {
+    var bg = modal(
+      '<div style="font-size:2.6rem">🎉</div>' +
+      '<h2>Bravo, votre compte est prêt !</h2>' +
+      '<p>Votre contrat est configuré. Envoyez maintenant le lien de check-in à votre prochain voyageur : il signera en 3 minutes depuis son téléphone.</p>' +
+      '<button class="onb-cta" type="button" data-send>Envoyer mon lien →</button>' +
+      '<button class="onb-later" type="button" data-close>Fermer</button>');
+    bg.querySelector('[data-send]').onclick = function () { bg.remove(); runStep('link'); };
+    bg.querySelector('[data-close]').onclick = function () { bg.remove(); };
+  }
+
+  function afterDashboardLoad() {
+    render();
+    var p = progress();
+    var allDone = STEPS.every(function (st) { return p[st.key]; });
+    var s = loadState();
+    // L'accueil ne s'affiche qu'une fois, et pas aux hôtes déjà actifs
+    if (!allDone && !s.welcomed && !s.hidden && statNum('statTotal') === 0) {
+      saveState({ welcomed: true });
+      setTimeout(welcome, 500);
+    }
+  }
+
+  // Revoir le guide depuis les paramètres
+  window.restartOnboarding = function () {
+    saveState({ hidden: false });
+    showSection('overview');
+    render();
+    setTimeout(welcome, 200);
+  };
+
+  // ── Rafraîchir la carte après les actions de l'hôte ──
+  function wrap(name, after) {
+    var orig = window[name];
+    if (typeof orig !== 'function') return;
+    window[name] = function () {
+      var r = orig.apply(this, arguments);
+      Promise.resolve(r).then(function () { try { after(); } catch (e) {} }, function () {});
+      return r;
+    };
+  }
+  wrap('loadDashboard', afterDashboardLoad);
+  ['loadProperties', 'saveContractTemplate', '_generatePropertyLink', 'updateStats'].forEach(function (n) { wrap(n, render); });
+  // Retour depuis l'onglet de l'exemple
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) render(); });
+})();
 </script>
 </body>
 </html>
