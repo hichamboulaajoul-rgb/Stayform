@@ -124,6 +124,34 @@ test('un client existant revoit l\'accueil le lendemain tant que le guide n\'est
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
+test('le guide pas à pas est accessible depuis le menu et le bouton d\'aide', async ({ page }) => {
+  const errors = await openDashboard(page, {
+    profile: { id: HOST_ID, name: 'Hicham Test', plan: 'free', guest_count: 0, link_id: 'l1' },
+    properties: [property],
+  });
+  await page.locator('.onb-modal [data-later]').click();
+  await page.locator('#onbHelpFab').click();
+  await expect(page.locator('#section-guide')).toBeVisible();
+  await expect(page.locator('#section-guide .guide-step')).toHaveCount(4);
+  await expect(page.locator('#section-guide .guide-step').nth(0)).toContainText('hébergement');
+  await expect(page.locator('#section-guide .guide-step').nth(1)).toContainText('règles');
+  await expect(page.locator('#section-guide .guide-step').nth(2)).toContainText('lien');
+  await expect(page.locator('#section-guide .guide-step.is-done')).toHaveCount(1);
+
+  // « Montrez-moi » sur l'étape règles ouvre l'hébergement et pointe le champ CNIE
+  await page.locator('[data-guide-show="contract"]').click();
+  await expect(page.locator('#section-property-detail')).toBeVisible();
+  await expect(page.locator('#ct-host-cin')).toHaveClass(/onb-spot/);
+
+  // Le menu y mène aussi, même quand le guide est masqué
+  await page.evaluate(() => showSection('overview'));
+  await page.locator('[data-onb-hide]').click();
+  await page.evaluate(() => { const s = document.getElementById('sidebar'); if (s) s.classList.add('open'); });
+  await page.locator('.nav-item', { hasText: 'Guide pas à pas' }).click();
+  await expect(page.locator('#section-guide')).toBeVisible();
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
 test('l\'exemple de contrat s\'ouvre sans toucher Supabase', async ({ page }) => {
   const calls = [];
   page.on('request', (r) => { if (r.url().includes('supabase.co')) calls.push(r.url()); });
