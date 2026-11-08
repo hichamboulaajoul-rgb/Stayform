@@ -71,6 +71,7 @@ test('la progression suit les données de l\'hôte', async ({ page }) => {
     profile: { id: HOST_ID, name: 'Hicham Test', plan: 'free', guest_count: 0, link_id: 'l1', cin: 'AB123456' },
     properties: [property],
   });
+  await expect(page.locator('.onb-modal')).toContainText('Plus que 2 étapes');
   await page.locator('.onb-modal [data-later]').click();
   await expect(page.locator('#onbCard .onb-step.done')).toHaveCount(2);
   await expect(page.locator('#onbCard .onb-step.current')).toHaveAttribute('data-onb-step', 'link');
@@ -83,6 +84,42 @@ test('la progression suit les données de l\'hôte', async ({ page }) => {
   // Masquer le guide
   await page.evaluate(() => showSection('overview'));
   await page.locator('[data-onb-hide]').click();
+  await expect(page.locator('#onbCard')).toBeHidden();
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('un client existant revoit l\'accueil le lendemain tant que le guide n\'est pas fini', async ({ page }) => {
+  const errors = await openDashboard(page, {
+    profile: { id: HOST_ID, name: 'Hicham Test', plan: 'free', guest_count: 0, link_id: 'l1', cin: 'AB123456' },
+    properties: [property],
+  });
+  await page.locator('.onb-modal [data-later]').click();
+  // Simule une connexion le lendemain
+  await page.evaluate((id) => {
+    const k = 'sf_onb_' + id;
+    const s = JSON.parse(localStorage.getItem(k));
+    s.lastWelcome = '2000-01-01';
+    localStorage.setItem(k, JSON.stringify(s));
+  }, HOST_ID);
+  await page.reload();
+  await page.waitForFunction(() => typeof sb !== 'undefined' && sb);
+  await page.evaluate((id) => loadDashboard({ id, email: 'hote@test.ma' }), HOST_ID);
+  await expect(page.locator('.onb-modal')).toContainText('Bon retour');
+
+  // « Masquer » met le guide en pause : pas d'accueil le lendemain
+  await page.locator('.onb-modal [data-later]').click();
+  await page.locator('[data-onb-hide]').click();
+  await page.evaluate((id) => {
+    const k = 'sf_onb_' + id;
+    const s = JSON.parse(localStorage.getItem(k));
+    s.lastWelcome = '2000-01-01';
+    localStorage.setItem(k, JSON.stringify(s));
+  }, HOST_ID);
+  await page.reload();
+  await page.waitForFunction(() => typeof sb !== 'undefined' && sb);
+  await page.evaluate((id) => loadDashboard({ id, email: 'hote@test.ma' }), HOST_ID);
+  await page.waitForTimeout(800);
+  await expect(page.locator('.onb-modal')).toHaveCount(0);
   await expect(page.locator('#onbCard')).toBeHidden();
   expect(errors, errors.join('\n')).toEqual([]);
 });
