@@ -250,7 +250,7 @@
   function nationalityLabel(code, lang) {
     var n = NATIONALITIES[code];
     if (!n) return code;
-    return lang === 'en' ? n[1] : n[0];
+    return lang && lang !== 'fr' ? n[1] : n[0];
   }
 
   function titleCase(s) {
@@ -425,7 +425,11 @@
       partial: 'تعذرت قراءة رقم الوثيقة: يرجى إدخاله يدوياً.',
     },
   };
-  function tr(k) { var l = window._lang || 'fr'; return (TXT[l] && TXT[l][k]) || TXT.fr[k]; }
+  // Langues sans traduction ici : anglais (le français reste la langue par défaut).
+  function tr(k) {
+    var l = window._lang || 'fr';
+    return (TXT[l] && TXT[l][k]) || (l === 'fr' ? TXT.fr[k] : TXT.en[k]) || TXT.fr[k];
+  }
 
   var FIELD_IDS = ['docNumber', 'firstName', 'lastName', 'nationality', 'birthdate'];
 
@@ -529,6 +533,7 @@
     translate();
 
     document.querySelectorAll('.lang-btn').forEach(function (b) { b.addEventListener('click', function () { setTimeout(translate, 0); }); });
+    document.addEventListener('sf:langchange', translate);
   }
 
   function translate() {
