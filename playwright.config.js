@@ -6,7 +6,8 @@ module.exports = defineConfig({
   timeout: 30_000,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
-  use: { baseURL: 'http://127.0.0.1:4173', trace: 'off' },
+  // locale fr-FR : le check-in suit la langue du navigateur, les tests partent du français.
+  use: { baseURL: 'http://127.0.0.1:4173', trace: 'off', locale: 'fr-FR' },
   webServer: {
     command: 'node tests/serve.js 4173',
     url: 'http://127.0.0.1:4173/index.html',

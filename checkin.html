@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Check-in · Votre Séjour</title>
+<script src="checkin-i18n.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 .lang-selector {
-  display: flex; gap: 0.3rem; margin-left: auto;
+  display: flex; gap: 0.3rem; margin-inline-start: auto; flex-shrink: 0;
 }
 .lang-btn {
   background: none; border: 1.5px solid var(--warm);
@@ -17,43 +18,19 @@
   transition: all 0.15s; font-family: 'Inter', sans-serif;
 }
 .lang-btn.active { background: var(--terracotta); color: white; border-color: var(--terracotta); }
-body.rtl { direction: rtl; font-family: 'Noto Sans Arabic', 'Inter', sans-serif; }
-body.rtl .step-label { margin-left: 0; margin-right: 0.5rem; }
-body.rtl .btn-group { flex-direction: row-reverse; }
-body.rtl .form-row { direction: rtl; }
-body.rtl header { flex-direction: row-reverse; }
-body.rtl .progress-bar { flex-direction: row-reverse; }
-body.rtl .lang-selector { margin-left: 0; margin-right: auto; }
-body.rtl .sig-toolbar { flex-direction: row-reverse; }
-body.rtl .checkbox-row { flex-direction: row-reverse; }
-body.rtl .info-banner { flex-direction: row-reverse; }
-body.rtl .date-display { direction: ltr; } /* keep calendar LTR */
+/* Arabe : dir="rtl" sur <html> inverse déjà l'ordre des blocs flex/grid. */
+body.rtl, body.rtl button, body.rtl input, body.rtl select { font-family: 'Noto Sans Arabic', 'Inter', sans-serif; }
+[dir="rtl"] .cal-nav, [dir="rtl"] .date-arrow { display: inline-block; transform: scaleX(-1); }
+[dir="rtl"] input[type="email"], [dir="rtl"] input[type="tel"], [dir="rtl"] #docNumber { direction: ltr; text-align: right; }
+[dir="rtl"] #tokenTimer { right: auto !important; left: 1rem; direction: ltr; }
+.contract-note { font-size: 0.78rem; color: var(--mid); background: var(--cream); border-radius: 8px; padding: 0.6rem 0.8rem; margin-bottom: 0.8rem; line-height: 1.5; }
+.contract-note:empty { display: none; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 // Fonctions appelées via onclick= disponibles immédiatement
-function setLang(lang) {
-  window._lang = lang || 'fr';
-  localStorage.setItem('sf_lang', lang);
-  // Update buttons
-  document.querySelectorAll('.lang-btn').forEach(function(btn) {
-    btn.classList.toggle('active', btn.textContent.trim() === lang.toUpperCase());
-  });
-  // RTL
-  if (lang === 'ar') {
-    document.documentElement.setAttribute('dir', 'rtl');
-    document.body.classList.add('rtl');
-    document.body.style.fontFamily = "'Noto Sans Arabic', 'Inter', sans-serif";
-  } else {
-    document.documentElement.setAttribute('dir', 'ltr');
-    document.body.classList.remove('rtl');
-    document.body.style.fontFamily = '';
-  }
-  // Call main translation function if loaded
-  if (typeof _mainSetLang === 'function') _mainSetLang(lang);
-  else if (typeof applyTranslations === 'function') applyTranslations();
-}
+// (setLang et les traductions sont dans checkin-i18n.js)
 function changeMonth(delta) {
   if (typeof _changeMonth === 'function') _changeMonth(delta);
 }
@@ -65,11 +42,6 @@ function togglePassword(inputId, btnId) {
   if (!input) return;
   input.type = input.type === 'text' ? 'password' : 'text';
 }
-// Apply saved language on load
-document.addEventListener('DOMContentLoaded', function() {
-  var saved = localStorage.getItem('sf_lang') || 'fr';
-  if (saved !== 'fr') setLang(saved);
-});
 </script>
 <style>
   :root {
@@ -726,13 +698,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <header>
   <div class="logo-mark sf-mark">S</div>
   <div class="header-text">
-    <h1 id="hdr-title">Check-in en ligne</h1>
-    <p id="hostNameDisplay">Bienvenue dans votre logement</p>
+    <h1 id="hdr-title" data-i18n="hdr_title">Check-in en ligne</h1>
+    <p id="hostNameDisplay" data-i18n="hdr_welcome">Bienvenue dans votre logement</p>
   </div>
-  <div class="lang-selector">
-    <button class="lang-btn active" onclick="setLang('fr')">FR</button>
-    <button class="lang-btn" onclick="setLang('en')">EN</button>
-    <button class="lang-btn" onclick="setLang('ar')">AR</button>
+  <div class="lang-selector" role="group" data-i18n-aria="lang_switch" aria-label="Langue">
+    <button type="button" class="lang-btn" data-lang="fr" lang="fr" onclick="setLang('fr')">FR</button>
+    <button type="button" class="lang-btn" data-lang="en" lang="en" onclick="setLang('en')">EN</button>
+    <button type="button" class="lang-btn" data-lang="es" lang="es" onclick="setLang('es')">ES</button>
+    <button type="button" class="lang-btn" data-lang="ar" lang="ar" onclick="setLang('ar')">ع</button>
   </div>
 </header>
 
@@ -768,15 +741,15 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="card">
       <div class="calendar-wrap">
         <div class="cal-header">
-          <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+          <button class="cal-nav" onclick="changeMonth(-1)" data-i18n-aria="cal_prev" aria-label="Mois précédent">‹</button>
           <h3 id="calTitle"></h3>
-          <button class="cal-nav" onclick="changeMonth(1)">›</button>
+          <button class="cal-nav" onclick="changeMonth(1)" data-i18n-aria="cal_next" aria-label="Mois suivant">›</button>
         </div>
         <div class="cal-grid" id="calGrid"></div>
         <div class="date-display">
-          <div class="date-box" id="boxStart"><small>Arrivée</small><strong id="txtStart">—</strong></div>
+          <div class="date-box" id="boxStart"><small data-i18n="date_arrival">Arrivée</small><strong id="txtStart">—</strong></div>
           <div class="date-arrow">→</div>
-          <div class="date-box" id="boxEnd"><small>Départ</small><strong id="txtEnd">—</strong></div>
+          <div class="date-box" id="boxEnd"><small data-i18n="date_departure">Départ</small><strong id="txtEnd">—</strong></div>
         </div>
         <div id="nightsBadge"></div>
       </div>
@@ -786,19 +759,19 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="form-group">
         <label data-i18n="lbl_arrival">Heure d'arrivée prévue</label>
         <select id="arrivalTime">
-          <option value="">Sélectionner</option>
-          <option>Avant 12h00</option>
-          <option>12h00 – 14h00</option>
-          <option>14h00 – 16h00</option>
-          <option>16h00 – 18h00</option>
-          <option>18h00 – 20h00</option>
-          <option>Après 20h00</option>
+          <option value="" data-i18n="opt_select">Sélectionner</option>
+          <option value="Avant 12h00" data-i18n="arr_before12">Avant 12h00</option>
+          <option value="12h00 – 14h00" data-i18n="arr_12_14">12h00 – 14h00</option>
+          <option value="14h00 – 16h00" data-i18n="arr_14_16">14h00 – 16h00</option>
+          <option value="16h00 – 18h00" data-i18n="arr_16_18">16h00 – 18h00</option>
+          <option value="18h00 – 20h00" data-i18n="arr_18_20">18h00 – 20h00</option>
+          <option value="Après 20h00" data-i18n="arr_after20">Après 20h00</option>
         </select>
       </div>
 
       <!-- Adultes -->
       <div class="form-group">
-        <label>👤 Adultes <span style="font-size:0.75rem;color:var(--text3);font-weight:400;">(18 ans et plus)</span></label>
+        <label>👤 <span data-i18n="lbl_adults">Adultes</span> <span data-i18n="lbl_adults_hint" style="font-size:0.75rem;color:var(--text3);font-weight:400;">(18 ans et plus)</span></label>
         <div style="display:flex;align-items:center;gap:1rem;">
           <button type="button" onclick="changeCount('adults', -1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);background:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;">−</button>
           <span id="adultsDisplay" style="font-size:1.3rem;font-weight:800;font-family:'Inter',sans-serif;min-width:2rem;text-align:center;">1</span>
@@ -808,7 +781,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       <!-- Enfants -->
       <div class="form-group">
-        <label>🧒 Enfants <span style="font-size:0.75rem;color:var(--text3);font-weight:400;">(moins de 18 ans)</span></label>
+        <label>🧒 <span data-i18n="lbl_children">Enfants</span> <span data-i18n="lbl_children_hint" style="font-size:0.75rem;color:var(--text3);font-weight:400;">(moins de 18 ans)</span></label>
         <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.8rem;">
           <button type="button" onclick="changeCount('children', -1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);background:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;">−</button>
           <span id="childrenDisplay" style="font-size:1.3rem;font-weight:800;font-family:'Inter',sans-serif;min-width:2rem;text-align:center;">0</span>
@@ -835,7 +808,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Message sensibilisation identité -->
     <div id="identityNotice" style="background:#EEF5F1;border:1px solid rgba(22,36,30,0.2);border-radius:10px;padding:0.8rem 1rem;margin-bottom:1.2rem;display:flex;align-items:flex-start;gap:0.7rem;">
       <span style="font-size:1.1rem;flex-shrink:0;margin-top:1px;">🪪</span>
-      <div style="font-size:0.82rem;color:#16241E;line-height:1.6;" id="identityNoticeText">
+      <div style="font-size:0.82rem;color:#16241E;line-height:1.6;" id="identityNoticeText" data-i18n-html="identity_notice">
         <strong>Saisissez vos informations exactement comme sur votre CIN ou passeport.</strong>
         Ces données seront vérifiées à l'étape suivante par scan de votre document.
       </div>
@@ -844,30 +817,30 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="card">
       <div class="form-row">
         <div class="form-group">
-          <label data-i18n="lbl_docnum">N° CIN / Passeport <span style="color:var(--terracotta)">*</span></label>
+          <label><span data-i18n="lbl_docnum">N° CIN / Passeport</span> <span style="color:var(--terracotta)">*</span></label>
           <input type="text" id="docNumber" placeholder="AB123456" style="font-weight:600;letter-spacing:0.05em">
         </div>
         <div class="form-group">
           <label data-i18n="lbl_doctype">Type de document</label>
           <select id="docTypeIdentity">
-            <option value="cin">CIN</option>
-            <option value="passport">Passeport</option>
-            <option value="residence">Titre de séjour</option>
+            <option value="cin" data-i18n="doc_cin">CIN</option>
+            <option value="passport" data-i18n="doc_passport">Passeport</option>
+            <option value="residence" data-i18n="doc_residence">Titre de séjour</option>
           </select>
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label data-i18n="lbl_firstname">Prénom <span style="color:var(--terracotta)">*</span></label>
+          <label><span data-i18n="lbl_firstname">Prénom</span> <span style="color:var(--terracotta)">*</span></label>
           <input type="text" id="firstName" placeholder="Marie">
         </div>
         <div class="form-group">
-          <label data-i18n="lbl_lastname">Nom de famille <span style="color:var(--terracotta)">*</span></label>
+          <label><span data-i18n="lbl_lastname">Nom de famille</span> <span style="color:var(--terracotta)">*</span></label>
           <input type="text" id="lastName" placeholder="Dupont">
         </div>
       </div>
       <div class="form-group">
-        <label data-i18n="lbl_email">Adresse e-mail <span style="color:var(--terracotta)">*</span></label>
+        <label><span data-i18n="lbl_email">Adresse e-mail</span> <span style="color:var(--terracotta)">*</span></label>
         <input type="email" id="email" placeholder="marie.dupont@email.com">
       </div>
       <div class="form-group">
@@ -877,16 +850,16 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="form-row">
         <div class="form-group">
           <label data-i18n="lbl_nationality">Nationalité</label>
-          <input type="text" id="nationality" placeholder="Française">
+          <input type="text" id="nationality" placeholder="Française" data-i18n-placeholder="ph_nationality">
         </div>
         <div class="form-group">
           <label data-i18n="lbl_birthdate">Date de naissance</label>
-          <input type="text" id="birthdate" placeholder="JJ/MM/AAAA">
+          <input type="text" id="birthdate" placeholder="JJ/MM/AAAA" data-i18n-placeholder="ph_birthdate">
         </div>
       </div>
       <div class="form-group">
         <label data-i18n="lbl_address">Adresse de résidence</label>
-        <input type="text" id="address" placeholder="12 rue de la Paix, Paris">
+        <input type="text" id="address" placeholder="12 rue de la Paix, Paris" data-i18n-placeholder="ph_address">
       </div>
 
       <div class="btn-group">
@@ -902,15 +875,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   <!-- STEP 3: DOCUMENTS -->
   <div class="page" id="page3">
-    <p class="page-title">Vérification d'identité</p>
-    <p class="page-subtitle">Scannez le recto de votre CIN avec la caméra. La vérification est automatique.</p>
+    <p class="page-title" data-i18n="t_verify">Vérification d'identité</p>
+    <p class="page-subtitle" data-i18n="t_verify_sub">Scannez le recto de votre CIN avec la caméra. La vérification est automatique.</p>
 
     <div class="card">
 
       <!-- Bannière confidentialité -->
       <div style="background:#EEF5F1;border:1px solid rgba(22,36,30,0.2);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;display:flex;gap:0.8rem;align-items:flex-start;">
         <span style="font-size:1.2rem;flex-shrink:0;">🛡️</span>
-        <div style="font-size:0.8rem;color:#16241E;line-height:1.7;">
+        <div style="font-size:0.8rem;color:#16241E;line-height:1.7;" data-i18n-html="privacy_box">
           <strong>Vos données sont protégées</strong><br>
           Votre CIN est utilisée <u>uniquement</u> pour vérifier votre identité. Elle apparaît dans votre contrat PDF uniquement — <strong>non stockée</strong> sur nos serveurs.
         </div>
@@ -918,11 +891,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
       <!-- Type de document -->
       <div class="form-group" style="margin-bottom:1rem;">
-        <label>Type de document</label>
+        <label data-i18n="lbl_doctype">Type de document</label>
         <select id="docType" onchange="onDocTypeChange()">
-          <option value="cin">Carte d'identité nationale (CIN)</option>
-          <option value="passport">Passeport</option>
-          <option value="residence">Titre de séjour</option>
+          <option value="cin" data-i18n="doc_cin_long">Carte d'identité nationale (CIN)</option>
+          <option value="passport" data-i18n="doc_passport">Passeport</option>
+          <option value="residence" data-i18n="doc_residence">Titre de séjour</option>
         </select>
       </div>
 
@@ -933,13 +906,13 @@ document.addEventListener('DOMContentLoaded', function() {
         <div id="scanReady">
           <div style="border:2px dashed var(--warm);border-radius:14px;padding:2rem;text-align:center;background:var(--cream);">
             <div style="font-size:2.5rem;margin-bottom:0.8rem;">📷</div>
-            <div style="font-size:0.95rem;font-weight:600;color:var(--deep);margin-bottom:0.4rem;">Scanner votre CIN</div>
-            <div style="font-size:0.8rem;color:var(--light-mid);margin-bottom:1.2rem;line-height:1.6;">Placez le recto de votre carte devant la caméra.<br>La détection est automatique.</div>
-            <button onclick="startCINScanner()" style="background:var(--riad-green);color:#fff;border:none;border-radius:10px;padding:0.75rem 1.8rem;font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;width:100%;">
+            <div style="font-size:0.95rem;font-weight:600;color:var(--deep);margin-bottom:0.4rem;" data-i18n="scan_title">Scanner votre CIN</div>
+            <div style="font-size:0.8rem;color:var(--light-mid);margin-bottom:1.2rem;line-height:1.6;" data-i18n-html="scan_help">Placez le recto de votre carte devant la caméra.<br>La détection est automatique.</div>
+            <button onclick="startCINScanner()" style="background:var(--riad-green);color:#fff;border:none;border-radius:10px;padding:0.75rem 1.8rem;font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;width:100%;" data-i18n="scan_open">
               📸 Ouvrir la caméra
             </button>
             <div style="margin-top:0.8rem;">
-              <button onclick="showGalleryFallback()" style="background:none;border:none;color:var(--sand);font-size:0.78rem;cursor:pointer;text-decoration:underline;">
+              <button onclick="showGalleryFallback()" style="background:none;border:none;color:var(--sand);font-size:0.78rem;cursor:pointer;text-decoration:underline;" data-i18n="scan_gallery">
                 Utiliser une photo depuis la galerie
               </button>
             </div>
@@ -963,18 +936,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div style="position:absolute;bottom:-3px;left:-3px;width:24px;height:24px;border-bottom:4px solid #C9A227;border-left:4px solid #C9A227;border-radius:0 0 0 3px;"></div>
                 <div style="position:absolute;bottom:-3px;right:-3px;width:24px;height:24px;border-bottom:4px solid #C9A227;border-right:4px solid #C9A227;border-radius:0 0 3px 0;"></div>
                 <!-- Texte guide centré -->
-                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,0.5);font-size:0.7rem;white-space:nowrap;pointer-events:none;">Placez la CIN — numéro visible</div>
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,0.5);font-size:0.7rem;white-space:nowrap;pointer-events:none;" data-i18n="scan_guide">Placez la CIN — numéro visible</div>
               </div>
               <!-- Ligne de scan animée -->
               <div id="scanLine" style="position:absolute;left:7.5%;right:7.5%;top:22%;height:2px;background:rgba(201,162,39,0.7);animation:scanMove 2s ease-in-out infinite;"></div>
             </div>
             <!-- Statut scan -->
             <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);padding:0.8rem;text-align:center;">
-              <div id="scanStatus" style="font-size:0.82rem;color:#fff;font-weight:500;">🔍 Scan en cours...</div>
+              <div id="scanStatus" style="font-size:0.82rem;color:#fff;font-weight:500;" data-i18n="scan_running">🔍 Scan en cours...</div>
             </div>
           </div>
           <!-- Bouton arrêter -->
-          <button onclick="stopCINScanner()" style="width:100%;margin-top:0.8rem;background:transparent;border:1px solid var(--border);border-radius:8px;padding:0.6rem;font-size:0.82rem;color:var(--light-mid);cursor:pointer;">
+          <button onclick="stopCINScanner()" style="width:100%;margin-top:0.8rem;background:transparent;border:1px solid var(--border);border-radius:8px;padding:0.6rem;font-size:0.82rem;color:var(--light-mid);cursor:pointer;" data-i18n="scan_cancel">
             ✕ Annuler
           </button>
         </div>
@@ -987,7 +960,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div id="scanSuccessDetails" style="font-size:0.82rem;color:#2F5446;margin-bottom:1rem;line-height:1.6;"></div>
             <!-- Aperçu photo capturée -->
             <img id="cinCaptured" style="max-width:100%;border-radius:8px;border:1px solid var(--border);margin-bottom:0.8rem;display:none;" alt="CIN capturée">
-            <button onclick="resetScanner()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:0.4rem 1rem;font-size:0.78rem;color:var(--light-mid);cursor:pointer;">
+            <button onclick="resetScanner()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:0.4rem 1rem;font-size:0.78rem;color:var(--light-mid);cursor:pointer;" data-i18n="scan_rescan">
               🔄 Rescanner
             </button>
           </div>
@@ -997,8 +970,8 @@ document.addEventListener('DOMContentLoaded', function() {
         <div id="scanFallback" style="display:none;">
           <div style="background:#FFFBF0;border:1px solid #FFE082;border-radius:12px;padding:1.2rem;margin-bottom:1rem;text-align:center;">
             <div style="font-size:1.5rem;margin-bottom:0.4rem;">⚠️</div>
-            <div style="font-size:0.85rem;font-weight:600;color:#C67600;margin-bottom:0.3rem;">Scan automatique difficile</div>
-            <div style="font-size:0.78rem;color:#8B6500;">Essayez avec une meilleure lumière, ou importez une photo depuis votre galerie.</div>
+            <div style="font-size:0.85rem;font-weight:600;color:#C67600;margin-bottom:0.3rem;" data-i18n="scan_hard_title">Scan automatique difficile</div>
+            <div id="scanFallbackText" style="font-size:0.78rem;color:#8B6500;" data-i18n="scan_hard_text">Essayez avec une meilleure lumière, ou importez une photo depuis votre galerie.</div>
           </div>
           <!-- Upload galerie fallback -->
           <div class="upload-zone" id="zone1" style="margin-bottom:0;">
@@ -1006,15 +979,15 @@ document.addEventListener('DOMContentLoaded', function() {
             <div id="preview1" style="display:none"></div>
             <div id="placeholder1">
               <div class="upload-icon">🖼️</div>
-              <h4>Photo depuis la galerie</h4>
-              <p>Choisissez une photo nette de votre CIN</p>
-              <button class="upload-btn" type="button" onclick="document.getElementById('file1').click()">📁 Choisir une photo</button>
+              <h4 data-i18n="gallery_title">Photo depuis la galerie</h4>
+              <p data-i18n="gallery_sub">Choisissez une photo nette de votre CIN</p>
+              <button class="upload-btn" type="button" onclick="document.getElementById('file1').click()" data-i18n="gallery_btn">📁 Choisir une photo</button>
               <div class="upload-types"><span>JPG</span><span>PNG</span></div>
             </div>
           </div>
           <div id="ocrStatus" style="display:none;margin-top:0.8rem;padding:0.8rem 1rem;border-radius:10px;font-size:0.82rem;"></div>
           <div style="text-align:center;margin-top:0.5rem;">
-            <button onclick="startCINScanner()" style="background:none;border:none;color:var(--riad-green);font-size:0.78rem;cursor:pointer;text-decoration:underline;">↩ Réessayer avec la caméra</button>
+            <button onclick="startCINScanner()" style="background:none;border:none;color:var(--riad-green);font-size:0.78rem;cursor:pointer;text-decoration:underline;" data-i18n="scan_retry_camera">↩ Réessayer avec la caméra</button>
           </div>
         </div>
 
@@ -1022,15 +995,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
       <!-- Selfie optionnel -->
       <div style="margin-top:1.5rem;">
-        <label style="font-size:0.82rem;color:var(--light-mid);">Selfie <span style="font-style:italic;font-weight:400;">(optionnel)</span></label>
+        <label style="font-size:0.82rem;color:var(--light-mid);"><span data-i18n="selfie_label">Selfie</span> <span style="font-style:italic;font-weight:400;" data-i18n="optional">(optionnel)</span></label>
         <div class="upload-zone" id="zone3" style="margin-top:0.4rem;">
           <input type="file" id="file3" accept="image/*" capture="user" onchange="handleFile(this,'preview3',3)">
           <div id="preview3" style="display:none"></div>
           <div id="placeholder3">
             <div class="upload-icon">🤳</div>
-            <h4>Photo de vous</h4>
-            <p>Prenez un selfie ou choisissez une photo</p>
-            <button class="upload-btn" type="button" onclick="document.getElementById('file3').click()">📷 Prendre / Choisir</button>
+            <h4 data-i18n="selfie_title">Photo de vous</h4>
+            <p data-i18n="selfie_sub">Prenez un selfie ou choisissez une photo</p>
+            <button class="upload-btn" type="button" onclick="document.getElementById('file3').click()" data-i18n="selfie_btn">📷 Prendre / Choisir</button>
             <div class="upload-types"><span>JPG</span><span>PNG</span></div>
           </div>
         </div>
@@ -1039,7 +1012,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <!-- Consentement CIN -->
       <div class="checkbox-row" onclick="toggleCheck('check4', event)" style="margin-top:1.2rem;background:#EEF5F1;border:1px solid rgba(22,36,30,0.15);border-radius:8px;padding:0.8rem;">
         <input type="checkbox" id="check4">
-        <span style="font-size:0.82rem;">🛡️ Je consens à l'utilisation de ma pièce d'identité <strong>uniquement</strong> à des fins de vérification d'identité pour cette location. Elle sera incluse dans mon contrat PDF uniquement et <strong>non stockée</strong> sur les serveurs de Stayform.</span>
+        <span style="font-size:0.82rem;" data-i18n-html="check4">🛡️ Je consens à l'utilisation de ma pièce d'identité <strong>uniquement</strong> à des fins de vérification d'identité pour cette location. Elle sera incluse dans mon contrat PDF uniquement et <strong>non stockée</strong> sur les serveurs de Stayform.</span>
       </div>
 
       <!-- Skip -->
@@ -1047,13 +1020,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
       <!-- Bouton passer l'étape -->
       <div id="skipBanner" style="display:none;background:#FFF8EE;border:1px solid #F0D9A0;border-radius:10px;padding:1rem 1.2rem;margin-bottom:1rem;text-align:center;">
-        <div style="font-size:0.82rem;color:#8B6914;margin-bottom:0.8rem;">Vous pouvez passer cette étape, mais votre document sera marqué comme non fourni dans le contrat.</div>
+        <div style="font-size:0.82rem;color:#8B6914;margin-bottom:0.8rem;" data-i18n="skip_banner">Vous pouvez passer cette étape, mais votre document sera marqué comme non fourni dans le contrat.</div>
         <button onclick="skipDocuments()" style="background:#C9A227;color:#16241E;border:none;border-radius:8px;padding:0.6rem 1.4rem;font-family:'Inter',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;" data-i18n="skip_step">Passer cette étape →</button>
       </div>
 
       <div class="btn-group">
-        <button class="btn btn-secondary" onclick="prevStep(3)">← Retour</button>
-        <button class="btn btn-primary" onclick="nextStepDoc()" id="btn3" disabled>Continuer →</button>
+        <button class="btn btn-secondary" onclick="prevStep(3)" data-i18n="btn_back">← Retour</button>
+        <button class="btn btn-primary" onclick="nextStepDoc()" id="btn3" disabled data-i18n="btn_next">Continuer →</button>
       </div>
       <div style="text-align:center;margin-top:0.8rem;">
         <button id="toggleSkipBtn" onclick="toggleSkip()" style="background:none;border:none;color:var(--text3);font-size:0.78rem;cursor:pointer;text-decoration:underline;" data-i18n="skip_doc">Je n'ai pas mon document maintenant</button>
@@ -1069,49 +1042,50 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="card">
       <div class="summary-grid" id="contractSummary"></div>
 
+      <p class="contract-note" data-i18n="contract_translation_note"></p>
       <div class="contract-scroll" id="contractText">
-        <h4>CONTRAT DE LOCATION MEUBLÉE TOURISTIQUE</h4>
-        Entre le soussigné, ci-après dénommé « le Bailleur », et le(s) voyageur(s) mentionné(s) dans le présent contrat, ci-après dénommé(s) « le(s) Locataire(s) ».
+        <h4 data-i18n="contract_title">CONTRAT DE LOCATION MEUBLÉE TOURISTIQUE</h4>
+        <span data-i18n="contract_intro">Entre le soussigné, ci-après dénommé « le Bailleur », et le(s) voyageur(s) mentionné(s) dans le présent contrat, ci-après dénommé(s) « le(s) Locataire(s) ».</span>
 
-        <h4>Article 1 — Objet du contrat</h4>
-        Le présent contrat a pour objet la location meublée à titre touristique du logement décrit dans la réservation. Cette location est consentie et acceptée aux conditions stipulées ci-après. La location ne peut en aucun cas bénéficier à des tiers et ne peut faire l'objet d'une sous-location ou cession sans accord écrit préalable du bailleur.
+        <h4 data-i18n="art1_t">Article 1 — Objet du contrat</h4>
+        <span data-i18n="art1">Le présent contrat a pour objet la location meublée à titre touristique du logement décrit dans la réservation. Cette location est consentie et acceptée aux conditions stipulées ci-après. La location ne peut en aucun cas bénéficier à des tiers et ne peut faire l'objet d'une sous-location ou cession sans accord écrit préalable du bailleur.</span>
 
-        <h4>Article 2 — Durée de la location</h4>
-        La location commence et se termine aux dates sélectionnées lors de ce check-in. Le locataire devra libérer les lieux au plus tard à 11h00 le jour du départ. Le bailleur se réserve le droit de facturer une nuit supplémentaire en cas de départ tardif non convenu.
+        <h4 data-i18n="art2_t">Article 2 — Durée de la location</h4>
+        <span data-i18n="art2">La location commence et se termine aux dates sélectionnées lors de ce check-in. Le locataire devra libérer les lieux au plus tard à 11h00 le jour du départ. Le bailleur se réserve le droit de facturer une nuit supplémentaire en cas de départ tardif non convenu.</span>
 
-        <h4>Article 3 — Prix et conditions de paiement</h4>
-        Le montant du loyer, les frais de ménage, taxes de séjour et autres charges ont été convenus entre les parties conformément aux conditions de la réservation.
+        <h4 data-i18n="art3_t">Article 3 — Prix et conditions de paiement</h4>
+        <span data-i18n="art3">Le montant du loyer, les frais de ménage, taxes de séjour et autres charges ont été convenus entre les parties conformément aux conditions de la réservation.</span>
 
-        <h4>Article 4 — Dépôt de garantie</h4>
-        Un dépôt de garantie peut être demandé par le bailleur. En l'absence de dommages constatés lors de l'état des lieux de sortie, ce dépôt est intégralement restitué dans un délai de 7 jours ouvrés après le départ.
+        <h4 data-i18n="art4_t">Article 4 — Dépôt de garantie</h4>
+        <span data-i18n="art4">Un dépôt de garantie peut être demandé par le bailleur. En l'absence de dommages constatés lors de l'état des lieux de sortie, ce dépôt est intégralement restitué dans un délai de 7 jours ouvrés après le départ.</span>
 
-        <h4>Article 5 — Occupation et règles de séjour</h4>
+        <h4 data-i18n="art5_t">Article 5 — Occupation et règles de séjour</h4>
         <span id="contract-art5">Le logement est loué à usage exclusivement touristique et résidentiel temporaire. Il est expressément interdit : d'introduire plus de personnes que le nombre déclaré ; d'organiser des fêtes, soirées ou rassemblements ; de fumer à l'intérieur du logement ; d'introduire des animaux de compagnie sans autorisation préalable ; d'endommager les équipements et le mobilier.</span>
 
-        <h4>Article 6 — Règlement intérieur</h4>
+        <h4 data-i18n="art6_t">Article 6 — Règlement intérieur</h4>
         <span id="contract-art6">Le locataire s'engage à respecter le règlement intérieur du logement. Le non-respect du règlement peut entraîner une résiliation immédiate du contrat sans remboursement.</span>
 
-        <h4>Article 7 — Responsabilité</h4>
-        Le locataire est responsable de tout dommage causé au logement, à son contenu et aux équipements durant son séjour. Le bailleur ne pourra être tenu responsable des vols, pertes ou dommages affectant les biens personnels du locataire.
+        <h4 data-i18n="art7_t">Article 7 — Responsabilité</h4>
+        <span data-i18n="art7">Le locataire est responsable de tout dommage causé au logement, à son contenu et aux équipements durant son séjour. Le bailleur ne pourra être tenu responsable des vols, pertes ou dommages affectant les biens personnels du locataire.</span>
 
-        <h4>Article 8 — Protection des données</h4>
-        Les données personnelles collectées dans ce formulaire sont traitées conformément au Règlement Général sur la Protection des Données (RGPD – UE 2016/679). Elles sont utilisées uniquement aux fins de vérification d'identité et de gestion de la location.
+        <h4 data-i18n="art8_t">Article 8 — Protection des données</h4>
+        <span data-i18n="art8">Les données personnelles collectées dans ce formulaire sont traitées conformément au Règlement Général sur la Protection des Données (RGPD – UE 2016/679). Elles sont utilisées uniquement aux fins de vérification d'identité et de gestion de la location.</span>
 
-        <h4>Article 9 — Litiges</h4>
-        Tout litige relatif au présent contrat sera soumis à la juridiction compétente du lieu du logement loué, après tentative de résolution amiable.
+        <h4 data-i18n="art9_t">Article 9 — Litiges</h4>
+        <span data-i18n="art9">Tout litige relatif au présent contrat sera soumis à la juridiction compétente du lieu du logement loué, après tentative de résolution amiable.</span>
       </div>
 
       <div class="checkbox-row" onclick="toggleCheck('check1', event)">
         <input type="checkbox" id="check1">
-        <span>J'ai lu et j'accepte les conditions générales du contrat de location ci-dessus.</span>
+        <span data-i18n="check1">J'ai lu et j'accepte les conditions générales du contrat de location ci-dessus.</span>
       </div>
       <div class="checkbox-row" onclick="toggleCheck('check2', event)">
         <input type="checkbox" id="check2">
-        <span>Je certifie que les informations fournies sont exactes et que les pièces d'identité téléchargées sont authentiques.</span>
+        <span data-i18n="check2">Je certifie que les informations fournies sont exactes et que les pièces d'identité téléchargées sont authentiques.</span>
       </div>
       <div class="checkbox-row" onclick="toggleCheck('check3', event)">
         <input type="checkbox" id="check3">
-        <span>J'accepte le traitement de mes données personnelles conformément au RGPD pour la gestion de cette location.</span>
+        <span data-i18n="check3">J'accepte le traitement de mes données personnelles conformément au RGPD pour la gestion de cette location.</span>
       </div>
 
 
@@ -1121,32 +1095,32 @@ document.addEventListener('DOMContentLoaded', function() {
       <div style="background:linear-gradient(135deg,rgba(22,36,30,0.08),rgba(22,36,30,0.03));border:1.5px solid rgba(22,36,30,0.2);border-radius:14px;padding:1.2rem;margin-bottom:1.5rem;">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.8rem;">
           <div>
-            <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--light-mid);margin-bottom:0.3rem;">🔑 Code d'accès au logement</div>
+            <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--light-mid);margin-bottom:0.3rem;" data-i18n="lock_title">🔑 Code d'accès au logement</div>
             <div id="lockCodeDisplay" style="font-family:'Fraunces',serif;font-size:2.2rem;font-weight:600;color:var(--terracotta);letter-spacing:0.2em">— — —</div>
-            <div style="font-size:0.72rem;color:var(--sand);margin-top:0.2rem">Serrure numérique · 7 chiffres</div>
+            <div style="font-size:0.72rem;color:var(--sand);margin-top:0.2rem" data-i18n="lock_label">Serrure numérique · 7 chiffres</div>
           </div>
-          <button type="button" onclick="generateLockCode()" style="background:var(--terracotta);color:white;border:none;border-radius:10px;padding:0.65rem 1.2rem;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;">
+          <button type="button" onclick="generateLockCode()" style="background:var(--terracotta);color:white;border:none;border-radius:10px;padding:0.65rem 1.2rem;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;" data-i18n="lock_generate">
             🎲 Générer
           </button>
         </div>
         <input type="hidden" id="lockCode" value="">
-        <div id="lockCodeInfo" style="display:none;margin-top:0.8rem;padding:0.6rem 0.8rem;background:rgba(90,138,106,0.1);border-radius:8px;font-size:0.78rem;color:var(--success);">
+        <div id="lockCodeInfo" style="display:none;margin-top:0.8rem;padding:0.6rem 0.8rem;background:rgba(90,138,106,0.1);border-radius:8px;font-size:0.78rem;color:var(--success);" data-i18n="lock_info">
           ✓ Code généré et inclus dans le contrat PDF
         </div>
       </div>
 
-      <label data-i18n="lbl_signature">Signature manuscrite <span style="color:var(--terracotta)">*</span> <span style="font-style:italic;font-weight:400;text-transform:none;letter-spacing:0;color:var(--sand);font-size:0.7rem">(obligatoire)</span></label>
+      <label><span data-i18n="lbl_signature">Signature manuscrite</span> <span style="color:var(--terracotta)">*</span> <span data-i18n="required" style="font-style:italic;font-weight:400;text-transform:none;letter-spacing:0;color:var(--sand);font-size:0.7rem">(obligatoire)</span></label>
       <div class="signature-area" id="sigArea">
         <div class="sig-toolbar">
-          <span>✍ Signez ici</span>
-          <button class="sig-clear" onclick="clearSig()">Effacer</button>
+          <span data-i18n="sig_here">✍ Signez ici</span>
+          <button class="sig-clear" onclick="clearSig()" data-i18n="sig_clear">Effacer</button>
         </div>
         <div style="position:relative">
           <canvas id="sigCanvas"></canvas>
-          <span class="sig-placeholder" id="sigPlaceholder">Signez avec votre doigt ou votre souris</span>
+          <span class="sig-placeholder" id="sigPlaceholder" data-i18n="sig_placeholder">Signez avec votre doigt ou votre souris</span>
         </div>
       </div>
-      <div id="sigError" style="display:none;color:var(--terracotta);font-size:0.78rem;margin-top:0.4rem;padding:0.4rem 0.6rem;background:rgba(22,36,30,0.08);border-radius:6px;">
+      <div id="sigError" style="display:none;color:var(--terracotta);font-size:0.78rem;margin-top:0.4rem;padding:0.4rem 0.6rem;background:rgba(22,36,30,0.08);border-radius:6px;" data-i18n="sig_error">
         ⚠ La signature est obligatoire pour valider le contrat.
       </div>
 
@@ -1161,19 +1135,19 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="page" id="page5">
     <div class="card" style="text-align:center; padding: 3rem 2rem;">
       <div class="success-icon">✓</div>
-      <p class="page-title" style="margin-bottom:0.5rem">Check-in validé !</p>
-      <p class="page-subtitle" style="margin-bottom:2rem">Votre dossier a bien été enregistré. Téléchargez le contrat signé ci-dessous.</p>
+      <p class="page-title" style="margin-bottom:0.5rem" data-i18n="success_title">Check-in validé !</p>
+      <p class="page-subtitle" style="margin-bottom:2rem" data-i18n="success_sub">Votre dossier a bien été enregistré. Téléchargez le contrat signé ci-dessous.</p>
       <div class="summary-grid" id="finalSummary" style="text-align:left; margin-bottom: 1.5rem;"></div>
       <div class="info-banner" style="text-align:left; margin-bottom: 1.5rem;">
         <span class="icon">📧</span>
-        <span>Un email de confirmation a été envoyé à votre adresse. L'hôte a également été notifié. Bon séjour !</span>
+        <span data-i18n="success_email">Un email de confirmation a été envoyé à votre adresse. L'hôte a également été notifié. Bon séjour !</span>
       </div>
       <div style="border-top: 1px solid var(--warm); padding-top: 1.5rem;">
-        <p style="font-size:0.82rem; color:var(--mid); margin-bottom:1rem;">📋 Générez le dossier complet pour vos archives ou les autorités</p>
-        <button class="btn btn-primary" onclick="generatePDF()" id="btnPDF" style="width:100%; font-size:1rem; padding:1rem;">
+        <p style="font-size:0.82rem; color:var(--mid); margin-bottom:1rem;" data-i18n="pdf_intro">📋 Générez le dossier complet pour vos archives ou les autorités</p>
+        <button class="btn btn-primary" onclick="generatePDF()" id="btnPDF" style="width:100%; font-size:1rem; padding:1rem;" data-i18n="btn_pdf">
           ⬇ Télécharger le contrat PDF
         </button>
-        <p style="font-size:0.72rem; color:var(--sand); margin-top:0.7rem;">Contient : identité, dates, contrat complet et signature</p>
+        <p style="font-size:0.72rem; color:var(--sand); margin-top:0.7rem;" data-i18n="pdf_contains">Contient : identité, dates, contrat complet et signature</p>
       </div>
     </div>
   </div>
@@ -1182,14 +1156,15 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="page" id="pageLocked">
     <div class="card" style="text-align:center; padding: 3rem 2rem;">
       <div style="font-size:3rem; margin-bottom:1rem;">🔒</div>
-      <p class="page-title" style="margin-bottom:0.5rem; color:var(--terracotta)">Check-in indisponible</p>
-      <p class="page-subtitle" style="margin-bottom:2rem;">
+      <p class="page-title" style="margin-bottom:0.5rem; color:var(--terracotta)" data-i18n="locked_title">Check-in indisponible</p>
+      <p class="page-subtitle" style="margin-bottom:2rem;" data-i18n-html="locked_text">
         Votre hôte a atteint la limite de son plan gratuit.<br>
         Veuillez le contacter directement pour finaliser votre arrivée.
       </p>
       <div class="info-banner" style="text-align:left;">
         <span class="icon">📞</span>
-        <span>Contactez votre hôte par téléphone ou WhatsApp pour confirmer votre check-in.</span>
+        <span data-i18n="locked_contact">Contactez votre hôte par téléphone
+ ou WhatsApp pour confirmer votre check-in.</span>
       </div>
     </div>
   </div>
@@ -1202,14 +1177,13 @@ let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth();
 let startDate = null, endDate = null, selecting = 'start';
 
-const dayNames = ['Lu','Ma','Me','Je','Ve','Sa','Di'];
-const monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+let datesPrefilled = false;
 
 function renderCalendar() {
-  document.getElementById('calTitle').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+  document.getElementById('calTitle').textContent = `${t('cal_months').split(',')[currentMonth]} ${currentYear}`;
   const grid = document.getElementById('calGrid');
   grid.innerHTML = '';
-  dayNames.forEach(d => {
+  t('cal_days').split(',').forEach(d => {
     const el = document.createElement('div');
     el.className = 'cal-day-name';
     el.textContent = d;
@@ -1276,14 +1250,17 @@ function selectDay(date) {
 }
 
 function updateDateDisplay() {
-  const fmt = d => d ? d.toLocaleDateString('fr-FR', {day:'2-digit',month:'short',year:'numeric'}) : '—';
+  const fmt = d => d ? d.toLocaleDateString(sfLocale(), {day:'2-digit',month:'short',year:'numeric'}) : '—';
   document.getElementById('txtStart').textContent = fmt(startDate);
   document.getElementById('txtEnd').textContent = fmt(endDate);
   document.getElementById('boxStart').classList.toggle('filled', !!startDate);
   document.getElementById('boxEnd').classList.toggle('filled', !!endDate);
   if (startDate && endDate) {
     const nights = Math.round((endDate - startDate) / 86400000);
-    document.getElementById('nightsBadge').innerHTML = `<span class="nights-badge">🌙 ${nights} nuit${nights>1?'s':''}</span>`;
+    const badge = document.createElement('span');
+    badge.className = 'nights-badge';
+    badge.textContent = '🌙 ' + tn('nights', nights) + (datesPrefilled ? ' · ' + t('dates_prefilled') : '');
+    document.getElementById('nightsBadge').replaceChildren(badge);
     document.getElementById('btn1').disabled = false;
   } else {
     document.getElementById('nightsBadge').innerHTML = '';
@@ -1329,28 +1306,10 @@ initCalendarEvents();
   renderCalendar();
 
   // Mettre à jour le DOM une fois prêt
+  datesPrefilled = true;
   document.addEventListener('DOMContentLoaded', function() {
-    var fmtD = function(d) {
-      return d ? d.toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'}) : '—';
-    };
-
-    var txtStart    = document.getElementById('txtStart');
-    var txtEnd      = document.getElementById('txtEnd');
-    var boxStart    = document.getElementById('boxStart');
-    var boxEnd      = document.getElementById('boxEnd');
-    var nightsBadge = document.getElementById('nightsBadge');
-
-    if (txtStart) txtStart.textContent = fmtD(arrDate);
-    if (txtEnd)   txtEnd.textContent   = fmtD(depDate);
-    if (boxStart) { boxStart.classList.add('filled'); }
-    if (boxEnd)   { boxEnd.classList.add('filled'); }
-
-    var nights = Math.round((depDate - arrDate) / 86400000);
-    if (nightsBadge) nightsBadge.innerHTML = '<span class="nights-badge">🌙 ' + nights + ' nuit' + (nights>1?'s':'') + ' · Dates pré-remplies</span>';
-
-    // Activer le bouton Continuer — dates déjà définies par l'hôte
-    var btn1 = document.getElementById('btn1');
-    if (btn1) btn1.disabled = false;
+    // Affiche les dates et active « Continuer » — dates déjà définies par l'hôte
+    updateDateDisplay();
 
     var calWrap = document.querySelector('.calendar-wrap');
     if (calWrap) {
@@ -1360,7 +1319,8 @@ initCalendarEvents();
 
     var subtitle = document.querySelector('[data-i18n="t_sejour_sub"]');
     if (subtitle) {
-      subtitle.textContent = 'Les dates de votre séjour ont été pré-remplies par votre hôte.';
+      subtitle.setAttribute('data-i18n', 't_sejour_prefilled');
+      subtitle.textContent = t('t_sejour_prefilled');
       subtitle.style.color = '#2D7A45';
       subtitle.style.fontWeight = '600';
     }
@@ -1370,33 +1330,32 @@ initCalendarEvents();
   });
 })();
 
+// Sans données du logement (pd vide) : texte par défaut du contrat.
 function updateContractArticles(pd) {
-  if (!pd) return;
-
   // Article 5
-  const noSmoking   = pd.no_smoking !== false;
-  const petsOk      = pd.pets_allowed;
-  const partiesOk   = pd.parties_allowed;
-  const acteMariage = pd.acte_mariage !== false;
+  const noSmoking   = !pd || pd.no_smoking !== false;
+  const petsOk      = pd && pd.pets_allowed;
+  const partiesOk   = pd && pd.parties_allowed;
+  const acteMariage = pd && pd.acte_mariage !== false;
 
-  let art5 = "Le logement est loué à usage exclusivement touristique et résidentiel temporaire. Il est expressément interdit : d'introduire plus de personnes que le nombre déclaré ; ";
-  if (!partiesOk) art5 += "d'organiser des fêtes, soirées ou rassemblements ; ";
-  if (noSmoking)  art5 += "de fumer à l'intérieur du logement ; ";
-  if (!petsOk)    art5 += "d'introduire des animaux de compagnie sans autorisation préalable ; ";
-  else            art5 += "les animaux de compagnie sont autorisés sur accord préalable ; ";
-  if (acteMariage) art5 += "un acte de mariage est exigé pour les couples de nationalité marocaine ; ";
-  art5 += "d'endommager les équipements et le mobilier.";
+  let art5 = t('art5_base');
+  if (!partiesOk) art5 += t('art5_parties');
+  if (noSmoking)  art5 += t('art5_smoking');
+  if (!petsOk)    art5 += t('art5_pets_no');
+  else            art5 += t('art5_pets_ok');
+  if (acteMariage) art5 += t('art5_marriage');
+  art5 += t('art5_damage');
 
   // Article 6
-  const quietStart   = pd.quiet_hours_start || '22:00';
-  const quietEnd     = pd.quiet_hours_end   || '08:00';
-  const parkingOk    = pd.parking;
-  const specialInstr = pd.special_instructions || '';
-
-  let art6 = "Le locataire s'engage à respecter le règlement intérieur du logement. Le non-respect du règlement peut entraîner une résiliation immédiate du contrat sans remboursement. ";
-  art6 += "Heures calmes : de " + quietStart + " à " + quietEnd + ". ";
-  if (parkingOk) art6 += "Un emplacement de parking est disponible. ";
-  if (specialInstr) art6 += specialInstr;
+  let art6 = t('art6_base') + ' ';
+  if (pd) {
+    const quietStart   = pd.quiet_hours_start || '22:00';
+    const quietEnd     = pd.quiet_hours_end   || '08:00';
+    const specialInstr = pd.special_instructions || '';
+    art6 += t('art6_quiet', { a: quietStart, b: quietEnd }) + ' ';
+    if (pd.parking) art6 += t('art6_parking') + ' ';
+    if (specialInstr) art6 += specialInstr;
+  }
 
   var el5 = document.getElementById('contract-art5');
   var el6 = document.getElementById('contract-art6');
@@ -1422,6 +1381,13 @@ function changeCount(type, delta) {
   }
 }
 
+// Texte affiché au voyageur (dans sa langue) ; #guestCount garde la version française enregistrée.
+function guestCountLabel() {
+  var parts = [tn('adults', adultsCount)];
+  if (childrenCount > 0) parts.push(tn('children', childrenCount));
+  return parts.join(', ');
+}
+
 function updateGuestCount() {
   var parts = [];
   parts.push(adultsCount + ' adulte' + (adultsCount > 1 ? 's' : ''));
@@ -1438,8 +1404,8 @@ function updateChildrenAges() {
   for (var i = 0; i < childrenCount; i++) {
     var div = document.createElement('div');
     div.style.cssText = 'display:flex;align-items:center;gap:0.7rem;';
-    div.innerHTML = '<label style="font-size:0.82rem;color:var(--text2);white-space:nowrap;">Enfant ' + (i+1) + ' :</label>' +
-      '<input type="number" id="childAge' + i + '" min="0" max="17" placeholder="Âge" style="width:80px;border:1.5px solid var(--border2);border-radius:8px;padding:0.4rem 0.7rem;font-family:Inter,sans-serif;font-size:0.9rem;">';
+    div.innerHTML = '<label class="child-age-label" data-n="' + (i+1) + '" style="font-size:0.82rem;color:var(--text2);white-space:nowrap;">' + t('child_n', { n: i+1 }) + '</label>' +
+      '<input type="number" id="childAge' + i + '" min="0" max="17" placeholder="' + t('age_ph') + '" data-i18n-placeholder="age_ph" style="width:80px;border:1.5px solid var(--border2);border-radius:8px;padding:0.4rem 0.7rem;font-family:Inter,sans-serif;font-size:0.9rem;">';
     container.appendChild(div);
   }
 }
@@ -1459,21 +1425,47 @@ function updateCompanions() {
   var extras = adultsCount - 1;
   if (extras <= 0) { section.style.display = 'none'; section.innerHTML = ''; return; }
   section.style.display = 'block';
-  var html = '<div style="font-family:Inter,sans-serif;font-size:0.92rem;font-weight:700;color:var(--text);margin-bottom:0.8rem;">👥 Accompagnants adultes</div>';
+  // Les valeurs déjà saisies sont conservées quand le nombre d'adultes change.
+  var kept = getCompanionsDraft();
+  var html = '<div data-i18n="companions_title" style="font-family:Inter,sans-serif;font-size:0.92rem;font-weight:700;color:var(--text);margin-bottom:0.8rem;"></div>';
   for (var i = 0; i < extras; i++) {
     html += '<div class="card" style="margin-bottom:0.8rem;padding:1rem;">' +
-      '<div style="font-size:0.82rem;font-weight:700;color:var(--accent);margin-bottom:0.8rem;">Adulte ' + (i+2) + '</div>' +
+      '<div class="companion-title" data-n="' + (i+2) + '" style="font-size:0.82rem;font-weight:700;color:var(--accent);margin-bottom:0.8rem;"></div>' +
       '<div class="form-row">' +
-        '<div class="form-group"><label>Prénom</label><input type="text" id="compFirstName' + i + '" placeholder="Prénom"></div>' +
-        '<div class="form-group"><label>Nom</label><input type="text" id="compLastName' + i + '" placeholder="Nom"></div>' +
+        '<div class="form-group"><label data-i18n="lbl_firstname"></label><input type="text" id="compFirstName' + i + '" data-i18n-placeholder="lbl_firstname"></div>' +
+        '<div class="form-group"><label data-i18n="lbl_lastname"></label><input type="text" id="compLastName' + i + '" data-i18n-placeholder="lbl_lastname"></div>' +
       '</div>' +
       '<div class="form-row">' +
-        '<div class="form-group"><label>N° CIN / Passeport</label><input type="text" id="compDoc' + i + '" placeholder="AB123456" style="font-weight:600;letter-spacing:0.05em;"></div>' +
-        '<div class="form-group"><label>Type</label><select id="compDocType' + i + '" style="appearance:auto;"><option value="cin">CIN</option><option value="passport">Passeport</option></select></div>' +
+        '<div class="form-group"><label data-i18n="lbl_docnum"></label><input type="text" id="compDoc' + i + '" placeholder="AB123456" style="font-weight:600;letter-spacing:0.05em;"></div>' +
+        '<div class="form-group"><label data-i18n="lbl_type"></label><select id="compDocType' + i + '" style="appearance:auto;"><option value="cin" data-i18n="doc_cin"></option><option value="passport" data-i18n="doc_passport"></option></select></div>' +
       '</div>' +
     '</div>';
   }
   section.innerHTML = html;
+  applyI18n(section);
+  refreshDynamicLabels();
+  kept.forEach(function (c, i) {
+    if (i >= extras) return;
+    ['FirstName', 'LastName', 'Doc', 'DocType'].forEach(function (f) {
+      var el = document.getElementById('comp' + f + i);
+      if (el && c[f]) el.value = c[f];
+    });
+  });
+}
+
+function getCompanionsDraft() {
+  var out = [];
+  document.querySelectorAll('[id^="compFirstName"]').forEach(function (el, i) {
+    var v = function (f) { var e = document.getElementById('comp' + f + i); return e ? e.value : ''; };
+    out.push({ FirstName: v('FirstName'), LastName: v('LastName'), Doc: v('Doc'), DocType: v('DocType') });
+  });
+  return out;
+}
+
+// Libellés numérotés (Enfant 1, Adulte 2…) à retraduire quand la langue change.
+function refreshDynamicLabels() {
+  document.querySelectorAll('.child-age-label').forEach(function (el) { el.textContent = t('child_n', { n: el.dataset.n }); });
+  document.querySelectorAll('.companion-title').forEach(function (el) { el.textContent = t('adult_n', { n: el.dataset.n }); });
 }
 
 function getCompanions() {
@@ -1549,15 +1541,15 @@ function nextStepWithOCR(from) {
 
 function nextStep(from) {
   if (from === 4 && hasSig) captureSignature();
-  if (from === 1 && !startDate) { alert('Veuillez sélectionner votre date d\'arrivée.'); return; }
-  if (from === 1 && !endDate) { alert('Veuillez sélectionner votre date de départ.'); return; }
+  if (from === 1 && !startDate) { alert(t('err_arrival')); return; }
+  if (from === 1 && !endDate) { alert(t('err_departure')); return; }
   if (from === 2) {
     const docNum = document.getElementById('docNumber').value.trim();
     const f = document.getElementById('firstName').value.trim();
     const l = document.getElementById('lastName').value.trim();
     const e = document.getElementById('email').value.trim();
-    if (!docNum) { alert('Veuillez saisir votre numéro de CIN ou passeport.'); return; }
-    if (!f || !l || !e) { alert('Veuillez remplir au moins votre prénom, nom et e-mail.'); return; }
+    if (!docNum) { alert(t('err_docnum')); return; }
+    if (!f || !l || !e) { alert(t('err_required')); return; }
   }
   if (from === 4) { submitForm(); return; }
   currentStep = from + 1;
@@ -1646,14 +1638,14 @@ async function startCINScanner() {
     // Countdown 3s avant le premier scan pour laisser le temps d'ajuster
     var countdown = 3;
     var countEl = document.getElementById('scanStatus');
-    if (countEl) countEl.textContent = '⏱ Ajustez la carte... ' + countdown + 's';
+    if (countEl) countEl.textContent = t('scan_adjust', { n: countdown });
     var countTimer = setInterval(function() {
       countdown--;
       if (countEl) {
         if (countdown > 0) {
-          countEl.textContent = '⏱ Ajustez la carte... ' + countdown + 's';
+          countEl.textContent = t('scan_adjust', { n: countdown });
         } else {
-          countEl.textContent = '🔍 Scan en cours...';
+          countEl.textContent = t('scan_running');
           clearInterval(countTimer);
           // Démarrer le scan toutes les 2s
           cinScanInterval = setInterval(function() {
@@ -1669,9 +1661,10 @@ async function startCINScanner() {
     showGalleryFallback();
     document.getElementById('scanStatus') && (document.getElementById('scanStatus').textContent = '');
     // Show error message
-    var fb = document.getElementById('scanFallback');
-    if (fb) {
-      fb.querySelector('div > div:last-child').textContent = 'Caméra non disponible. Importez une photo depuis la galerie.';
+    var fbText = document.getElementById('scanFallbackText');
+    if (fbText) {
+      fbText.setAttribute('data-i18n', 'scan_no_camera');
+      fbText.textContent = t('scan_no_camera');
     }
   }
 }
@@ -1705,7 +1698,7 @@ async function captureAndScan() {
   ctx2.drawImage(video, 0, 0);
 
   var status = document.getElementById('scanStatus');
-  if (status) status.textContent = '🔍 Analyse Google Vision...';
+  if (status) status.textContent = t('scan_analyzing');
 
   try {
     var dataUrl = canvas.toDataURL('image/jpeg', 0.9);
@@ -1714,7 +1707,7 @@ async function captureAndScan() {
   } catch(e) {
     console.warn('Scan error:', e);
     cinScanAttempts++;
-    if (status) status.textContent = '📷 Maintenez la carte stable...';
+    if (status) status.textContent = t('scan_hold');
     if (cinScanAttempts >= cinScanMaxAttempts) { stopCINScanner(); showGalleryFallback(); }
   }
 }
@@ -1735,7 +1728,7 @@ async function callVisionOCR(base64, mediaType, canvasEl) {
     console.log('Vision result:', result);
 
     if (!result.readable) {
-      if (status) { status.style.display='block'; status.style.background='#FFF0F0'; status.style.border='1px solid #FFCDD2'; status.style.color='#C13515'; status.textContent = '📷 Document illisible — prenez une photo plus nette et bien éclairée'; }
+      if (status) { status.style.display='block'; status.style.background='#FFF0F0'; status.style.border='1px solid #FFCDD2'; status.style.color='#C13515'; status.textContent = t('scan_unreadable'); }
       cinScanAttempts++;
       if (cinScanAttempts >= cinScanMaxAttempts) { stopCINScanner(); showGalleryFallback(); }
       return;
@@ -1774,7 +1767,7 @@ async function callVisionOCR(base64, mediaType, canvasEl) {
         if (titleEl) {
           var dtSel = document.getElementById('docType');
           var dtVal = dtSel ? dtSel.value : 'cin';
-          titleEl.textContent = dtVal === 'cin' ? 'Carte valide — Identité vérifiée' : dtVal === 'passport' ? 'Passeport valide — Identité vérifiée' : 'Document valide — Identité vérifiée';
+          titleEl.textContent = t(dtVal === 'cin' ? 'scan_valid_cin' : dtVal === 'passport' ? 'scan_valid_passport' : 'scan_valid_doc');
         }
       }
 
@@ -1782,21 +1775,21 @@ async function callVisionOCR(base64, mediaType, canvasEl) {
       var ocrEl = document.getElementById('ocrStatus');
       if (ocrEl) { ocrEl.style.display='block'; ocrEl.style.background='#F0FFF4'; ocrEl.style.border='1px solid rgba(0,138,5,0.3)'; ocrEl.style.color='#008A05'; var docTypeSel = document.getElementById('docType');
           var docTypeVal = docTypeSel ? docTypeSel.value : 'cin';
-          var docLabel = docTypeVal === 'cin' ? 'Carte valide' : docTypeVal === 'passport' ? 'Passeport valide' : 'Document valide';
-          ocrEl.innerHTML = '✅ <strong>' + docLabel + ' — Identité vérifiée</strong>'; }
+          var docLabel = t(docTypeVal === 'cin' ? 'scan_valid_cin' : docTypeVal === 'passport' ? 'scan_valid_passport' : 'scan_valid_doc');
+          ocrEl.innerHTML = '✅ <strong>' + docLabel + '</strong>'; }
 
       var details = document.getElementById('scanSuccessDetails');
       if (details) {
         var guestName = (document.getElementById('guestName') || {}).value || '';
         var nameStr = guestName ? '<strong>' + guestName + '</strong><br>' : '';
-        details.innerHTML = nameStr + '🛡️ Identité vérifiée · Document authentique<br><span style="font-size:0.75rem;color:var(--mid);">Numéro enregistré de manière sécurisée</span>';
+        details.innerHTML = nameStr + t('scan_verified_line') + '<br><span style="font-size:0.75rem;color:var(--mid);">' + t('scan_saved_line') + '</span>';
       }
 
       checkStep3();
 
     } else {
       cinScanAttempts++;
-      var msg = '⚠️ Document non reconnu — repositionnez votre carte et réessayez';
+      var msg = t('scan_not_recognized');
       if (status) { status.style.display='block'; status.textContent = msg; }
       // Dans galerie, afficher dans ocrStatus
       var ocrEl2 = document.getElementById('ocrStatus');
@@ -1808,7 +1801,7 @@ async function callVisionOCR(base64, mediaType, canvasEl) {
     console.warn('Vision API error:', e);
     cinScanAttempts++;
     var errEl = document.getElementById('scanStatus') || document.getElementById('ocrStatus');
-    if (errEl) { errEl.style.display='block'; errEl.textContent = '⚠️ Erreur réseau — réessayez'; }
+    if (errEl) { errEl.style.display='block'; errEl.textContent = t('scan_network'); }
     if (cinScanAttempts >= cinScanMaxAttempts) { stopCINScanner(); showGalleryFallback(); }
   }
 }
@@ -1867,7 +1860,7 @@ function handleFile(input, previewId, idx) {
           <img src="${e.target.result}" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px;border:1.5px solid var(--warm)">
           <div style="margin-top:0.6rem;display:flex;align-items:center;justify-content:space-between;gap:0.5rem">
             <span style="font-size:0.8rem;color:var(--mid);word-break:break-all">${file.name}</span>
-            <button class="upload-btn" type="button" style="white-space:nowrap;font-size:0.75rem;padding:0.35rem 0.8rem;background:var(--mid)" onclick="removeFile(${idx})">✕ Supprimer</button>
+            <button class="upload-btn" type="button" style="white-space:nowrap;font-size:0.75rem;padding:0.35rem 0.8rem;background:var(--mid)" onclick="removeFile(${idx})">${t('file_remove')}</button>
           </div>
         </div>`;
       // Lancer Google Vision OCR pour le recto (zone 1)
@@ -1877,7 +1870,7 @@ function handleFile(input, previewId, idx) {
           var b64 = ev.target.result.split(',')[1];
           var mt = ev.target.result.split(';')[0].replace('data:','');
           var statusEl = document.getElementById('ocrStatus');
-          if (statusEl) { statusEl.style.display='block'; statusEl.style.background='#F7F7F7'; statusEl.style.border='1px solid #EBEBEB'; statusEl.style.color='#717171'; statusEl.textContent='🔍 Analyse Google Vision en cours...'; }
+          if (statusEl) { statusEl.style.display='block'; statusEl.style.background='#F7F7F7'; statusEl.style.border='1px solid #EBEBEB'; statusEl.style.color='#717171'; statusEl.textContent=t('scan_ocr_running'); }
           callVisionOCR(b64, mt || 'image/jpeg').then(function() {
             // callVisionOCR met à jour le UI directement
             // Si verified → activer btn3
@@ -1934,7 +1927,8 @@ function toggleSkip() {
   const btn = document.getElementById('toggleSkipBtn');
   const isVisible = banner.style.display !== 'none';
   banner.style.display = isVisible ? 'none' : 'block';
-  btn.textContent = isVisible ? 'Je n\'ai pas mon document maintenant' : '← Annuler';
+  btn.setAttribute('data-i18n', isVisible ? 'skip_doc' : 'cancel');
+  btn.textContent = t(btn.getAttribute('data-i18n'));
 }
 
 function skipDocuments() {
@@ -1969,18 +1963,31 @@ function skipDocuments() {
 
 // ── CONTRACT SUMMARY ──
 function buildContractSummary() {
-  const fmt = d => d ? d.toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}) : '—';
-  const nights = startDate && endDate ? Math.round((endDate - startDate) / 86400000) : '—';
+  const fmt = d => d ? d.toLocaleDateString(sfLocale(), {day:'2-digit',month:'long',year:'numeric'}) : '—';
+  const nights = startDate && endDate ? Math.round((endDate - startDate) / 86400000) : null;
   const name = `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`;
-  const html = `
-    <div class="summary-item"><small>Locataire</small><strong>${name}</strong></div>
-    <div class="summary-item"><small>Voyageurs</small><strong>${document.getElementById('guestCount').value}</strong></div>
-    <div class="summary-item"><small>Arrivée</small><strong>${fmt(startDate)}</strong></div>
-    <div class="summary-item"><small>Départ</small><strong>${fmt(endDate)}</strong></div>
-    <div class="summary-item"><small>Durée</small><strong>${nights} nuit${nights>1?'s':''}</strong></div>
-    <div class="summary-item"><small>Arrivée prévue</small><strong>${document.getElementById('arrivalTime').value || '—'}</strong></div>
-  `;
-  document.getElementById('contractSummary').innerHTML = html;
+  const arrSel = document.getElementById('arrivalTime');
+  const arrival = arrSel.value ? arrSel.options[arrSel.selectedIndex].text : '—';
+  const rows = [
+    ['sum_tenant', name],
+    ['sum_guests', guestCountLabel()],
+    ['date_arrival', fmt(startDate)],
+    ['date_departure', fmt(endDate)],
+    ['sum_duration', nights == null ? '—' : tn('nights', nights)],
+    ['sum_arrival_time', arrival],
+  ];
+  const box = document.getElementById('contractSummary');
+  box.replaceChildren();
+  rows.forEach(([key, val]) => {
+    const item = document.createElement('div');
+    item.className = 'summary-item';
+    const small = document.createElement('small');
+    small.textContent = t(key);
+    const strong = document.createElement('strong');
+    strong.textContent = val;
+    item.append(small, strong);
+    box.appendChild(item);
+  });
 }
 
 // ── SIGNATURE ──
@@ -2134,58 +2141,38 @@ function _generateLockCode() {
 
 // ── Afficher les infos du logement dans le formulaire ──
 function showPropertyInfoBanner(prop) {
-  if (!prop) return;
-  // Check if banner already exists
-  if (document.getElementById('propInfoBanner')) return;
-  
-  const infos = [];
-  if (prop.checkin_time) infos.push({ icon: '🕐', label: 'Check-in', val: prop.checkin_time });
-  if (prop.checkout_time) infos.push({ icon: '🕚', label: 'Check-out', val: prop.checkout_time });
-  if (prop.wifi_name) infos.push({ icon: '📶', label: 'WiFi', val: prop.wifi_name });
-  if (prop.wifi_password) infos.push({ icon: '🔑', label: 'Mot de passe', val: prop.wifi_password });
-  
-  if (infos.length === 0) return;
-  
-  const banner = document.createElement('div');
-  banner.id = 'propInfoBanner';
-  banner.style.cssText = 'background:linear-gradient(135deg,#FFF8F5,#FFF0EC);border:1px solid rgba(22,36,30,0.2);border-radius:14px;padding:1.2rem 1.5rem;margin:1rem 2.5rem 0;';
-  banner.innerHTML = `
-    <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--terracotta);margin-bottom:0.7rem;">
-      ℹ️ Informations de votre logement
-    </div>
-    <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-      ${infos.map(i => `
-        <div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:0.5rem 0.8rem;font-size:0.82rem;">
-          <span style="opacity:0.7">${i.icon} ${i.label} : </span>
-          <strong style="color:var(--deep)">${i.val}</strong>
-        </div>`).join('')}
-    </div>
-  `;
-  
-  // Insert after header
-  const progressBar = document.querySelector('.progress-bar');
-  if (progressBar) progressBar.parentNode.insertBefore(banner, progressBar.nextSibling);
-}
-
-// ── Afficher les infos du logement dans le formulaire ──
-function showPropertyInfoBanner(prop) {
   if (!prop || document.getElementById('propInfoBanner')) return;
   const infos = [];
-  if (prop.checkin_time) infos.push({ icon: '🕐', label: 'Check-in', val: prop.checkin_time });
-  if (prop.checkout_time) infos.push({ icon: '🕚', label: 'Check-out', val: prop.checkout_time });
-  if (prop.wifi_name) infos.push({ icon: '📶', label: 'WiFi', val: prop.wifi_name });
-  if (prop.wifi_password) infos.push({ icon: '🔐', label: 'Mot de passe', val: prop.wifi_password });
+  if (prop.checkin_time) infos.push({ icon: '🕐', key: 'info_checkin', val: prop.checkin_time });
+  if (prop.checkout_time) infos.push({ icon: '🕚', key: 'info_checkout', val: prop.checkout_time });
+  if (prop.wifi_name) infos.push({ icon: '📶', key: 'info_wifi', val: prop.wifi_name });
+  if (prop.wifi_password) infos.push({ icon: '🔐', key: 'info_wifi_pw', val: prop.wifi_password });
   if (infos.length === 0) return;
   const banner = document.createElement('div');
   banner.id = 'propInfoBanner';
   banner.style.cssText = 'background:linear-gradient(135deg,#FFF8F5,#FFF0EC);border:1px solid rgba(22,36,30,0.2);border-radius:14px;padding:1.2rem 1.5rem;margin:1rem 0 0;';
-  banner.innerHTML = `
-    <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--terracotta);margin-bottom:0.7rem;">ℹ️ Informations du logement</div>
-    <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
-      ${infos.map(i => `<div style="background:rgba(255,255,255,0.8);border-radius:8px;padding:0.5rem 0.8rem;font-size:0.82rem;"><span style="opacity:0.7">${i.icon} ${i.label} : </span><strong style="color:var(--deep)">${i.val}</strong></div>`).join('')}
-    </div>
-
-  `;
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--terracotta);margin-bottom:0.7rem;';
+  title.setAttribute('data-i18n', 'info_title');
+  const list = document.createElement('div');
+  list.style.cssText = 'display:flex;gap:0.8rem;flex-wrap:wrap;';
+  infos.forEach(i => {
+    const item = document.createElement('div');
+    item.style.cssText = 'background:rgba(255,255,255,0.8);border-radius:8px;padding:0.5rem 0.8rem;font-size:0.82rem;';
+    const label = document.createElement('span');
+    label.style.opacity = '0.7';
+    label.append(i.icon + ' ');
+    const labelText = document.createElement('span');
+    labelText.setAttribute('data-i18n', i.key);
+    label.append(labelText, ' : ');
+    const val = document.createElement('strong');
+    val.style.color = 'var(--deep)';
+    val.textContent = i.val;
+    item.append(label, val);
+    list.appendChild(item);
+  });
+  banner.append(title, list);
+  applyI18n(banner);
   const main = document.querySelector('.container') || document.querySelector('main') || document.body;
   const firstPage = document.querySelector('.page.active') || document.querySelector('.page');
   if (firstPage) firstPage.insertBefore(banner, firstPage.firstChild);
@@ -2229,16 +2216,16 @@ function checkTokenOnLoad() {
   }
   if (!rawToken) {
     // ── PAS DE TOKEN → PAGE BLOQUÉE ──
-    showExpiredPage('Accès non autorisé. Cette page nécessite un lien de check-in valide généré par votre hôte.');
+    showExpiredPage('exp_no_token');
     return;
   }
   const data = parseToken(rawToken);
   if (!data || !data.lid || !data.exp) {
-    showExpiredPage('Lien invalide.');
+    showExpiredPage('exp_invalid');
     return;
   }
   if (Date.now() > data.exp) {
-    showExpiredPage('Ce lien a expiré. Demandez un nouveau lien à votre hôte.');
+    showExpiredPage('exp_expired');
     return;
   }
   hostLinkId = data.lid;
@@ -2248,12 +2235,14 @@ function checkTokenOnLoad() {
   startCheckinCountdown(data.exp);
 }
 
-function showExpiredPage(reason) {
-  console.trace('showExpiredPage:', reason);
+// reasonKey : clé de traduction (exp_no_token, exp_expired…) de checkin-i18n.js.
+function showExpiredPage(reasonKey) {
+  console.trace('showExpiredPage:', reasonKey);
   // Cacher l'overlay de chargement
   var overlay = document.getElementById('loadingOverlay');
   if (overlay) overlay.style.display = 'none';
-  const isUnauthorized = reason.includes('non autorisé') || reason.includes('nécessite');
+  const isUnauthorized = reasonKey === 'exp_no_token';
+  const reason = t(reasonKey);
   document.body.innerHTML = `
     <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#F7F3EE;font-family:'Inter',sans-serif;padding:2rem;">
       <div style="text-align:center;max-width:420px;">
@@ -2261,15 +2250,12 @@ function showExpiredPage(reason) {
           ${isUnauthorized ? '🔒' : '⏰'}
         </div>
         <h1 style="font-family:'Fraunces',serif;font-size:2rem;color:#2C2420;margin-bottom:0.8rem;">
-          ${isUnauthorized ? 'Accès refusé' : 'Lien expiré'}
+          ${isUnauthorized ? t('exp_denied_title') : t('exp_title')}
         </h1>
         <p style="color:#6B5448;font-size:0.95rem;line-height:1.7;margin-bottom:1.5rem;">${reason}</p>
         <div style="background:rgba(22,36,30,0.08);border:1px solid rgba(22,36,30,0.2);border-radius:12px;padding:1.2rem;">
           <div style="font-size:0.82rem;color:#9E8476;line-height:1.6;">
-            ${isUnauthorized 
-              ? '🏠 Cette page est réservée aux guests ayant reçu un lien de check-in de leur hôte via <strong style="color:#B5573D">Stayform</strong>.'
-              : '⏱ Les liens de check-in sont valables <strong style="color:#B5573D">3 heures</strong> pour votre sécurité. Contactez votre hôte pour un nouveau lien.'
-            }
+            ${isUnauthorized ? t('exp_denied_help') : t('exp_help')}
           </div>
         </div>
       </div>
@@ -2283,7 +2269,7 @@ function startCheckinCountdown(expiry) {
   document.body.appendChild(badge);
   function tick() {
     const rem = expiry - Date.now();
-    if (rem <= 0) { badge.textContent = '⏰ Lien expiré'; badge.style.background = 'rgba(192,80,80,0.9)'; return; }
+    if (rem <= 0) { badge.textContent = t('timer_expired'); badge.style.background = 'rgba(192,80,80,0.9)'; return; }
     const h = Math.floor(rem/3600000);
     const m = Math.floor((rem%3600000)/60000);
     const s = Math.floor((rem%60000)/1000);
@@ -2311,7 +2297,7 @@ async function checkHostLimit() {
   if (!hostLinkId) return { allowed: false, reason: 'no_token' };
   const host = await findHostByLinkId(hostLinkId);
   if (!host) {
-    showExpiredPage('Ce lien a déjà été utilisé. Demandez un nouveau lien à votre hôte.');
+    showExpiredPage('exp_used');
     return { allowed: false, reason: 'used' };
   }
 
@@ -2324,7 +2310,7 @@ async function checkHostLimit() {
     });
     const planActive = await planRes.json();
     if (!planActive) {
-      showExpiredPage('Ce lien est temporairement indisponible. Veuillez contacter votre hôte.');
+      showExpiredPage('exp_unavailable');
       return { allowed: false, reason: 'plan_expired' };
     }
   } catch(e) {
@@ -2466,7 +2452,7 @@ async function fetchPropertyAndHost() {
       // ── VÉRIFICATION CRITIQUE : link_id toujours valide ? ──
       if (!hosts || hosts.length === 0) {
         // link_id introuvable = lien déjà utilisé ou invalidé
-        showExpiredPage('Ce lien a déjà été utilisé ou est invalide. Demandez un nouveau lien à votre hôte.');
+        showExpiredPage('exp_used_or_invalid');
         return;
       }
 
@@ -2531,9 +2517,12 @@ async function fetchPropertyAndHost() {
     const pd = window._propertyData;
     if (hostEl) {
       if (pd && pd.name) {
+        hostEl.removeAttribute('data-i18n');
         hostEl.textContent = pd.name + (pd.address ? ' · ' + pd.address : '');
       } else if (window._hostName) {
-        hostEl.textContent = 'Logement de ' + window._hostName;
+        hostEl.removeAttribute('data-i18n');
+        hostEl.dataset.hostName = window._hostName;
+        hostEl.textContent = t('hdr_host_home', { name: window._hostName });
       }
     }
 
@@ -2672,8 +2661,9 @@ async function submitForm() {
 
   const btn = document.getElementById('btnSubmit');
   btn.disabled = true;
-  btn.textContent = '⏳ Enregistrement...';
+  btn.textContent = t('submitting');
 
+  // Format français : ces dates sont enregistrées et lues par l'hôte.
   const fmt = d => d ? d.toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}) : '—';
   const nights = startDate && endDate ? Math.round((endDate - startDate) / 86400000) : 0;
   const name = `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`;
@@ -2763,14 +2753,7 @@ async function submitForm() {
     console.warn('Soumission sans token — accès bloqué normalement');
   }
 
-  document.getElementById('finalSummary').innerHTML = `
-    <div class="summary-item"><small>Nom</small><strong>${name}</strong></div>
-    <div class="summary-item"><small>E-mail</small><strong style="font-size:0.85rem">${guestData.email}</strong></div>
-    <div class="summary-item"><small>Arrivée</small><strong>${fmt(startDate)}</strong></div>
-    <div class="summary-item"><small>Départ</small><strong>${fmt(endDate)}</strong></div>
-    <div class="summary-item"><small>Durée</small><strong>${nights} nuit${nights>1?'s':''}</strong></div>
-    <div class="summary-item"><small>Pièce identité</small><strong style="color:${docSkipped?'#B5573D':'var(--success)'}">${docSkipped?'⚠ En attente':'✓ Fournie'}</strong></div>
-  `;
+  buildFinalSummary();
   currentStep = 5;
   document.querySelectorAll('.page').forEach((p,i) => p.classList.toggle('active', i+1 === 5));
   window.scrollTo({top: 0, behavior: 'smooth'});
@@ -2823,9 +2806,36 @@ async function generatePDFSilent() {
   }
 }
 
+// Récapitulatif de la page de confirmation, dans la langue du voyageur.
+function buildFinalSummary() {
+  const fmt = d => d ? d.toLocaleDateString(sfLocale(), {day:'2-digit',month:'long',year:'numeric'}) : '—';
+  const nights = startDate && endDate ? Math.round((endDate - startDate) / 86400000) : 0;
+  const rows = [
+    ['sum_name', `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`],
+    ['sum_email', document.getElementById('email').value, 'font-size:0.85rem'],
+    ['date_arrival', fmt(startDate)],
+    ['date_departure', fmt(endDate)],
+    ['sum_duration', tn('nights', nights)],
+    ['sum_id', t(docSkipped ? 'id_pending' : 'id_provided'), 'color:' + (docSkipped ? '#B5573D' : 'var(--success)')],
+  ];
+  const box = document.getElementById('finalSummary');
+  box.replaceChildren();
+  rows.forEach(([key, val, style]) => {
+    const item = document.createElement('div');
+    item.className = 'summary-item';
+    const small = document.createElement('small');
+    small.textContent = t(key);
+    const strong = document.createElement('strong');
+    if (style) strong.style.cssText = style;
+    strong.textContent = val;
+    item.append(small, strong);
+    box.appendChild(item);
+  });
+}
+
 async function generatePDF() {
   const btn = document.getElementById('btnPDF');
-  btn.textContent = '⏳ Génération en cours...';
+  btn.textContent = t('pdf_generating');
   btn.disabled = true;
   await _runPDFGeneration(btn, false);
 }
@@ -2991,7 +3001,9 @@ async function _runPDFGeneration(btn, silent) {
   const address     = document.getElementById('address').value;
   const docNumber   = document.getElementById('docNumber') ? document.getElementById('docNumber').value : '—';
   const docTypeId   = document.getElementById('docTypeIdentity');
-  const docTypeLabel = docTypeId ? docTypeId.options[docTypeId.selectedIndex].text : '—';
+  // Le PDF reste en français, quelle que soit la langue choisie par le voyageur.
+  const docTypeLabel = docTypeId ? ({ cin: 'CIN', passport: 'Passeport', residence: 'Titre de séjour' }[docTypeId.value] || '—') : '—';
+
   const guestCount  = document.getElementById('guestCount').value;
   const arrivalTime = document.getElementById('arrivalTime').value;
   const lockCode    = document.getElementById('lockCode') ? document.getElementById('lockCode').value : '';
@@ -3367,267 +3379,34 @@ async function _runPDFGeneration(btn, silent) {
   }
   doc.save(`CheckIn_${safeLastName}_${startDate ? startDate.toISOString().slice(0,10) : 'date'}.pdf`);
   if (btn) {
-    btn.textContent = 'Telecharge !';
+    btn.textContent = t('pdf_done');
     btn.style.background = 'var(--success)';
-    setTimeout(() => { btn.textContent = 'Telecharger le contrat PDF'; btn.style.background = ''; btn.disabled = false; }, 3000);
+    setTimeout(() => { btn.textContent = t('btn_pdf'); btn.style.background = ''; btn.disabled = false; }, 3000);
+
   }
 }
 
 // ══════════════════════════════════════════════════════════
-// SYSTÈME DE TRADUCTION FR / EN / AR
+// LANGUE DU VOYAGEUR (traductions dans checkin-i18n.js)
+// Quand le voyageur change de langue, on redessine ce qui est généré en JS.
 // ══════════════════════════════════════════════════════════
-window._lang = 'fr';
-
-const TRANSLATIONS = {
-  fr: {
-    'step1': 'Séjour', 'step2': 'Identité', 'step3': 'Documents', 'step4': 'Contrat',
-    't_sejour': 'Votre séjour',
-    't_sejour_sub': 'Sélectionnez les dates de votre location sur le calendrier ci-dessous.',
-    't_coords': 'Vos coordonnées',
-    't_coords_sub': 'Informations du voyageur principal de la réservation.',
-    't_docs': "Piece d'identite",
-    't_contrat': 'Contrat de location',
-    't_contrat_sub': 'Veuillez lire attentivement et signer le contrat ci-dessous.',
-    'btn_next': 'Continuer →', 'btn_back': '← Retour',
-    'btn_submit': '✓ Valider le check-in', 'btn_pdf': '⬇ Télécharger le contrat PDF',
-    'hdr_title': 'Check-in en ligne',
-    'lbl_docnum': 'N° CIN / Passeport', 'lbl_firstname': 'Prénom', 'lbl_lastname': 'Nom de famille',
-    'lbl_email': 'Adresse e-mail', 'lbl_phone': 'Téléphone',
-    'lbl_nationality': 'Nationalité', 'lbl_birthdate': 'Date de naissance',
-    'lbl_address': 'Adresse de résidence',
-    'lbl_arrival': "Heure d'arrivée prévue", 'lbl_guests': 'Nombre de voyageurs',
-    'lbl_doctype': 'Type de document',
-    'lbl_recto': 'Recto du document', 'lbl_verso': 'Verso du document',
-    'lbl_selfie': 'Selfie du voyageur',
-    'lbl_signature': 'Signature manuscrite',
-    'skip_doc': "Je n'ai pas mon document maintenant",
-    'skip_step': 'Passer cette étape →',
-    'lock_generate': '🎲 Générer',
-    'lock_title': "🔑 Code d'accès au logement",
-    'lock_label': 'Serrure numérique · 7 chiffres',
-    'check1': "J'ai lu et j'accepte les conditions générales du contrat de location ci-dessus.",
-    'check2': "Je certifie que les informations fournies sont exactes et que les pièces d'identité téléchargées sont authentiques.",
-    'check3': "J'accepte le traitement de mes données personnelles conformément au RGPD pour la gestion de cette location.",
-    'success_title': 'Check-in validé !',
-    'success_sub': 'Votre dossier a bien été enregistré. Téléchargez le contrat signé ci-dessous.',
-    'sig_placeholder': 'Signez avec votre doigt ou votre souris',
-    // PDF contract text
-    'contract_title': 'CONTRAT DE LOCATION MEUBLÉE TOURISTIQUE',
-    'contract_intro': 'Entre le soussigné, ci-après dénommé « le Bailleur », et le(s) voyageur(s) mentionné(s) dans le présent contrat, ci-après dénommé(s) « le(s) Locataire(s) ».',
-    'section_identity': 'IDENTITÉ DU LOCATAIRE',
-    'section_sejour': 'DÉTAILS DU SÉJOUR',
-    'section_docs': "PIECE D'IDENTITE",
-    'section_signature': 'SIGNATURE ÉLECTRONIQUE',
-    'pdf_tenant': 'LE LOCATAIRE', 'pdf_landlord': 'LE BAILLEUR',
-  },
-  en: {
-    'step1': 'Stay', 'step2': 'Identity', 'step3': 'Documents', 'step4': 'Contract',
-    't_sejour': 'Your stay',
-    't_sejour_sub': 'Select your rental dates on the calendar below.',
-    't_coords': 'Your details',
-    't_coords_sub': 'Information about the main traveler for this booking.',
-    't_docs': 'ID Document',
-    't_contrat': 'Rental Contract',
-    't_contrat_sub': 'Please read carefully and sign the contract below.',
-    'btn_next': 'Continue →', 'btn_back': '← Back',
-    'btn_submit': '✓ Complete check-in', 'btn_pdf': '⬇ Download PDF contract',
-    'hdr_title': 'Online check-in',
-    'lbl_docnum': 'ID / Passport Number', 'lbl_firstname': 'First name', 'lbl_lastname': 'Last name',
-    'lbl_email': 'Email address', 'lbl_phone': 'Phone',
-    'lbl_nationality': 'Nationality', 'lbl_birthdate': 'Date of birth',
-    'lbl_address': 'Home address',
-    'lbl_arrival': 'Expected arrival time', 'lbl_guests': 'Number of guests',
-    'lbl_doctype': 'Document type',
-    'lbl_recto': 'Front of document', 'lbl_verso': 'Back of document',
-    'lbl_selfie': 'Guest selfie',
-    'lbl_signature': 'Handwritten signature',
-    'skip_doc': "I don't have my document right now",
-    'skip_step': 'Skip this step →',
-    'lock_generate': '🎲 Generate',
-    'lock_title': '🔑 Property access code',
-    'lock_label': 'Digital lock · 7 digits',
-    'check1': 'I have read and accept the general terms of the rental contract above.',
-    'check2': 'I certify that the information provided is accurate and that the uploaded ID documents are authentic.',
-    'check3': 'I accept the processing of my personal data in accordance with GDPR for the management of this rental.',
-    'success_title': 'Check-in complete!',
-    'success_sub': 'Your file has been saved. Download your signed contract below.',
-    'sig_placeholder': 'Sign with your finger or mouse',
-    'contract_title': 'TOURIST FURNISHED RENTAL CONTRACT',
-    'contract_intro': 'Between the undersigned, hereinafter referred to as "the Landlord", and the traveler(s) mentioned in this contract, hereinafter referred to as "the Tenant(s)".',
-    'section_identity': 'TENANT IDENTITY',
-    'section_sejour': 'STAY DETAILS',
-    'section_docs': 'ID DOCUMENT',
-    'section_signature': 'ELECTRONIC SIGNATURE',
-    'pdf_tenant': 'THE TENANT', 'pdf_landlord': 'THE LANDLORD',
-  },
-  ar: {
-    'step1': 'الإقامة', 'step2': 'الهوية', 'step3': 'الوثائق', 'step4': 'العقد',
-    't_sejour': 'إقامتك',
-    't_sejour_sub': 'اختر تواريخ إيجارك على التقويم أدناه.',
-    't_coords': 'بياناتك الشخصية',
-    't_coords_sub': 'معلومات المسافر الرئيسي للحجز.',
-    't_docs': 'وثيقة الهوية',
-    't_contrat': 'عقد الإيجار',
-    't_contrat_sub': 'يرجى القراءة بعناية والتوقيع على العقد أدناه.',
-    'btn_next': 'متابعة ←', 'btn_back': '→ رجوع',
-    'btn_submit': '✓ تأكيد تسجيل الوصول', 'btn_pdf': '⬇ تحميل العقد PDF',
-    'hdr_title': 'تسجيل الوصول الإلكتروني',
-    'lbl_docnum': 'رقم بطاقة الهوية / جواز السفر', 'lbl_firstname': 'الاسم الأول', 'lbl_lastname': 'اسم العائلة',
-    'lbl_email': 'البريد الإلكتروني', 'lbl_phone': 'الهاتف',
-    'lbl_nationality': 'الجنسية', 'lbl_birthdate': 'تاريخ الميلاد',
-    'lbl_address': 'العنوان',
-    'lbl_arrival': 'وقت الوصول المتوقع', 'lbl_guests': 'عدد المسافرين',
-    'lbl_doctype': 'نوع الوثيقة',
-    'lbl_recto': 'الوجه الأمامي للوثيقة', 'lbl_verso': 'الوجه الخلفي للوثيقة',
-    'lbl_selfie': 'صورة المسافر',
-    'lbl_signature': 'التوقيع اليدوي',
-    'skip_doc': 'ليس لدي وثيقتي الآن',
-    'skip_step': '← تخطي هذه الخطوة',
-    'lock_generate': '🎲 توليد',
-    'lock_title': '🔑 رمز الدخول للسكن',
-    'lock_label': 'قفل رقمي · 7 أرقام',
-    'check1': 'لقد قرأت وأوافق على الشروط العامة لعقد الإيجار أعلاه.',
-    'check2': 'أشهد أن المعلومات المقدمة صحيحة وأن وثائق الهوية المرفوعة أصلية.',
-    'check3': 'أوافق على معالجة بياناتي الشخصية وفقاً للوائح حماية البيانات لإدارة هذا الإيجار.',
-    'success_title': 'تم تسجيل الوصول!',
-    'success_sub': 'تم حفظ ملفك بنجاح. قم بتنزيل العقد الموقع أدناه.',
-    'sig_placeholder': 'وقّع بإصبعك أو الماوس',
-    'contract_title': 'عقد إيجار مفروش سياحي',
-    'contract_intro': 'بين الموقع أدناه، المشار إليه فيما بعد بـ "المؤجر"، والمسافر(ين) المذكور(ين) في هذا العقد، المشار إليهم فيما بعد بـ "المستأجر(ين)".',
-    'section_identity': 'هوية المستأجر',
-    'section_sejour': 'تفاصيل الإقامة',
-    'section_docs': 'وثيقة الهوية',
-    'section_signature': 'التوقيع الإلكتروني',
-    'pdf_tenant': 'المستأجر', 'pdf_landlord': 'المؤجر',
-  }
-};
-
-function t(key) {
-  return (TRANSLATIONS[window._lang] && TRANSLATIONS[window._lang][key]) 
-    || TRANSLATIONS['fr'][key] || key;
-}
-
-function _mainSetLang(lang) {
-  window._lang = lang;
-  localStorage.setItem('sf_lang', lang);
-  
-  // RTL pour arabe
-  if (lang === 'ar') {
-    document.documentElement.setAttribute('dir', 'rtl');
-    document.documentElement.setAttribute('lang', 'ar');
-    document.body.classList.add('rtl');
-    document.body.style.fontFamily = "'Noto Sans Arabic', 'Inter', sans-serif";
-  } else {
-    document.documentElement.setAttribute('dir', 'ltr');
-    document.documentElement.setAttribute('lang', lang);
-    document.body.classList.remove('rtl');
-    document.body.style.fontFamily = '';
-  }
-  
-  // Update lang buttons
-  document.querySelectorAll('.lang-btn').forEach(function(btn) {
-    btn.classList.toggle('active', btn.textContent.trim() === lang.toUpperCase());
-  });
-  
-  // Translate all data-i18n elements
-  document.querySelectorAll('[data-i18n]').forEach(function(el) {
-    var key = el.getAttribute('data-i18n');
-    var text = t(key);
-    if (text) el.textContent = text;
-  });
-  
-  // Update header title
-  var hdr = document.getElementById('hdr-title');
-  if (hdr) hdr.textContent = t('hdr_title');
-  
-  // Update sig placeholder
-  var sigPh = document.getElementById('sigPlaceholder');
-  if (sigPh) sigPh.textContent = t('sig_placeholder');
-
-  // Update identity notice
-  var noticeEl = document.getElementById('identityNoticeText');
-  if (noticeEl) {
-    var notices = {
-      'fr': '<strong>Saisissez vos informations exactement comme sur votre CIN ou passeport.</strong> Ces données seront vérifiées à l\'étape suivante par scan de votre document.',
-      'en': '<strong>Enter your information exactly as it appears on your ID card or passport.</strong> This information will be verified at the next step by scanning your document.',
-      'ar': '<strong>أدخل معلوماتك بالضبط كما تظهر في بطاقة هويتك أو جواز سفرك.</strong> سيتم التحقق من هذه المعلومات في الخطوة التالية عبر مسح وثيقتك.'
-    };
-    noticeEl.innerHTML = notices[lang] || notices['fr'];
-  }
-  
-  // Update labels dynamically
-  updateLabels();
-  
-  // Update step circles (done checkmarks stay)
+updateContractArticles(window._propertyData || null);
+document.addEventListener('sf:langchange', function () {
   renderCalendar();
-}
-
-function updateLabels() {
-  var labelMap = {
-    'docNumber': 'lbl_docnum',
-    'firstName': 'lbl_firstname',
-    'lastName': 'lbl_lastname',
-    'email': 'lbl_email',
-    'phone': 'lbl_phone',
-    'nationality': 'lbl_nationality',
-    'birthdate': 'lbl_birthdate',
-    'address': 'lbl_address',
-    'arrivalTime': 'lbl_arrival',
-    'guestCount': 'lbl_guests',
-  };
-  Object.keys(labelMap).forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el && el.previousElementSibling && el.previousElementSibling.tagName === 'LABEL') {
-      // don't override — use data-i18n on labels instead
-    }
-  });
-}
-
-function applyTranslations() {
-  var lang = window._lang || 'fr';
-  var tr = TRANSLATIONS[lang] || TRANSLATIONS['fr'];
-  if (!tr) return;
-  // Translate all data-i18n elements
-  document.querySelectorAll('[data-i18n]').forEach(function(el) {
-    var key = el.getAttribute('data-i18n');
-    if (tr[key]) {
-      // Don't override elements with children (labels with spans)
-      if (el.children.length === 0) el.textContent = tr[key];
-    }
-  });
-  // Update header title
-  var hdr = document.getElementById('hdr-title');
-  if (hdr && tr['hdr_title']) hdr.textContent = tr['hdr_title'];
-  // Update sig placeholder
-  var sigPh = document.getElementById('sigPlaceholder');
-  if (sigPh && tr['sig_placeholder']) sigPh.textContent = tr['sig_placeholder'];
-}
-
-// Override setLang in main script to call applyTranslations
-var _earlySetLang = window.setLang;
-window.setLang = function(lang) {
-  if (_earlySetLang) _earlySetLang(lang);
-  window._lang = lang;
-  applyTranslations();
-};
-
-// Load saved language on startup
-(function() {
-  var saved = localStorage.getItem('sf_lang') || 'fr';
-  window._lang = saved;
-  if (saved !== 'fr') setTimeout(function() { setLang(saved); }, 200);
-})();
+  if (startDate) updateDateDisplay();
+  updateContractArticles(window._propertyData || null);
+  refreshDynamicLabels();
+  var hostEl = document.getElementById('hostNameDisplay');
+  if (hostEl && hostEl.dataset.hostName) hostEl.textContent = t('hdr_host_home', { name: hostEl.dataset.hostName });
+  if (currentStep === 4) buildContractSummary();
+  if (currentStep === 5) buildFinalSummary();
+});
 
 </script>
 <script>
 // Explique au voyageur pourquoi le bouton « Continuer » est grisé.
 (function () {
-  var hints = {
-    btn1: { fr: 'Choisissez vos dates d\'arrivée et de départ pour continuer.', en: 'Pick your arrival and departure dates to continue.', ar: 'اختر تاريخي الوصول والمغادرة للمتابعة.' },
-    btn3: { fr: 'Vérifiez votre pièce d\'identité pour continuer.', en: 'Verify your ID document to continue.', ar: 'تحقق من وثيقة هويتك للمتابعة.' },
-    btnSubmit: { fr: 'Cochez les cases et signez pour valider.', en: 'Tick the boxes and sign to confirm.', ar: 'ضع علامة على الخانات ووقّع للتأكيد.' }
-  };
-  function lang() { return window._lang || 'fr'; }
+  var hints = { btn1: 'hint_btn1', btn3: 'hint_btn3', btnSubmit: 'hint_btnSubmit' };
   function sync(btn) {
     var hint = document.getElementById(btn.id + 'Hint');
     if (!hint) {
@@ -3637,7 +3416,7 @@ window.setLang = function(lang) {
       hint.setAttribute('aria-live', 'polite');
       btn.closest('.btn-group').insertAdjacentElement('afterend', hint);
     }
-    hint.textContent = btn.disabled ? hints[btn.id][lang()] || hints[btn.id].fr : '';
+    hint.textContent = btn.disabled ? t(hints[btn.id]) : '';
   }
   document.addEventListener('DOMContentLoaded', function () {
     Object.keys(hints).forEach(function (id) {
@@ -3646,11 +3425,10 @@ window.setLang = function(lang) {
       sync(btn);
       new MutationObserver(function () { sync(btn); }).observe(btn, { attributes: true, attributeFilter: ['disabled'] });
     });
-    document.querySelectorAll('.lang-btn').forEach(function (b) {
-      b.addEventListener('click', function () {
-        Object.keys(hints).forEach(function (id) { var btn = document.getElementById(id); if (btn && btn.closest('.btn-group')) sync(btn); });
-      });
+    document.addEventListener('sf:langchange', function () {
+      Object.keys(hints).forEach(function (id) { var btn = document.getElementById(id); if (btn && btn.closest('.btn-group')) sync(btn); });
     });
+
   });
 })();
 </script>
