@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Check-in · Votre Séjour</title>
-<script src="checkin-i18n.js?v=20261111b"></script>
+<script src="checkin-i18n.js?v=20261111c"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 .lang-selector {
@@ -2094,10 +2094,11 @@ function clearSig() {
 }
 
 function toggleCheck(id, event) {
-  if (event && event.target && event.target.type === 'checkbox') return;
   const cb = document.getElementById(id);
   if (!cb) return;
-  cb.checked = !cb.checked;
+  // Clic sur la case elle-même : le navigateur l'a déjà cochée, on ne la recoche pas,
+  // mais on met quand même à jour le bouton (sinon il reste grisé si on a signé avant).
+  if (!(event && event.target && event.target.type === 'checkbox')) cb.checked = !cb.checked;
   if (id === 'check4') checkStep3();
   else checkSubmit();
 }
@@ -2844,235 +2845,338 @@ async function _runPDFGeneration(btn, silent) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const W = 210, H = 297, margin = 15, contentW = W - margin * 2;
 
-  // ── Palette Option H ──
-  const GREEN    = [45, 74, 62];
-  const GREEN2   = [74, 124, 101];
-  const GOLD     = [212, 168, 83];
-  const CREAM    = [250, 246, 241];
-  const BORDER   = [220, 210, 198];
-  const DEEP     = [28, 18, 10];
-  const MID      = [107, 88, 72];
-  const LIGHT    = [176, 154, 136];
-  const WHITE    = [255, 255, 255];
-  const SUCCESS  = [45, 122, 69];
-  const WARN     = [193, 53, 21];
+  // ── Langue du contrat : celle du voyageur (FR / EN / ES ; l'arabe reste en français) ──
+  const L = (typeof sfPdfLang === 'function') ? sfPdfLang() : 'fr';
+  const LOC = (typeof sfPdfLocale === 'function') ? sfPdfLocale() : 'fr-FR';
+  const pt = (key, vars) => (typeof tl === 'function' ? tl(L, key, vars) : key);
+  const ptn = (key, nb) => (typeof tnl === 'function' ? tnl(L, key, nb) : String(nb));
+  // Helvetica (jsPDF) ne connaît que l'alphabet latin : on retire émojis et balises.
+  const pdfSafe = str => String(str == null ? '' : str).replace(/<[^>]*>/g, '')
+    .replace(/[^\u0000-\u00FF\u0152\u0153\u0160\u0161\u0178\u017D\u017E\u0192\u02C6\u02DC\u2013\u2014\u2018-\u201E\u2020-\u2022\u2026\u2030\u2039\u203A\u20AC\u2122]/g, '')
+    .replace(/\s{2,}/g, ' ').trim();
+  const _docText = doc.text.bind(doc);
+  doc.text = (txt, ...rest) => _docText(Array.isArray(txt) ? txt.map(pdfSafe) : pdfSafe(txt), ...rest);
+  const _split = doc.splitTextToSize.bind(doc);
+  doc.splitTextToSize = (txt, ...rest) => _split(pdfSafe(txt), ...rest);
+
+  // ── Style « Officiel » : double cadre, police à empattements (Times) ──
+  const GREEN  = [36, 66, 58];
+  const GOLD   = [201, 162, 39];
+  const CREAM  = [243, 236, 221];
+  const RULE   = [207, 198, 176];
+  const INK    = [22, 36, 30];
+  const GREY   = [110, 110, 110];
+  const WARN   = [193, 53, 21];
+  const SERIF  = 'times';
+  const SANS   = 'helvetica';
+  const M      = 24;                 // marge du texte (à l'intérieur du cadre)
+  const CW     = W - M * 2;          // largeur utile
+  const BOTTOM = H - 24;             // limite basse du texte
 
   let y = 0;
-  let pageNum = 1;
 
-  function newPage() {
-    addFooter();
-    doc.addPage();
-    pageNum++;
-    y = 15;
+  function newPage() { doc.addPage(); y = 26; }
+  function checkY(need) { if (y + need > BOTTOM) newPage(); }
+
+  function setF(family, style, size, color) {
+    doc.setFont(family, style); doc.setFontSize(size); doc.setTextColor(...(color || INK));
   }
-
-  function checkY(need) {
-    if (y + need > H - 20) newPage();
+  // Texte espacé (lettres écartées), centré
+  function spaced(txt, cy, size, color, family, style) {
+    setF(family || SERIF, style || 'bold', size, color);
+    const s = pdfSafe(txt);
+    const cs = size * 0.12;
+    const w = doc.getTextWidth(s) + cs * Math.max(0, s.length - 1);
+    _docText(s, W / 2 - w / 2, cy, { charSpace: cs });
   }
-
-  // ── HEADER bande verte ──
-  function addHeader() {
-    // Bande verte
-    doc.setFillColor(...GREEN);
-    doc.rect(0, 0, W, 28, 'F');
-    // Bande or fine
+  function diamond(cx, cy, r) {
     doc.setFillColor(...GOLD);
-    doc.rect(0, 28, W, 1.5, 'F');
-    // Logo texte
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(18);
-    doc.setTextColor(...WHITE);
-    doc.text('stayform', margin, 16);
-    // Sous-titre
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(...GOLD);
-    doc.text('DOSSIER DE CHECK-IN', margin, 23);
-    // Infos bailleur + logement à droite
-    const pd = window._propertyData;
-    const propName = (pd && pd.name) || window._propertyName || '';
-    const hostName = window._hostName || '';
-    doc.setFontSize(7.5);
-    doc.setTextColor(255, 255, 255, 0.8);
-    if (hostName) doc.text(hostName, W - margin, 14, { align: 'right' });
-    if (propName) {
-      const propLines = doc.splitTextToSize(propName, 80);
-      doc.text(propLines[0], W - margin, 20, { align: 'right' });
-    }
-    // Date
-    const now = new Date();
-    doc.setFontSize(6.5);
-    doc.setTextColor(...GOLD);
-    doc.text(now.toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}), W - margin, 25, { align: 'right' });
-    y = 38;
+    doc.triangle(cx - r, cy, cx, cy - r, cx + r, cy, 'F');
+    doc.triangle(cx - r, cy, cx, cy + r, cx + r, cy, 'F');
   }
-
-  function addFooter() {
-    const pageH = doc.internal.pageSize.getHeight();
-    doc.setFillColor(...CREAM);
-    doc.rect(0, pageH - 10, W, 10, 'F');
-    doc.setDrawColor(...BORDER);
-    doc.setLineWidth(0.3);
-    doc.line(0, pageH - 10, W, pageH - 10);
-    doc.setFontSize(6.5);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...LIGHT);
-    const firstName = document.getElementById('firstName').value;
-    const lastName  = document.getElementById('lastName').value;
-    doc.text(`${firstName} ${lastName} — Contrat de location`, margin, pageH - 4);
-    doc.text(`Page ${pageNum}`, W - margin, pageH - 4, { align: 'right' });
+  // Paragraphe avec une amorce en gras (petites capitales simulées), puis texte courant
+  function leadPara(lead, body, size) {
+    size = size || 10.5;
+    const lh = size * 0.47;
+    setF(SERIF, 'bold', size, GREEN);
+    const leadTxt = pdfSafe(lead) + ' ';
+    const leadW = doc.getTextWidth(leadTxt);
+    setF(SERIF, 'normal', size, INK);
+    const words = pdfSafe(body).split(' ');
+    const lines = []; let cur = ''; let width = CW - leadW;
+    words.forEach(w => {
+      const test = cur ? cur + ' ' + w : w;
+      if (doc.getTextWidth(test) > width && cur) { lines.push(cur); cur = w; width = CW; }
+      else cur = test;
+    });
+    if (cur) lines.push(cur);
+    lines.forEach((ln, i) => {
+      checkY(lh + 1);
+      if (i === 0) {
+        setF(SERIF, 'bold', size, GREEN); doc.text(pdfSafe(lead), M, y);
+        setF(SERIF, 'normal', size, INK); _docText(ln, M + leadW, y);
+      } else {
+        setF(SERIF, 'normal', size, INK); _docText(ln, M, y);
+      }
+      y += lh;
+    });
+    y += 3;
   }
-
-  // ── Section titre ──
-  function sectionTitle(title) {
+  function centerCaps(txt) {
     checkY(12);
-    doc.setFillColor(...GREEN);
-    doc.rect(margin, y, contentW, 8, 'F');
-    doc.setFillColor(...GOLD);
-    doc.rect(margin, y + 8, contentW, 0.8, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.5);
-    doc.setTextColor(...WHITE);
-    doc.text(title.toUpperCase(), margin + 4, y + 5.5);
-    y += 12;
+    y += 3;
+    spaced(txt, y, 9.5, INK);
+    y += 7;
   }
-
-  // ── Ligne info label/valeur ──
-  function infoRow(label, value, opts) {
-    opts = opts || {};
-    checkY(10);
-    const half = opts.full ? contentW : contentW / 2 - 1;
-    if (opts.shade) {
+  // Tableau label / valeur
+  function table(rows) {
+    const labW = CW * 0.3;
+    const padX = 3, size = 10, lh = 4.6;
+    rows.forEach(r => {
+      setF(SERIF, 'normal', size, INK);
+      const lines = doc.splitTextToSize(r[1] || '—', CW - labW - padX * 2);
+      setF(SERIF, 'bold', 9, GREEN);
+      const labLines = doc.splitTextToSize(String(r[0]).toUpperCase(), labW - padX * 2);
+      const h = Math.max(lines.length, labLines.length, 1) * lh + 3.4;
+      checkY(h + 1);
       doc.setFillColor(...CREAM);
-      doc.rect(margin, y, contentW, 9, 'F');
-    }
-    doc.setFontSize(7);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...LIGHT);
-    doc.text(label.toUpperCase(), margin + 3, y + 3.5);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...DEEP);
-    const valStr = (value || '—');
-    const maxChars = opts.full ? 90 : 45;
-    const displayVal = valStr.length > maxChars ? valStr.substring(0, maxChars) + '…' : valStr;
-    doc.text(displayVal, margin + 3, y + 8);
-    y += 10;
-  }
-
-  function infoRowDual(l1, v1, l2, v2, shade) {
-    checkY(10);
-    const half = (contentW - 3) / 2;
-    if (shade) { doc.setFillColor(...CREAM); doc.rect(margin, y, contentW, 9, 'F'); }
-    // Col 1
-    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
-    doc.text(l1.toUpperCase(), margin + 3, y + 3.5);
-    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...DEEP);
-    doc.text((v1||'—').substring(0,35), margin + 3, y + 8);
-    // Col 2
-    const x2 = margin + half + 4;
-    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
-    doc.text(l2.toUpperCase(), x2, y + 3.5);
-    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...DEEP);
-    doc.text((v2||'—').substring(0,35), x2, y + 8);
-    y += 10;
-  }
-
-  function divider() {
-    checkY(4);
-    doc.setDrawColor(...BORDER);
-    doc.setLineWidth(0.3);
-    doc.line(margin, y + 2, margin + contentW, y + 2);
+      doc.rect(M, y, labW, h, 'F');
+      doc.setDrawColor(...RULE); doc.setLineWidth(0.25);
+      doc.rect(M, y, CW, h, 'S');
+      doc.line(M + labW, y, M + labW, y + h);
+      setF(SERIF, 'bold', 9, GREEN);
+      doc.text(labLines, M + padX, y + 4.9);
+      setF(SERIF, 'normal', size, INK);
+      doc.text(lines, M + labW + padX, y + 5);
+      y += h;
+    });
     y += 5;
+  }
+  function articleTitle(txt) {
+    checkY(14);
+    setF(SERIF, 'bold', 11, GREEN);
+    doc.text(txt, M, y);
+    y += 5;
+  }
+  function bodyText(txt, size, color) {
+    size = size || 10;
+    setF(SERIF, 'normal', size, color || INK);
+    const lines = doc.splitTextToSize(txt, CW);
+    const lh = size * 0.46;
+    lines.forEach(ln => { checkY(lh); doc.text(ln, M, y); y += lh; });
+    y += 3;
   }
 
   // ══════════════════════════════════════════
   // Collect data
   // ══════════════════════════════════════════
-  const fmtDate = d => d ? d.toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'}) : '—';
-  const firstName   = document.getElementById('firstName').value;
-  const lastName    = document.getElementById('lastName').value;
-  const email       = document.getElementById('email').value;
-  const phone       = document.getElementById('phone').value;
-  const nationality = document.getElementById('nationality').value;
-  const birthdate   = document.getElementById('birthdate').value;
-  const address     = document.getElementById('address').value;
-  const docNumber   = document.getElementById('docNumber') ? document.getElementById('docNumber').value : '—';
+  const fmtDate = d => d ? d.toLocaleDateString(LOC, {day:'2-digit', month:'long', year:'numeric'}) : '—';
+  const val = id => { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
+  const firstName   = val('firstName');
+  const lastName    = val('lastName');
+  const email       = val('email');
+  const phone       = val('phone');
+  const nationality = val('nationality');
+  const birthdate   = val('birthdate');
+  const address     = val('address');
+  const docNumber   = val('docNumber');
   const docTypeId   = document.getElementById('docTypeIdentity');
-  // Le PDF reste en français, quelle que soit la langue choisie par le voyageur.
-  const docTypeLabel = docTypeId ? ({ cin: 'CIN', passport: 'Passeport', residence: 'Titre de séjour' }[docTypeId.value] || '—') : '—';
+  const docTypeLabel = docTypeId ? ({ cin: pt('doc_cin'), passport: pt('doc_passport'), residence: pt('doc_residence') }[docTypeId.value] || '') : '';
 
-  const guestCount  = document.getElementById('guestCount').value;
-  const arrivalTime = document.getElementById('arrivalTime').value;
-  const lockCode    = document.getElementById('lockCode') ? document.getElementById('lockCode').value : '';
-  const lockFmt     = lockCode ? lockCode.slice(0,3)+' '+lockCode.slice(3,5)+' '+lockCode.slice(5,7) : '—';
+  const arrivalTime = val('arrivalTime');
+  const lockCode    = val('lockCode');
+  const lockFmt     = lockCode ? lockCode.slice(0,3)+' '+lockCode.slice(3,5)+' '+lockCode.slice(5,7) : '';
   const nights      = startDate && endDate ? Math.round((endDate - startDate) / 86400000) : 0;
   const pd          = window._propertyData;
-  const bailName    = window._hostName || 'Le bailleur';
+  const bailName    = window._hostName || pt('pdf_landlord_default');
+  const hostQuality = (pd && pd.host_quality) || pt('pdf_owner');
+  const today       = new Date();
+  const guestName   = `${firstName} ${lastName}`.trim();
+  const propName    = (pd && pd.name) || window._propertyName || '';
+  const city        = (pd && pd.city) || '';
+  const fmtBirth    = (() => {
+    if (!birthdate) return '';
+    const d = new Date(birthdate + 'T12:00:00');
+    return isNaN(d) ? birthdate : fmtDate(d);
+  })();
 
   // ══════════════════════════════════════════
-  // PAGE 1 — Logement + Identité + Séjour
+  // En-tête
   // ══════════════════════════════════════════
-  addHeader();
+  y = 30;
+  spaced('STAYFORM', y, 8.5, GREEN, SANS, 'bold');
+  y += 10;
+  setF(SERIF, 'bold', 17, INK);
+  const titleLines = doc.splitTextToSize(pt('contract_title'), CW);
+  titleLines.forEach(ln => { doc.text(ln, W / 2, y, { align: 'center' }); y += 7.5; });
+  y += 0.5;
+  diamond(W / 2 - 7, y - 1.2, 1.4); diamond(W / 2, y - 1.2, 1.4); diamond(W / 2 + 7, y - 1.2, 1.4);
+  y += 5.5;
+  setF(SERIF, 'italic', 9.5, GREY);
+  const sub = [propName, city].filter(Boolean).join(' · ');
+  doc.text((sub ? sub + ' — ' : '') + pt('pdf_made_on', { date: fmtDate(today) }), W / 2, y, { align: 'center' });
+  y += 10;
 
-  // ── Logement & Bailleur ──
-  if (pd || bailName !== 'Le bailleur') {
-    sectionTitle('Logement & Bailleur');
-    const hostQuality = (pd && pd.host_quality) || 'Proprietaire';
-    const bailDisplay = bailName + ' (' + hostQuality + ')';
-    const hostCin = window._hostCin || '';
-    infoRowDual('Bailleur', bailDisplay, 'Logement', (pd && pd.name) || window._propertyName || '—', false);
-    if (hostCin) infoRowDual('N° CNIE Bailleur', hostCin, 'Adresse', (pd && pd.address) || '—', true);
-    if (pd && pd.address) infoRowDual('Adresse', pd.address, 'Localisation', pd.city || '—', true);
-    if (pd && pd.checkin_time) infoRowDual('Check-in', pd.checkin_time, 'Check-out', pd.checkout_time || '—', false);
-    if (pd && pd.wifi_name) infoRowDual('WiFi', pd.wifi_name, 'Mot de passe', pd.wifi_password || '—', true);
-    y += 1;
+  // ══════════════════════════════════════════
+  // Parties
+  // ══════════════════════════════════════════
+  centerCaps(pt('pdf_between'));
+  const hostParts = [bailName, hostQuality.toLowerCase()];
+  if (window._hostCin) hostParts.push(pt('pdf_host_cin2', { v: window._hostCin }));
+  leadPara(pt('pdf_host_lead'), hostParts.join(', ') + ', ' + pt('pdf_host_tail'));
+
+  const gParts = [guestName || '—'];
+  if (nationality) gParts.push(pt('pdf_g_nat', { v: nationality }));
+  if (fmtBirth)    gParts.push(pt('pdf_g_birth', { v: fmtBirth }));
+  if (docNumber)   gParts.push(pt('pdf_g_doc', { type: /^[A-Z]{2,}$/.test(docTypeLabel) ? docTypeLabel : docTypeLabel.toLowerCase(), v: docNumber }).replace(/\s{2,}/g, ' '));
+  if (address)     gParts.push(pt('pdf_g_addr', { v: address }));
+  if (phone)       gParts.push(pt('pdf_g_phone', { v: phone }));
+  if (email)       gParts.push(pt('pdf_g_email', { v: email }));
+  leadPara(pt('pdf_guest_lead'), gParts.join(', ') + ', ' + pt('pdf_guest_tail'));
+
+  // ══════════════════════════════════════════
+  // Conditions particulières (tableau)
+  // ══════════════════════════════════════════
+  centerCaps(pt('pdf_agreed'));
+  const rows = [];
+  const propLine = [propName, pd && pd.address, city].filter(Boolean).join(' — ');
+  if (propLine) rows.push([pt('pdf_property'), propLine]);
+  rows.push([pt('pdf_period'), pt('pdf_period_v', { from: fmtDate(startDate), to: fmtDate(endDate), nights: ptn('nights', nights) })]);
+  const guestSummary = ptn('adults', adultsCount) + (childrenCount > 0 ? ', ' + ptn('children', childrenCount) : '');
+  rows.push([pt('pdf_guests'), guestSummary + (arrivalTime ? ' — ' + pt('pdf_arrival_v', { v: arrivalTime }) : '')]);
+  if (pd && pd.checkin_time) rows.push([pt('pdf_hours'), pt('pdf_hours_v', { a: pd.checkin_time, b: pd.checkout_time || '—' })]);
+  if (pd && pd.wifi_name) rows.push([pt('pdf_wifi'), pd.wifi_name + (pd.wifi_password ? ' — ' + pt('pdf_wifi_pw') + (L === 'fr' ? ' : ' : ': ') + pd.wifi_password : '')]);
+  if (lockFmt) rows.push([pt('pdf_lock_short'), lockFmt]);
+
+  // Accompagnants
+  const companions = getCompanions();
+  const childAges = getChildrenAges();
+  companions.forEach(function(c, i) {
+    if (c.firstName || c.lastName || c.docNumber) {
+      const nm = ((c.firstName || '') + ' ' + (c.lastName || '')).trim() || '—';
+      const dt = c.docType === 'passport' ? pt('doc_passport') : pt('doc_cin');
+      rows.push([pt('adult_n', { n: i + 2 }), nm + (c.docNumber ? ' — ' + dt + ' ' + c.docNumber : '')]);
+    }
+  });
+  if (childrenCount > 0 && childAges.length > 0) {
+    rows.push([pt('pdf_children_ages', { children: ptn('children', childrenCount) }), pt('pdf_years', { list: childAges.join(', ') })]);
   }
+  table(rows);
+  y += 3;
 
-  // ── Identité ──
-  sectionTitle('Identité du locataire');
-  infoRowDual('Prénom', firstName, 'Nom de famille', lastName, false);
-  infoRowDual('N° document', docNumber, 'Type', docTypeLabel, true);
-  infoRowDual('Nationalité', nationality, 'Date de naissance', birthdate, false);
-  infoRow('E-mail', email, { full: true, shade: true });
-  infoRowDual('Téléphone', phone, 'Adresse personnelle', address, false);
+  // ══════════════════════════════════════════
+  // Articles
+  // ══════════════════════════════════════════
+  // Données dynamiques règlement (mêmes règles que le contrat affiché à l'écran)
+  const noSmoking    = !pd || pd.no_smoking !== false;
+  const petsOk       = pd && pd.pets_allowed;
+  const partiesOk    = pd && pd.parties_allowed;
+  const acteMariage  = !pd || pd.acte_mariage !== false;
+  const parkingOk    = pd && pd.parking;
+  const quietStart   = (pd && pd.quiet_hours_start) || '22:00';
+  const quietEnd     = (pd && pd.quiet_hours_end)   || '08:00';
+  const specialInstr = (pd && pd.special_instructions) || '';
+  const checkoutTime = (pd && pd.checkout_time) || '11:00';
+
+  let art5 = pt('art5_base');
+  if (!partiesOk) art5 += pt('art5_parties');
+  if (noSmoking)  art5 += pt('art5_smoking');
+  if (!petsOk)    art5 += pt('art5_pets_no');
+  else            art5 += pt('art5_pets_ok');
+  if (acteMariage) art5 += pt('art5_marriage');
+  art5 += pt('art5_damage');
+
+  let art6 = pt('art6_base') + ' ';
+  art6 += pt('art6_quiet', { a: quietStart, b: quietEnd }) + ' ';
+  if (parkingOk) art6 += pt('art6_parking') + ' ';
+  if (specialInstr) art6 += specialInstr;
+  art6 = art6.trim();
+
+  const clauses = [
+    [pt('art1_t'), pt('art1')],
+    [pt('art2_t'), pt('pdf_art2', { from: fmtDate(startDate), to: fmtDate(endDate), nights: ptn('nights', nights), time: checkoutTime })],
+    [pt('art3_t'), pt('art3')],
+    [pt('art4_t'), pt('art4')],
+    [pt('art5_t'), art5],
+    [pt('art6_t'), art6],
+    [pt('art7_t'), pt('art7')],
+    [pt('art8_t'), pt('art8')],
+    [pt('art9_t'), pt('art9')],
+  ];
+  if (pd && pd.custom_article_title && pd.custom_article_content) {
+    clauses.push([pt('pdf_custom_art', { n: clauses.length + 1, title: pd.custom_article_title }), pd.custom_article_content]);
+  }
+  clauses.forEach(c => { articleTitle(c[0]); bodyText(c[1]); y += 1; });
+
+  // ══════════════════════════════════════════
+  // Déclarations du locataire
+  // ══════════════════════════════════════════
   y += 2;
+  articleTitle(pt('pdf_sec_decl'));
+  [pt('check1'), pt('check2'), pt('check3'), pt('check4')].forEach(d => {
+    setF(SERIF, 'normal', 10, INK);
+    const lines = doc.splitTextToSize(d, CW - 8);
+    checkY(lines.length * 4.6 + 2);
+    // case cochée
+    doc.setDrawColor(...GREEN); doc.setLineWidth(0.35);
+    doc.rect(M + 0.5, y - 3, 3.4, 3.4, 'S');
+    doc.setLineWidth(0.5);
+    doc.line(M + 1.1, y - 1.3, M + 2, y - 0.2);
+    doc.line(M + 2, y - 0.2, M + 3.5, y - 2.6);
+    doc.text(lines, M + 7, y);
+    y += lines.length * 4.6 + 1.6;
+  });
+  y += 4;
 
-  // ── Séjour ──
-  sectionTitle('Détails du séjour');
-  infoRowDual('Date d\'arrivée', fmtDate(startDate), 'Date de départ', fmtDate(endDate), false);
-  const guestSummary = adultsCount + ' adulte' + (adultsCount > 1 ? 's' : '') +
-    (childrenCount > 0 ? ', ' + childrenCount + ' enfant' + (childrenCount > 1 ? 's' : '') : '');
-  infoRowDual('Durée', nights + ' nuit' + (nights > 1 ? 's' : ''), 'Voyageurs', guestSummary, true);
-  infoRow('Heure d\'arrivée prévue', arrivalTime || '—', { full: true, shade: false });
+  // ══════════════════════════════════════════
+  // Fait à… + signatures
+  // ══════════════════════════════════════════
+  checkY(72);
+  setF(SERIF, 'italic', 10.5, INK);
+  doc.text(city ? pt('pdf_made_at', { city, date: fmtDate(today) }) : pt('pdf_made_at_nocity', { date: fmtDate(today) }), M, y);
+  y += 9;
+  const colW = (CW - 10) / 2;
+  const xR = M + colW + 10;
+  setF(SERIF, 'bold', 10, GREEN);
+  spacedLeft(pt('pdf_tenant'), M, y); spacedLeft(pt('pdf_landlord_up'), xR, y);
+  y += 5;
+  setF(SERIF, 'normal', 10, INK);
+  doc.text(guestName || '—', M, y); doc.text(bailName, xR, y);
+  y += 4.5;
+  setF(SERIF, 'italic', 9, GREY);
+  doc.text(pt('pdf_read_approved'), M, y); doc.text(pt('pdf_read_approved'), xR, y);
+  y += 3;
+  const sigH = 32;
+  doc.setDrawColor(...RULE); doc.setLineWidth(0.3);
+  doc.rect(M, y, colW, sigH, 'S');
+  doc.rect(xR, y, colW, sigH, 'S');
+  if (signatureDataURL) {
+    try { doc.addImage(signatureDataURL, 'PNG', M + 2, y + 2, colW - 4, sigH - 4, '', 'FAST'); } catch(e) {}
+  }
+  y += sigH + 4;
+  setF(SERIF, 'italic', 8, GREY);
+  doc.text(pt('pdf_esign'), M, y); doc.text(pt('pdf_host_sign'), xR, y);
+  y += 10;
 
-  // ── Code serrure ──
-  if (lockCode) {
-    y += 4;
-    checkY(16);
-    doc.setFillColor(...GOLD);
-    doc.roundedRect(margin, y, contentW, 14, 3, 3, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7);
-    doc.setTextColor(...DEEP);
-    doc.text('CODE D\'ACCES AU LOGEMENT', margin + 6, y + 5);
-    doc.setFontSize(18);
-    doc.setTextColor(...DEEP);
-    doc.text(lockFmt, margin + 6, y + 12);
-    doc.setFontSize(7);
-    doc.setTextColor(...MID);
-    doc.text('Serrure numerique 7 chiffres', W - margin - 4, y + 9, { align: 'right' });
-    y += 20;
+  function spacedLeft(txt, x, yy) {
+    const s = pdfSafe(txt);
+    _docText(s, x, yy, { charSpace: 0.6 });
   }
 
-  // ══════════════════════════════════════════
-  // PAGE 2 — Documents photo + Contrat
-  // ══════════════════════════════════════════
-  newPage();
-  addHeader();
+  // Mention électronique
+  checkY(14);
+  doc.setDrawColor(...GOLD); doc.setLineWidth(0.3);
+  doc.line(W / 2 - 30, y, W / 2 + 30, y);
+  y += 5;
+  setF(SERIF, 'bold', 9, GREEN);
+  doc.text(pt('pdf_stamp1'), W / 2, y, { align: 'center' });
+  y += 4.5;
+  setF(SERIF, 'italic', 8.5, GREY);
+  doc.text(pt('pdf_stamp2'), W / 2, y, { align: 'center' });
 
-  // ── Corriger orientation CIN ──
+  // ══════════════════════════════════════════
+  // Annexe — pièce d'identité et photo
+  // ══════════════════════════════════════════
   async function fixImageOrientation(dataUrl) {
     return new Promise(function(resolve) {
       var img = new Image();
@@ -3093,262 +3197,78 @@ async function _runPDFGeneration(btn, silent) {
     });
   }
 
-  // ── Section PIECE D'IDENTITE + PHOTO côte à côte ──
-  // ── Section accompagnants dans le PDF ──
-  const companions = getCompanions();
-  const childAges = getChildrenAges();
-  if (companions.length > 0 || childrenCount > 0) {
-    sectionTitle('Occupants du logement');
-    if (companions.length > 0) {
-      companions.forEach(function(c, i) {
-        if (c.firstName || c.lastName || c.docNumber) {
-          infoRowDual(
-            'Adulte ' + (i+2) + ' — ' + (c.docType === 'passport' ? 'Passeport' : 'CIN'),
-            c.docNumber || '—',
-            'Nom complet',
-            ((c.firstName || '') + ' ' + (c.lastName || '')).trim() || '—',
-            i % 2 === 0
-          );
-        }
-      });
-    }
-    if (childrenCount > 0) {
-      const agesStr = childAges.length > 0 ? childAges.join(', ') + ' ans' : '—';
-      infoRow(childrenCount + ' enfant' + (childrenCount > 1 ? 's' : '') + ' — Ages', agesStr, { full: true, shade: true });
-    }
-    y += 3;
-  }
+  newPage();
+  y = 32;
+  spaced(pt('pdf_annex'), y, 11, INK);
+  y += 5;
+  diamond(W / 2 - 7, y, 1.2); diamond(W / 2, y, 1.2); diamond(W / 2 + 7, y, 1.2);
+  y += 10;
 
-  sectionTitle('Piece d\'identite & Photo du voyageur');
-  checkY(75);
-
-  // Largeurs : CIN 2/3, Selfie 1/3
-  const cinW  = contentW * 0.63;
-  const selW  = contentW * 0.33;
-  const selX  = margin + cinW + contentW * 0.04;
-  const imgH  = 68;
-
-  // Cadre CIN
-  doc.setDrawColor(...BORDER);
-  doc.setLineWidth(0.4);
-  doc.roundedRect(margin, y, cinW, imgH, 2, 2, 'S');
-
-  // Cadre Selfie
-  doc.roundedRect(selX, y, selW, imgH, 2, 2, 'S');
-
-  // Labels
-  doc.setFontSize(6); doc.setFont('helvetica','bold'); doc.setTextColor(...LIGHT);
-  doc.text('PIECE D\'IDENTITE', margin + 2, y - 1.5);
-  doc.text('PHOTO DU VOYAGEUR', selX + 2, y - 1.5);
-
-  // Image CIN
+  const imgW = CW, cinH = 95, selH = 80, selW = 64;
+  setF(SERIF, 'bold', 9.5, GREEN);
+  spacedLeft(pt('pdf_id_doc'), M, y);
+  y += 3;
+  doc.setDrawColor(...RULE); doc.setLineWidth(0.3);
+  doc.rect(M, y, imgW, cinH, 'S');
   if (docImage1) {
     try {
       const fixedCIN = await fixImageOrientation(docImage1);
       const cinFmt = fixedCIN.startsWith('data:image/png') ? 'PNG' : 'JPEG';
-      doc.addImage(fixedCIN, cinFmt, margin + 1, y + 1, cinW - 2, imgH - 2, '', 'FAST');
-
-      // ── Watermark sur la CIN ──
+      // conserver les proportions dans le cadre
+      const props = doc.getImageProperties(fixedCIN);
+      let w = imgW - 4, h = w * props.height / props.width;
+      if (h > cinH - 4) { h = cinH - 4; w = h * props.width / props.height; }
+      const ix = M + (imgW - w) / 2, iy = y + (cinH - h) / 2;
+      doc.addImage(fixedCIN, cinFmt, ix, iy, w, h, '', 'FAST');
       doc.saveGraphicsState();
-      // Texte en diagonale semi-transparent
       doc.setGState(new doc.GState({ opacity: 0.18 }));
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.setTextColor(45, 74, 62); // vert Stayform
-      // Centre de la zone CIN
-      const cinCX = margin + cinW / 2;
-      const cinCY = y + imgH / 2;
-      // Rotation 30° via transform
-      doc.text('STAYFORM · CONFIDENTIEL', cinCX, cinCY - 6, { angle: 30, align: 'center' });
-      doc.setFontSize(7.5);
+      setF(SANS, 'bold', 14, GREEN);
+      doc.text(pt('pdf_wm1'), M + imgW / 2, y + cinH / 2 - 4, { angle: 25, align: 'center' });
+      doc.setFontSize(9);
       doc.setGState(new doc.GState({ opacity: 0.12 }));
-      doc.text('USAGE UNIQUE · VÉRIFICATION IDENTITÉ', cinCX, cinCY + 6, { angle: 30, align: 'center' });
+      doc.text(pt('pdf_wm2'), M + imgW / 2, y + cinH / 2 + 8, { angle: 25, align: 'center' });
       doc.restoreGraphicsState();
     } catch(e) {
-      doc.setFontSize(7); doc.setTextColor(...LIGHT);
-      doc.text('Document fourni', margin + 4, y + imgH/2);
+      setF(SERIF, 'italic', 9, GREY);
+      doc.text(pt('pdf_doc_provided'), M + imgW / 2, y + cinH / 2, { align: 'center' });
     }
   } else {
-    doc.setFillColor(...CREAM); doc.rect(margin, y, cinW, imgH, 'F');
-    doc.setFontSize(7); doc.setFont('helvetica','italic'); doc.setTextColor(...LIGHT);
-    doc.text('Non fourni', margin + cinW/2, y + imgH/2, { align: 'center' });
+    setF(SERIF, 'italic', 9, GREY);
+    doc.text(pt('pdf_not_provided'), M + imgW / 2, y + cinH / 2, { align: 'center' });
   }
+  y += cinH + 10;
 
-  // Image Selfie
+  setF(SERIF, 'bold', 9.5, GREEN);
+  spacedLeft(pt('pdf_guest_photo'), M, y);
+  y += 3;
+  doc.setDrawColor(...RULE);
+  doc.rect(M, y, selW, selH, 'S');
   if (selfieData) {
     try {
-      doc.addImage(selfieData, 'JPEG', selX + 1, y + 1, selW - 2, imgH - 2, '', 'FAST');
+      const props = doc.getImageProperties(selfieData);
+      let w = selW - 4, h = w * props.height / props.width;
+      if (h > selH - 4) { h = selH - 4; w = h * props.width / props.height; }
+      doc.addImage(selfieData, 'JPEG', M + (selW - w) / 2, y + (selH - h) / 2, w, h, '', 'FAST');
     } catch(e) {}
   } else {
-    doc.setFillColor(...CREAM); doc.rect(selX, y, selW, imgH, 'F');
-    doc.setFontSize(7); doc.setFont('helvetica','italic'); doc.setTextColor(...LIGHT);
-    doc.text('Non fourni', selX + selW/2, y + imgH/2, { align: 'center' });
+    setF(SERIF, 'italic', 9, GREY);
+    doc.text(pt('pdf_not_provided'), M + selW / 2, y + selH / 2, { align: 'center' });
   }
-
-  y += imgH + 8;
-
-  // ── Contrat ──
-  sectionTitle('Contrat de location meublee touristique');
-  // Préambule
-  checkY(14);
-  const hostQuality = (pd && pd.host_quality) || 'Proprietaire';
-  const bailDisplay = window._hostName || 'Le bailleur';
-  const hostCinPreamble = window._hostCin ? ', CIN : ' + window._hostCin : '';
-  doc.setFontSize(7.5); doc.setFont('helvetica','italic'); doc.setTextColor(...MID);
-  const preamble = doc.splitTextToSize(
-    "Entre le soussigne " + bailDisplay + hostCinPreamble + ", " + hostQuality + ", ci-apres denomme « le Bailleur », et le(s) voyageur(s) mentionne(s) dans le present contrat, ci-apres denomme(s) « le(s) Locataire(s) ».",
-    contentW - 4
-  );
-  doc.setFontSize(8); doc.setFont('helvetica','italic'); doc.setTextColor(...MID);
-  preamble.forEach(line => { checkY(5); doc.text(line, margin + 2, y + 5); y += 5; });
-  y += 3;
-
-  // Données dynamiques règlement
-  const noSmoking    = !pd || pd.no_smoking !== false;
-  const petsOk       = pd && pd.pets_allowed;
-  const partiesOk    = pd && pd.parties_allowed;
-  const acteMariage  = !pd || pd.acte_mariage !== false;
-  const parkingOk    = pd && pd.parking;
-  const quietStart   = (pd && pd.quiet_hours_start) || '22:00';
-  const quietEnd     = (pd && pd.quiet_hours_end)   || '08:00';
-  const specialInstr = (pd && pd.special_instructions) || '';
-  const checkoutTime = (pd && pd.checkout_time) || '11:00';
-
-  // Article 5 — règles d'occupation dynamiques
-  let art5 = "Le logement est loue a usage exclusivement touristique et residentiel temporaire. Il est expressement interdit : d'introduire plus de personnes que le nombre declare ; ";
-  if (!partiesOk) art5 += "d'organiser des fetes, soirees ou rassemblements ; ";
-  if (noSmoking)  art5 += "de fumer a l'interieur du logement ; ";
-  if (!petsOk)    art5 += "d'introduire des animaux de compagnie sans autorisation prealable ; ";
-  else            art5 += "les animaux de compagnie sont autorises sur accord prealable ; ";
-  if (acteMariage) art5 += "un acte de mariage est exige pour les couples de nationalite marocaine ; ";
-  art5 += "d'endommager les equipements et le mobilier.";
-
-  // Article 6 — règlement intérieur dynamique
-  let art6 = "Le locataire s'engage a respecter le reglement interieur du logement. Le non-respect du reglement peut entrainer une resilitation immediate du contrat sans remboursement. ";
-  art6 += "Heures calmes : de " + quietStart + " a " + quietEnd + ". ";
-  if (parkingOk) art6 += "Un emplacement de parking est disponible. ";
-  if (specialInstr) art6 += specialInstr;
-  art6 = art6.trim();
-
-  const clauses = [
-    ["Article 1 — Objet du contrat",
-     "Le present contrat a pour objet la location meublee a titre touristique du logement decrit dans la reservation. Cette location est consentie et acceptee aux conditions stipulees ci-apres. La location ne peut en aucun cas beneficier a des tiers et ne peut faire l'objet d'une sous-location ou cession sans accord ecrit prealable du bailleur."],
-    ["Article 2 — Duree de la location",
-     `La location s'etend du ${fmtDate(startDate)} au ${fmtDate(endDate)}, soit ${nights} nuit${nights>1?'s':''}. Le locataire devra liberer les lieux au plus tard a ${checkoutTime} le jour du depart. Le bailleur se reserve le droit de facturer une nuit supplementaire en cas de depart tardif non convenu.`],
-    ["Article 3 — Prix et conditions de paiement",
-     "Le montant du loyer, les frais de menage, taxes de sejour et autres charges ont ete convenus entre les parties conformement aux conditions de la reservation."],
-    ["Article 4 — Depot de garantie",
-     "Un depot de garantie peut etre demande par le bailleur. En l'absence de dommages constates lors de l'etat des lieux de sortie, ce depot est integralement restitue dans un delai de 7 jours ouvres apres le depart."],
-    ["Article 5 — Occupation et regles de sejour", art5],
-    ["Article 6 — Reglement interieur", art6],
-    ["Article 7 — Responsabilite",
-     "Le locataire est responsable de tout dommage cause au logement, a son contenu et aux equipements durant son sejour. Le bailleur ne pourra etre tenu responsable des vols, pertes ou dommages affectant les biens personnels du locataire."],
-    ["Article 8 — Protection des donnees",
-     "Les donnees personnelles collectees dans ce formulaire sont traitees conformement au Reglement General sur la Protection des Donnees (RGPD - UE 2016/679). Elles sont utilisees uniquement aux fins de verification d'identite et de gestion de la location."],
-    ["Article 9 — Litiges",
-     "Tout litige relatif au present contrat sera soumis a la juridiction competente du lieu du logement loue, apres tentative de resolution amiable."],
-  ];
-
-  // Article personnalisé (optionnel)
-  if (pd && pd.custom_article_title && pd.custom_article_content) {
-    const artNum = clauses.length + 1;
-    clauses.push(["Article " + artNum + " — " + pd.custom_article_title, pd.custom_article_content]);
-  }
-
-  clauses.forEach((clause, i) => {
-    checkY(18);
-    y += 2;
-    doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...GREEN);
-    doc.text(clause[0], margin + 2, y + 5);
-    y += 7;
-    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...MID);
-    const lines = doc.splitTextToSize(clause[1], contentW - 4);
-    lines.forEach(line => { checkY(5); doc.text(line, margin + 4, y + 5); y += 5; });
-    y += 3;
-  });
 
   // ══════════════════════════════════════════
-  // PAGE 3 — Signatures
+  // Cadre double + pied de page sur toutes les pages
   // ══════════════════════════════════════════
-  newPage();
-  addHeader();
-
-  // ── Checkboxes consentements ──
-  sectionTitle('Declarations et consentements');
-  const decls = [
-    'J\'ai lu et j\'accepte les conditions generales du contrat de location.',
-    'Je certifie que les informations fournies sont exactes et que les pieces d\'identite sont authentiques.',
-    'J\'accepte le traitement de mes donnees personnelles conformement au RGPD.',
-    'Je consens a l\'utilisation de ma piece d\'identite uniquement a des fins de verification — non stockee sur les serveurs de Stayform.',
-  ];
-  decls.forEach(d => {
-    checkY(8);
-    doc.setFillColor(...SUCCESS);
-    doc.roundedRect(margin + 2, y + 1.5, 4, 4, 0.5, 0.5, 'F');
-    doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(...MID);
-    const dLines = doc.splitTextToSize(d, contentW - 12);
-    doc.text(dLines, margin + 9, y + 5);
-    y += (dLines.length * 4.5) + 3;
-  });
-
-  y += 6;
-
-  // ── Signatures ──
-  sectionTitle('Signatures');
-  y += 4;
-
-  const halfW = (contentW - 8) / 2;
-
-  // Signature locataire
-  checkY(60);
-  doc.setFillColor(...CREAM);
-  doc.roundedRect(margin, y, halfW, 55, 2, 2, 'F');
-  doc.setDrawColor(...BORDER); doc.setLineWidth(0.3);
-  doc.roundedRect(margin, y, halfW, 55, 2, 2, 'S');
-  doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...GREEN);
-  doc.text('LE LOCATAIRE', margin + 4, y + 6);
-  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...DEEP);
-  doc.text(`${firstName} ${lastName}`, margin + 4, y + 13);
-  doc.setFontSize(6.5); doc.setTextColor(...LIGHT);
-  doc.text(new Date().toLocaleDateString('fr-FR'), margin + 4, y + 19);
-  // Signature image
-  if (signatureDataURL) {
-    try {
-      doc.addImage(signatureDataURL, 'PNG', margin + 2, y + 22, halfW - 4, 28, '', 'FAST');
-    } catch(e) {}
+  const total = doc.getNumberOfPages();
+  for (let i = 1; i <= total; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(...GREEN); doc.setLineWidth(0.5);
+    doc.rect(10, 10, W - 20, H - 20, 'S');
+    doc.setDrawColor(...GOLD); doc.setLineWidth(0.2);
+    doc.rect(12, 12, W - 24, H - 24, 'S');
+    setF(SERIF, 'italic', 8, GREY);
+    const foot = pt('pdf_footer', { name: guestName }) + '   ·   ' + pt('pdf_initials') + '   ·   ' + pt('pdf_page', { n: i }) + ' / ' + total;
+    doc.text(foot, W / 2, H - 16, { align: 'center' });
   }
-  doc.setFontSize(6.5); doc.setTextColor(...LIGHT);
-  doc.text('Signature manuscrite electronique', margin + 4, y + 52);
-
-  // Signature bailleur
-  const x2 = margin + halfW + 8;
-  doc.setFillColor(...CREAM);
-  doc.roundedRect(x2, y, halfW, 55, 2, 2, 'F');
-  doc.setDrawColor(...BORDER);
-  doc.roundedRect(x2, y, halfW, 55, 2, 2, 'S');
-  doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...GREEN);
-  doc.text('LE BAILLEUR', x2 + 4, y + 6);
-  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...DEEP);
-  doc.text(bailName, x2 + 4, y + 13);
-  doc.setFontSize(6.5); doc.setTextColor(...LIGHT);
-  doc.text(new Date().toLocaleDateString('fr-FR'), x2 + 4, y + 19);
-  doc.text('_________________________', x2 + 4, y + 45);
-  doc.text('Signature du bailleur', x2 + 4, y + 52);
-
-  y += 64;
-
-  // ── Cachet officiel ──
-  checkY(24);
-  y += 4;
-  doc.setDrawColor(...GOLD); doc.setLineWidth(0.8);
-  doc.roundedRect(margin, y, contentW, 18, 3, 3, 'S');
-  doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...GREEN);
-  doc.text('Stayform — Document genere electroniquement', W/2, y + 7, { align: 'center' });
-  doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
-  doc.text('Ce document a valeur contractuelle. Conservez-le pour vos archives.', W/2, y + 13, { align: 'center' });
-
-  // ── Footer derniere page ──
-  addFooter();
 
   // ── Filigrane « EXEMPLE » en mode aperçu hôte ──
   if (window._demoMode) {
