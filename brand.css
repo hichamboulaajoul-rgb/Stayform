@@ -153,3 +153,40 @@ body.rtl .header-text h1, body.rtl .step-title, body.rtl .card-title { font-fami
 
 /* Menu du tableau de bord : élément actif aux couleurs de la marque */
 .nav-item.active { background: rgba(22, 36, 30, 0.07) !important; color: var(--sf-ink) !important; }
+
+/* ── Choix de la langue (app-i18n.js) ───────────────────── */
+.sf-lang-select {
+  font-family: 'Inter', sans-serif; font-size: 0.82rem; color: #16241E;
+  background: transparent; border: 1px solid rgba(22, 36, 30, 0.18); border-radius: 8px;
+  padding: 0.35rem 0.5rem; cursor: pointer; max-width: 100%;
+}
+.sf-lang-select:focus-visible { outline: 2px solid #C9A227; outline-offset: 1px; }
+.lp-lang .sf-lang-select { font-size: 0.8rem; }
+.sidebar-lang { padding: 0 0.75rem 0.7rem; }
+.sidebar-lang .sf-lang-select, .settings-lang .sf-lang-select { width: 100%; padding: 0.5rem 0.6rem; background: #fff; }
+.settings-lang { max-width: 280px; }
+@media (max-width: 480px) {
+  .lp-nav > div:last-child { gap: 0.3rem !important; }
+  .lp-nav > div:last-child > button:first-of-type { padding: 0.4rem 0.4rem !important; }
+}
+@media (max-width: 430px) {
+  /* Place pour le choix de langue : le logo « S » suffit, sans le mot stayform. */
+  .lp-nav > div:first-child > span { display: none; }
+}
+
+/* ── Arabe : espace hôte de droite à gauche ─────────────── */
+html[dir="rtl"] body { font-family: 'Noto Sans Arabic', 'Inter', sans-serif; }
+html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--border); }
+html[dir="rtl"] .main-content { margin-left: 0; margin-right: 240px; }
+html[dir="rtl"] .mobile-menu-btn { left: auto; right: 1rem; }
+html[dir="rtl"] .plan-banner.free { border-left: none; border-right: 4px solid var(--success); }
+html[dir="rtl"] .plan-banner.paid { border-left: none; border-right: 4px solid var(--accent); }
+@media (max-width: 768px) {
+  html[dir="rtl"] .sidebar { transform: translateX(100%); }
+  html[dir="rtl"] .sidebar.open { transform: translateX(0); }
+  html[dir="rtl"] .main-content { margin-right: 0; }
+}
+html[dir="rtl"] .onb-fab { right: auto; left: 16px; }
+/* L'espacement entre lettres casse la liaison des lettres arabes. */
+html[dir="rtl"] [style*="letter-spacing"], html[dir="rtl"] [class] { letter-spacing: 0 !important; }
+html[dir="rtl"] [style*="JetBrains Mono"] { font-family: 'Noto Sans Arabic', 'Inter', sans-serif !important; }

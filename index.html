@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="app-i18n-dict.js"></script>
+<script src="app-i18n.js"></script>
 <title>Stayform — Check-in digital pour hôtes au Maroc</title>
 <meta name="description" content="Envoyez un lien à vos guests. Ils signent le contrat et uploadent leur CIN depuis leur téléphone. Zéro papier, zéro galère.">
 
@@ -978,55 +980,9 @@ function shareDetailWhatsApp() {
   window.open('https://wa.me/?text=' + msg, '_blank');
 }
 
-// ── LANGUE DASHBOARD ──
-function setDashLang(lang) {
-  localStorage.setItem('sf_lang', lang);
-  ['fr','en','ar'].forEach(function(l) {
-    var btn = document.getElementById('dl-' + l);
-    if (btn) {
-      btn.style.background = l === lang ? '#FF385C' : 'none';
-      btn.style.color = l === lang ? 'white' : '#717171';
-      btn.style.border = l === lang ? 'none' : '1px solid #DDDDDD';
-    }
-  });
-  if (lang === 'ar') {
-    document.documentElement.setAttribute('dir', 'rtl');
-    document.body.style.fontFamily = "'Noto Sans Arabic', 'Inter', sans-serif";
-  } else {
-    document.documentElement.setAttribute('dir', 'ltr');
-    document.body.style.fontFamily = '';
-  }
-}
-// Load saved lang
-(function() {
-  var saved = localStorage.getItem('sf_lang') || 'fr';
-  if (saved !== 'fr') setTimeout(function() { setDashLang(saved); }, 50);
-})();
+// ── LANGUE : voir app-i18n.js ──
 
 // ── TOAST ──
-// ── LANGUE ──
-function setDashLang(lang) {
-  localStorage.setItem('sf_lang', lang);
-  ['fr','en','ar'].forEach(function(l) {
-    var btn = document.getElementById('dl-' + l);
-    if (btn) {
-      btn.style.background = l === lang ? '#FF385C' : 'none';
-      btn.style.color = l === lang ? 'white' : '#717171';
-      btn.style.border = l === lang ? 'none' : '1px solid #DDDDDD';
-    }
-  });
-  if (lang === 'ar') {
-    document.documentElement.setAttribute('dir', 'rtl');
-    document.body.style.fontFamily = "'Noto Sans Arabic', 'Inter', sans-serif";
-  } else {
-    document.documentElement.setAttribute('dir', 'ltr');
-    document.body.style.fontFamily = '';
-  }
-}
-setTimeout(function() {
-  var saved = localStorage.getItem('sf_lang') || 'fr';
-  if (saved !== 'fr') setDashLang(saved);
-}, 100);
 
 function showToast(msg, color) {
   var dot = document.createElement('div');
@@ -1056,6 +1012,7 @@ function showToast(msg, color) {
       <span style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;color:#16241E;letter-spacing:-0.01em;">stayform</span>
     </div>
     <div style="display:flex;gap:0.6rem;align-items:center;">
+      <div class="lp-lang" data-lang-switch="short"></div>
       <button onclick="openAuthModal('login')" style="background:none;border:none;color:#24423A;font-family:'Inter',sans-serif;font-size:0.86rem;cursor:pointer;padding:0.4rem 0.8rem;">Se connecter</button>
       <button onclick="openAuthModal('register')" style="background:#16241E;color:#F3ECDD;border:none;border-radius:8px;padding:0.5rem 1.1rem;font-family:'Inter',sans-serif;font-size:0.86rem;font-weight:600;cursor:pointer;">Commencer</button>
     </div>
@@ -1082,7 +1039,7 @@ function showToast(msg, color) {
           Votre accueil,<br><span style="color:#C9A227;font-style:italic;">sans papier.</span>
         </h1>
         <p style="font-family:'Inter',sans-serif;font-size:1.02rem;color:#8FA79A;line-height:1.75;max-width:420px;margin:0 0 2rem;">
-          Envoyez un lien à vos voyageurs. Ils remplissent leurs informations, uploadent leur CIN et signent le contrat — depuis leur téléphone, dans leur langue, en 3 minutes.
+          Envoyez un lien à vos voyageurs. Ils remplissent leurs informations, scannent leur CIN et signent le contrat — depuis leur téléphone, dans leur langue, en 3 minutes.
         </p>
         <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
           <button onclick="openAuthModal('register')" style="background:#C9A227;color:#16241E;border:none;border-radius:9px;padding:0.95rem 2rem;font-family:'Inter',sans-serif;font-weight:600;font-size:0.95rem;cursor:pointer;">
@@ -1130,7 +1087,7 @@ function showToast(msg, color) {
     </div>
     <div style="text-align:center;padding:0 1rem;border-right:1px solid rgba(22,36,30,0.1);">
       <div style="font-family:'Fraunces',serif;font-size:1.4rem;color:#16241E;margin-bottom:6px;">Identité vérifiée</div>
-      <div style="font-size:0.82rem;color:#5C6B63;line-height:1.5;">Scan de CIN automatique, zéro saisie manuelle</div>
+      <div style="font-size:0.82rem;color:#5C6B63;line-height:1.5;">CIN scannée et vérifiée automatiquement</div>
     </div>
     <div style="text-align:center;padding:0 1rem;">
       <div style="font-family:'Fraunces',serif;font-size:1.4rem;color:#16241E;margin-bottom:6px;">Fiche de Police</div>
@@ -1218,7 +1175,7 @@ function showToast(msg, color) {
           </div>
           <div>
             <div style="font-family:'Fraunces',serif;font-size:1.25rem;color:#16241E;margin-bottom:0.45rem;">Check-in en 4 langues</div>
-            <div style="font-size:0.85rem;color:#5C6B63;line-height:1.65;">Français, anglais, espagnol et arabe (de droite à gauche). Le check-in s'ouvre dans la langue du téléphone du voyageur, qui peut en changer à tout moment. Vous envoyez le même lien à tout le monde.</div>
+            <div style="font-size:0.85rem;color:#5C6B63;line-height:1.65;">Français, anglais, espagnol et arabe. Le check-in s'ouvre dans la langue du téléphone du voyageur, qui peut en changer à tout moment, et son contrat PDF est rédigé en français, en anglais ou en espagnol. Vous envoyez le même lien à tout le monde.</div>
             <div style="margin-top:0.9rem;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#B5573D;letter-spacing:0.03em;">AUCUN RÉGLAGE DE VOTRE CÔTÉ</div>
           </div>
         </div>
@@ -1257,7 +1214,7 @@ function showToast(msg, color) {
         </div>
         <div style="background:#fff;padding:1.3rem 1.5rem;">
           <div style="font-family:'Fraunces',serif;font-size:1.02rem;color:#16241E;margin-bottom:4px;">Multilingue</div>
-          <div style="font-size:0.8rem;color:#5C6B63;line-height:1.5;">Français, anglais, espagnol et arabe pour vos voyageurs</div>
+          <div style="font-size:0.8rem;color:#5C6B63;line-height:1.5;">Check-in en 4 langues, contrat dans la langue du voyageur</div>
         </div>
       </div>
     </div>
@@ -1569,6 +1526,7 @@ function showToast(msg, color) {
       </div>
 
       <div class="sidebar-footer">
+        <div class="sidebar-lang" data-lang-switch></div>
         <div class="user-pill">
           <div class="user-avatar" id="sidebarAvatar">?</div>
           <div class="user-info">
@@ -2219,6 +2177,11 @@ function showToast(msg, color) {
           </div>
         </div>
         <div class="section-card fade-in">
+          <div class="section-title" style="margin-bottom:0.3rem">Langue</div>
+          <div class="section-sub" style="margin-bottom:0.9rem">Langue de l'espace hôte et de la page d'accueil</div>
+          <div class="settings-lang" data-lang-switch></div>
+        </div>
+        <div class="section-card fade-in">
           <div class="section-title" style="margin-bottom:0.3rem">Guide de démarrage</div>
           <div class="section-sub" style="margin-bottom:0.9rem">Revoir les 4 étapes pour préparer votre contrat, ou voir un exemple de contrat.</div>
           <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
@@ -2618,7 +2581,7 @@ function updatePlanUI() {
       sidebarPlan.textContent = plan.charAt(0).toUpperCase()+plan.slice(1) + ' · ⚠ ' + daysLeft + 'j';
       sidebarPlan.style.color = 'var(--riad-terracotta)';
     } else if (daysLeft !== null) {
-      const expStr = expiresAt.toLocaleDateString('fr-FR', {day:'2-digit', month:'short'});
+      const expStr = expiresAt.toLocaleDateString((window.SF_LOCALE || 'fr-FR'), {day:'2-digit', month:'short'});
       sidebarPlan.textContent = plan.charAt(0).toUpperCase()+plan.slice(1) + ' · exp. ' + expStr;
       sidebarPlan.style.color = 'var(--success)';
     }
@@ -2781,7 +2744,7 @@ async function renderCheckinChart() {
     var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
     months.push(key);
-    labels.push(d.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' }));
+    labels.push(d.toLocaleDateString((window.SF_LOCALE || 'fr-FR'), { month: 'short', year: '2-digit' }));
     counts.push(0);
   }
 
@@ -3037,7 +3000,7 @@ async function renderGuests(mode) {
     const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     wrap.innerHTML = '<div class="guest-grid">' + list.map(g => {
       const d = new Date(g.created_at);
-      const dateStr = d.toLocaleDateString('fr-FR', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      const dateStr = d.toLocaleDateString((window.SF_LOCALE || 'fr-FR'), {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
       const searchText = [g.name, g.email, g.phone, g.doc_number, g.property_name, g.nationality].filter(Boolean).join(' ').toLowerCase();
       return '<div class="guest-card" data-search="' + esc(searchText) + '" data-prop="' + esc(g.property_name || '') + '" data-signed="' + (g.signed ? 'signed' : 'pending') + '">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.8rem;">' +
@@ -3187,6 +3150,7 @@ function showWelcomeModal(phone, msg) {
 
   var msgPreview = document.createElement('div');
   msgPreview.style.cssText = 'background:#F7F7F7;border-radius:8px;padding:0.8rem;font-size:0.78rem;color:#444;line-height:1.6;white-space:pre-wrap;max-height:120px;overflow-y:auto;margin-bottom:1.2rem;font-family:monospace;';
+  msgPreview.setAttribute('data-no-i18n', ''); // message envoyé tel quel au voyageur
   msgPreview.textContent = msg;
 
   // Boutons
@@ -4672,8 +4636,8 @@ function renderIcalResults(events, prop) {
       var statusColor = isToday ? '#2D7A45' : isSoon ? '#B5573D' : 'var(--text3)';
       var statusLabel = isToday ? '🟢 En cours' : isSoon ? '🟡 Dans ' + Math.round((arrDate-now)/86400000) + 'j' : '📅 À venir';
 
-      var arrFr = arrDate.toLocaleDateString('fr-FR', {day:'2-digit',month:'short',year:'numeric'});
-      var depFr = depDate.toLocaleDateString('fr-FR', {day:'2-digit',month:'short',year:'numeric'});
+      var arrFr = arrDate.toLocaleDateString((window.SF_LOCALE || 'fr-FR'), {day:'2-digit',month:'short',year:'numeric'});
+      var depFr = depDate.toLocaleDateString((window.SF_LOCALE || 'fr-FR'), {day:'2-digit',month:'short',year:'numeric'});
 
       return '<div style="border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.7rem;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:0.8rem;flex-wrap:wrap;">' +
         '<div style="flex:1;min-width:0;">' +
@@ -4853,7 +4817,7 @@ function restoreDetailLink(propId) {
     if (urlEl) urlEl.textContent = data.url;
 
     const expiry = document.getElementById('detailLinkExpiry');
-    if (expiry) expiry.textContent = 'Expire à ' + new Date(data.expiry).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    if (expiry) expiry.textContent = 'Expire à ' + new Date(data.expiry).toLocaleTimeString((window.SF_LOCALE || 'fr-FR'), {hour:'2-digit', minute:'2-digit'});
 
     startDetailCountdown(propId, data.expiry);
 
@@ -4939,7 +4903,7 @@ async function loadPropertyGuests(propId) {
 
   list.innerHTML = guestList.map(g => {
     const d = new Date(g.created_at);
-    const dateStr = d.toLocaleDateString('fr-FR', {day:'2-digit',month:'short',year:'numeric'});
+    const dateStr = d.toLocaleDateString((window.SF_LOCALE || 'fr-FR'), {day:'2-digit',month:'short',year:'numeric'});
     return `<div style="border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.8rem;background:#FAFAFA;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
         <div style="font-weight:700;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;">${g.name||'—'}</div>
@@ -5494,7 +5458,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     };
     try { localStorage.setItem('sf_demo_contract', JSON.stringify(payload)); } catch (e) {}
     saveState({ previewed: true });
-    var w = window.open('checkin.html?demo=1', '_blank');
+    var w = window.open('checkin.html?demo=1' + (window.SF_LANG && window.SF_LANG !== 'fr' ? '&lang=' + window.SF_LANG : ''), '_blank');
     if (!w) window.location.href = 'checkin.html?demo=1';
     setTimeout(render, 300);
   }
