@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Check-in · Votre Séjour</title>
-<script src="checkin-i18n.js"></script>
+<script src="checkin-i18n.js?v=20261111"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 .lang-selector {
@@ -28,7 +28,7 @@ body.rtl, body.rtl button, body.rtl input, body.rtl select { font-family: 'Noto 
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="id-scan.js" defer></script>
+<script src="id-scan.js?v=20261111" defer></script>
 <script>
 // Fonctions appelées via onclick= disponibles immédiatement
 // (setLang et les traductions sont dans checkin-i18n.js)
@@ -841,7 +841,7 @@ function togglePassword(inputId, btnId) {
         </div>
       </div>
       <div class="form-group">
-        <label><span data-i18n="lbl_email">Adresse e-mail</span> <span style="color:var(--terracotta)">*</span></label>
+        <label data-i18n="lbl_email">Adresse e-mail</label>
         <input type="email" id="email" placeholder="marie.dupont@email.com">
       </div>
       <div class="form-group">
@@ -1548,9 +1548,8 @@ function nextStep(from) {
     const docNum = document.getElementById('docNumber').value.trim();
     const f = document.getElementById('firstName').value.trim();
     const l = document.getElementById('lastName').value.trim();
-    const e = document.getElementById('email').value.trim();
     if (!docNum) { alert(t('err_docnum')); return; }
-    if (!f || !l || !e) { alert(t('err_required')); return; }
+    if (!f || !l) { alert(t('err_required')); return; }
   }
   if (from === 4) { submitForm(); return; }
   currentStep = from + 1;
@@ -1565,6 +1564,8 @@ function prevStep(from) {
 }
 
 function updateUI() {
+  // Le scanner d'identité suit le voyageur entre l'étape 2 et l'étape 3 (id-scan.js).
+  if (window.StayformIdScan) StayformIdScan.place(currentStep);
   document.querySelectorAll('.page').forEach((p,i) => {
     p.classList.toggle('active', i+1 === currentStep);
   });
@@ -1787,6 +1788,8 @@ async function callVisionOCR(base64, mediaType, canvasEl) {
       }
 
       checkStep3();
+      // Scan fait dès l'étape 2 : pré-remplit le formulaire (id-scan.js).
+      if (window.StayformIdScan) StayformIdScan.onVerified(result);
 
     } else {
       cinScanAttempts++;

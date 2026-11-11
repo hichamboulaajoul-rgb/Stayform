@@ -1,20 +1,38 @@
-// Stayform · Remplissage automatique de l'étape 2 « Vos coordonnées » par scan
-// de la pièce d'identité.
+// Stayform · Scan de la pièce d'identité dès l'étape 2 « Vos coordonnées ».
 //
-// La photo est envoyée à la même fonction que le scan de l'étape 3
-// (verify-identity, Google Vision). Elle renvoie le numéro du document et, quand
-// il y a une MRZ (passeport, titre de séjour, carte d'identité au dos), le nom,
-// le prénom, la nationalité et les dates. Le formulaire est pré-rempli et
-// l'identité est marquée comme vérifiée : l'étape 3 n'a pas besoin d'un second
-// scan, sauf si le voyageur modifie ensuite le numéro du document.
+// On réutilise tel quel le scanner de l'étape 3 (caméra avec cadre, détection
+// automatique, galerie en secours, vérification Google Vision par la fonction
+// verify-identity) : le bloc #scannerSection est déplacé dans l'étape 2, puis
+// remis à sa place à l'étape 3. Quand le scan réussit à l'étape 2 :
+//   - le formulaire est pré-rempli avec ce que la fonction a lu ;
+//   - l'étape 3 affiche directement « Identité vérifiée », sans second scan.
+// Si le voyageur modifie ensuite le numéro du document, la vérification est
+// annulée et il devra scanner à l'étape 3.
 (function () {
   'use strict';
 
-  var ENDPOINT = 'https://syvpyvkgauyfqghwiqsl.supabase.co/functions/v1/verify-identity';
+  // Textes de secours si checkin-i18n.js est une ancienne version en cache.
+  var FALLBACK = {
+    idscan_title: "Remplir automatiquement avec votre pièce d'identité",
+    idscan_sub: "Scannez le recto de votre CIN ou la page photo de votre passeport : vos informations se remplissent et votre identité est vérifiée. Pas besoin de scanner à nouveau à l'étape suivante.",
+    idscan_ok: "✅ Identité vérifiée. Vérifiez les champs surlignés et corrigez-les si besoin.",
+    idscan_ok_cin: "Complétez la date de naissance et la nationalité si elles sont vides.",
+    idscan_expiry: "Valide jusqu'au {d}",
+    idscan_expired: "⚠️ Ce document semble expiré (date d'expiration : {d}).",
+    idscan_changed: "Vous avez modifié le numéro du document : il sera vérifié par un scan à l'étape suivante.",
+    idscan_step3: "Vérifiée à l'étape précédente",
+  };
 
-  function tr(key, vars) { return typeof window.t === 'function' ? window.t(key, vars) : key; }
+  function tr(key, vars) {
+    var s = typeof window.t === 'function' ? window.t(key, vars) : key;
+    if (s === key && FALLBACK[key]) {
+      s = FALLBACK[key];
+      if (vars) Object.keys(vars).forEach(function (k) { s = s.replace('{' + k + '}', vars[k]); });
+    }
+    return s;
+  }
 
-  // ── Conversion de la réponse vers les champs du formulaire ────────────────
+  // ── Réponse de verify-identity → champs du formulaire ─────────────────────
 
   function parseDate(yymmdd, kind) {
     if (!/^\d{6}$/.test(yymmdd || '')) return null;
@@ -93,38 +111,6 @@
     return v;
   }
 
-  // ── Photo → JPEG réduit (les photos de téléphone font souvent 4000 px) ─────
-
-  function toJpeg(file) {
-    return new Promise(function (resolve, reject) {
-      var url = URL.createObjectURL(file);
-      var img = new Image();
-      img.onload = function () {
-        var w = img.naturalWidth, h = img.naturalHeight, scale = Math.min(1, 1600 / Math.max(w, h));
-        var c = document.createElement('canvas');
-        c.width = Math.round(w * scale); c.height = Math.round(h * scale);
-        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-        URL.revokeObjectURL(url);
-        resolve(c.toDataURL('image/jpeg', 0.88));
-      };
-      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('image')); };
-      img.src = url;
-    });
-  }
-
-  function verify(dataUrl) {
-    var key = typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : '';
-    return fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-      // Sans numéro saisi, la fonction lit le document et renvoie ce qu'elle trouve.
-      body: JSON.stringify({ imageBase64: dataUrl.split(',')[1], mediaType: 'image/jpeg', docNumber: '' }),
-    }).then(function (res) {
-      if (res.status === 429) { var e = new Error('limit'); e.code = 'limit'; throw e; }
-      return res.json();
-    });
-  }
-
   // ── Interface ─────────────────────────────────────────────────────────────
 
   var FIELD_IDS = ['docNumber', 'firstName', 'lastName', 'nationality', 'birthdate'];
@@ -136,7 +122,8 @@
   function setStatus(kind, html) {
     var el = document.getElementById('idScanStatus');
     if (!el) return;
-    var c = { info: ['#F7F7F7', '#EBEBEB', '#4A4A4A'], ok: ['#F0FFF4', 'rgba(0,138,5,0.3)', '#0A6B1F'], warn: ['#FFFBF0', '#FFE082', '#8B6500'] }[kind];
+    if (!kind) { el.style.display = 'none'; el.innerHTML = ''; return; }
+    var c = { ok: ['#F0FFF4', 'rgba(0,138,5,0.3)', '#0A6B1F'], warn: ['#FFFBF0', '#FFE082', '#8B6500'] }[kind];
     el.style.display = 'block';
     el.style.background = c[0]; el.style.border = '1px solid ' + c[1]; el.style.color = c[2];
     el.innerHTML = html;
@@ -149,37 +136,10 @@
     el.addEventListener('input', function onIn() { el.classList.remove('id-scan-filled'); el.removeEventListener('input', onIn); });
   }
 
-  // Affiche l'étape 3 comme déjà vérifiée, avec la photo prise à l'étape 2.
-  function markVerified(dataUrl, docType) {
-    if (typeof stopCINScanner === 'function') { try { stopCINScanner(); } catch (e) {} }
-    cinVerified = true;
-    docImage1 = dataUrl;
-    filesUploaded[0] = true;
-    scannedNumber = norm(document.getElementById('docNumber').value);
-    var show = { scanReady: 'none', scanActive: 'none', scanFallback: 'none', scanSuccess: 'block' };
-    Object.keys(show).forEach(function (id) { var el = document.getElementById(id); if (el) el.style.display = show[id]; });
-    var img = document.getElementById('cinCaptured');
-    if (img) { img.src = dataUrl; img.style.display = 'block'; }
-    var title = document.getElementById('scanSuccessTitle');
-    if (title) title.textContent = tr(docType === 'cin' ? 'scan_valid_cin' : docType === 'passport' ? 'scan_valid_passport' : 'scan_valid_doc');
-    var details = document.getElementById('scanSuccessDetails');
-    if (details) details.innerHTML = esc(tr('scan_verified_line')) + '<br><span style="font-size:0.75rem;color:var(--mid);">' + esc(tr('idscan_step3')) + '</span>';
-    if (typeof checkStep3 === 'function') checkStep3();
-  }
-
-  // Le voyageur change le numéro après le scan : l'étape 3 redemande un scan.
-  function watchNumber() {
-    var el = document.getElementById('docNumber');
-    if (!el) return;
-    el.addEventListener('input', function () {
-      if (scannedNumber === null || norm(el.value) === scannedNumber) return;
-      scannedNumber = null;
-      if (typeof resetScanner === 'function') resetScanner();
-      setStatus('warn', esc(tr('idscan_changed')));
-    });
-  }
-
-  function applyToForm(v) {
+  // Appelé par callVisionOCR (checkin.html) quand le document est vérifié.
+  function onVerified(result) {
+    if (typeof currentStep === 'undefined' || currentStep !== 2) return;
+    var v = toFormValues(result || {});
     FIELD_IDS.forEach(function (id) {
       var el = document.getElementById(id);
       if (el && v[id]) { el.value = v[id]; highlight(id); }
@@ -191,6 +151,15 @@
         if (id === 'docTypeIdentity') highlight(id);
       }
     });
+    scannedNumber = norm(document.getElementById('docNumber').value);
+    // Photo choisie dans la galerie : on l'affiche dans le bloc « vérifiée » comme pour la caméra.
+    var img = document.getElementById('cinCaptured');
+    if (img && typeof docImage1 !== 'undefined' && docImage1) { img.src = docImage1; img.style.display = 'block'; }
+    var fb = document.getElementById('scanFallback');
+    if (fb) fb.style.display = 'none';
+    var details = document.getElementById('scanSuccessDetails');
+    if (details) details.innerHTML = esc(tr('scan_verified_line')) + '<br><span style="font-size:0.75rem;color:var(--mid);">' + esc(tr('idscan_step3')) + '</span>';
+
     var msg = esc(tr('idscan_ok'));
     if (!v.fromMrz) msg += '<br><span style="font-size:0.78rem;">' + esc(tr('idscan_ok_cin')) + '</span>';
     if (v.expiryIso) {
@@ -200,28 +169,31 @@
     setStatus('ok', msg);
   }
 
-  function onFile(input) {
-    var file = input.files && input.files[0];
-    input.value = '';
-    if (!file) return;
-    var btn = document.getElementById('idScanBtn');
-    if (btn) btn.disabled = true;
-    setStatus('info', esc(tr('idscan_reading')));
-    var photo;
-    toJpeg(file).then(function (dataUrl) {
-      photo = dataUrl;
-      return verify(dataUrl);
-    }).then(function (r) {
-      if (!r || !r.readable || !r.verified || !r.detectedNum) { setStatus('warn', esc(tr(r && r.readable === false ? 'scan_unreadable' : 'idscan_fail'))); return; }
-      var v = toFormValues(r);
-      applyToForm(v);
-      markVerified(photo, v.docType);
-    }).catch(function (e) {
-      console.warn('ID scan error:', e);
-      setStatus('warn', esc(tr(e && e.code === 'limit' ? 'idscan_limit' : e && e.message === 'image' ? 'idscan_fail' : 'scan_network')));
-    }).then(function () {
-      if (btn) btn.disabled = false;
+  // Le voyageur change le numéro après le scan : l'étape 3 redemandera un scan.
+  function watchNumber() {
+    var el = document.getElementById('docNumber');
+    if (!el) return;
+    el.addEventListener('input', function () {
+      if (scannedNumber === null || norm(el.value) === scannedNumber) return;
+      scannedNumber = null;
+      if (typeof resetScanner === 'function') resetScanner();
+      setStatus('warn', esc(tr('idscan_changed')));
     });
+  }
+
+  // Place le scanner dans l'étape affichée (appelé par updateUI).
+  function place(step) {
+    var scanner = document.getElementById('scannerSection');
+    var slot2 = document.getElementById('idScanSlot');
+    var slot3 = document.getElementById('scannerHome');
+    if (!scanner || !slot2 || !slot3) return;
+    var target = step === 2 ? slot2 : step === 3 ? slot3 : null;
+    if (!target || scanner.parentNode === target) return;
+    if (typeof stopCINScanner === 'function' && typeof cinStream !== 'undefined' && cinStream) {
+      stopCINScanner();
+      if (!cinVerified) document.getElementById('scanReady').style.display = 'block';
+    }
+    target.appendChild(scanner);
   }
 
   function translate() {
@@ -230,40 +202,42 @@
 
   function mount() {
     var page = document.getElementById('page2');
-    if (!page || document.getElementById('idScanCard')) return;
+    var scanner = document.getElementById('scannerSection');
+    if (!page || !scanner || document.getElementById('idScanCard')) return;
     var style = document.createElement('style');
     style.textContent =
-      '.id-scan-filled{background:#FFF8E1 !important;border-color:#C9A227 !important;}' +
-      '#idScanCard{background:#fff;border:1.5px solid rgba(201,162,39,0.6);border-radius:14px;padding:1rem 1.1rem;margin-bottom:1.2rem;}' +
+      '.id-scan-filled{background:#FFF8E1 !important;border-color:#C9A227 !important;color:#16241E !important;}' +
       '#idScanCard h3{font-size:0.95rem;font-weight:700;color:var(--deep,#16241E);margin:0 0 0.3rem;}' +
-      '#idScanCard p{font-size:0.8rem;color:var(--light-mid,#5E6B65);line-height:1.55;margin:0 0 0.6rem;}' +
-      '#idScanBtn{width:100%;background:var(--riad-green,#16241E);color:#fff;border:none;border-radius:10px;padding:0.75rem 1rem;font-family:Inter,sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;}' +
-      '#idScanBtn:disabled{opacity:0.6;cursor:wait;}' +
-      '#idScanStatus{display:none;margin-top:0.7rem;padding:0.7rem 0.9rem;border-radius:10px;font-size:0.8rem;line-height:1.5;}';
+      '#idScanCard .id-scan-sub{font-size:0.8rem;color:var(--light-mid,#5E6B65);line-height:1.55;margin:0 0 0.9rem;}' +
+      '#idScanStatus{display:none;margin-top:0.8rem;padding:0.7rem 0.9rem;border-radius:10px;font-size:0.8rem;line-height:1.5;}';
     document.head.appendChild(style);
+
+    // Emplacement d'origine du scanner à l'étape 3.
+    var home = document.createElement('div');
+    home.id = 'scannerHome';
+    scanner.parentNode.insertBefore(home, scanner);
+    home.appendChild(scanner);
 
     var card = document.createElement('div');
     card.id = 'idScanCard';
+    card.className = 'card';
+    card.style.marginBottom = '1.2rem';
     card.innerHTML =
       '<h3 data-idscan="idscan_title"></h3>' +
-      '<p data-idscan="idscan_sub"></p>' +
-      '<input type="file" id="idScanInput" accept="image/*" style="display:none">' +
-      '<button type="button" id="idScanBtn" data-idscan="idscan_btn"></button>' +
-      '<p data-idscan="idscan_privacy" style="font-size:0.74rem;margin:0.6rem 0 0;"></p>' +
+      '<p class="id-scan-sub" data-idscan="idscan_sub"></p>' +
+      '<div id="idScanSlot"></div>' +
       '<div id="idScanStatus" role="status" aria-live="polite"></div>';
     var notice = document.getElementById('identityNotice');
     if (notice && notice.parentNode === page) page.insertBefore(card, notice.nextSibling);
     else page.insertBefore(card, page.querySelector('.card'));
 
-    var input = card.querySelector('#idScanInput');
-    card.querySelector('#idScanBtn').addEventListener('click', function () { input.click(); });
-    input.addEventListener('change', function () { onFile(input); });
     translate();
     document.addEventListener('sf:langchange', translate);
     watchNumber();
+    if (typeof currentStep !== 'undefined') place(currentStep);
   }
 
-  window.StayformIdScan = { toFormValues: toFormValues, parseDate: parseDate };
+  window.StayformIdScan = { toFormValues: toFormValues, parseDate: parseDate, onVerified: onVerified, place: place };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
   else mount();
