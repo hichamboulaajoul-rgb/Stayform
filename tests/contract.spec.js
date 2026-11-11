@@ -72,8 +72,8 @@ test('cocher en cliquant sur le texte puis signer : « Valider » se débloque',
 
 for (const [lang, expected, absent] of [
   ['fr', ['Contrat de location', 'Article 2', 'LE LOCATAIRE'], ['Rental contract']],
-  ['en', ['Rental contract', 'Article 2', 'THE TENANT', 'TENANT IDENTITY'], ['Contrat de location']],
-  ['es', ['Contrato de alquiler', 'EL ARRENDATARIO', 'FIRMAS'], ['Contrat de location']],
+  ['en', ['Rental contract', 'Article 2', 'THE TENANT', 'IT HAS BEEN AGREED AS FOLLOWS'], ['Contrat de location']],
+  ['es', ['Contrato de alquiler', 'EL ARRENDATARIO', 'ENTRE LOS ABAJO FIRMANTES'], ['Contrat de location']],
   ['ar', ['Contrat de location', 'LE LOCATAIRE'], ['Rental contract']],
 ]) {
   test(`contrat PDF en « ${lang} »`, async ({ page }) => {
