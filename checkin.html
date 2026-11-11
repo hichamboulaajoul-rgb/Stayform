@@ -2094,10 +2094,11 @@ function clearSig() {
 }
 
 function toggleCheck(id, event) {
-  if (event && event.target && event.target.type === 'checkbox') return;
   const cb = document.getElementById(id);
   if (!cb) return;
-  cb.checked = !cb.checked;
+  // Clic sur la case elle-même : le navigateur l'a déjà cochée, on ne la recoche pas,
+  // mais on met quand même à jour le bouton (sinon il reste grisé si on a signé avant).
+  if (!(event && event.target && event.target.type === 'checkbox')) cb.checked = !cb.checked;
   if (id === 'check4') checkStep3();
   else checkSubmit();
 }
@@ -2844,6 +2845,20 @@ async function _runPDFGeneration(btn, silent) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const W = 210, H = 297, margin = 15, contentW = W - margin * 2;
 
+  // ── Langue du contrat : celle du voyageur (FR / EN / ES ; l'arabe reste en français) ──
+  const L = (typeof sfPdfLang === 'function') ? sfPdfLang() : 'fr';
+  const LOC = (typeof sfPdfLocale === 'function') ? sfPdfLocale() : 'fr-FR';
+  const pt = (key, vars) => (typeof tl === 'function' ? tl(L, key, vars) : key);
+  const ptn = (key, nb) => (typeof tnl === 'function' ? tnl(L, key, nb) : String(nb));
+  // Helvetica (jsPDF) ne connaît que l'alphabet latin : on retire émojis et balises.
+  const pdfSafe = str => String(str == null ? '' : str).replace(/<[^>]*>/g, '')
+    .replace(/[^\u0000-\u00FF\u0152\u0153\u0160\u0161\u0178\u017D\u017E\u0192\u02C6\u02DC\u2013\u2014\u2018-\u201E\u2020-\u2022\u2026\u2030\u2039\u203A\u20AC\u2122]/g, '')
+    .replace(/\s{2,}/g, ' ').trim();
+  const _docText = doc.text.bind(doc);
+  doc.text = (txt, ...rest) => _docText(Array.isArray(txt) ? txt.map(pdfSafe) : pdfSafe(txt), ...rest);
+  const _split = doc.splitTextToSize.bind(doc);
+  doc.splitTextToSize = (txt, ...rest) => _split(pdfSafe(txt), ...rest);
+
   // ── Palette Option H ──
   const GREEN    = [45, 74, 62];
   const GREEN2   = [74, 124, 101];
@@ -2888,7 +2903,7 @@ async function _runPDFGeneration(btn, silent) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(...GOLD);
-    doc.text('DOSSIER DE CHECK-IN', margin, 23);
+    doc.text(pt('pdf_file'), margin, 23);
     // Infos bailleur + logement à droite
     const pd = window._propertyData;
     const propName = (pd && pd.name) || window._propertyName || '';
@@ -2904,7 +2919,7 @@ async function _runPDFGeneration(btn, silent) {
     const now = new Date();
     doc.setFontSize(6.5);
     doc.setTextColor(...GOLD);
-    doc.text(now.toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}), W - margin, 25, { align: 'right' });
+    doc.text(now.toLocaleDateString(LOC, {day:'2-digit',month:'long',year:'numeric'}), W - margin, 25, { align: 'right' });
     y = 38;
   }
 
@@ -2920,8 +2935,8 @@ async function _runPDFGeneration(btn, silent) {
     doc.setTextColor(...LIGHT);
     const firstName = document.getElementById('firstName').value;
     const lastName  = document.getElementById('lastName').value;
-    doc.text(`${firstName} ${lastName} — Contrat de location`, margin, pageH - 4);
-    doc.text(`Page ${pageNum}`, W - margin, pageH - 4, { align: 'right' });
+    doc.text(pt('pdf_footer', { name: `${firstName} ${lastName}` }), margin, pageH - 4);
+    doc.text(pt('pdf_page', { n: pageNum }), W - margin, pageH - 4, { align: 'right' });
   }
 
   // ── Section titre ──
@@ -2990,7 +3005,7 @@ async function _runPDFGeneration(btn, silent) {
   // ══════════════════════════════════════════
   // Collect data
   // ══════════════════════════════════════════
-  const fmtDate = d => d ? d.toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'}) : '—';
+  const fmtDate = d => d ? d.toLocaleDateString(LOC, {day:'2-digit', month:'long', year:'numeric'}) : '—';
   const firstName   = document.getElementById('firstName').value;
   const lastName    = document.getElementById('lastName').value;
   const email       = document.getElementById('email').value;
@@ -3000,8 +3015,7 @@ async function _runPDFGeneration(btn, silent) {
   const address     = document.getElementById('address').value;
   const docNumber   = document.getElementById('docNumber') ? document.getElementById('docNumber').value : '—';
   const docTypeId   = document.getElementById('docTypeIdentity');
-  // Le PDF reste en français, quelle que soit la langue choisie par le voyageur.
-  const docTypeLabel = docTypeId ? ({ cin: 'CIN', passport: 'Passeport', residence: 'Titre de séjour' }[docTypeId.value] || '—') : '—';
+  const docTypeLabel = docTypeId ? ({ cin: pt('doc_cin'), passport: pt('doc_passport'), residence: pt('doc_residence') }[docTypeId.value] || '—') : '—';
 
   const guestCount  = document.getElementById('guestCount').value;
   const arrivalTime = document.getElementById('arrivalTime').value;
@@ -3009,7 +3023,7 @@ async function _runPDFGeneration(btn, silent) {
   const lockFmt     = lockCode ? lockCode.slice(0,3)+' '+lockCode.slice(3,5)+' '+lockCode.slice(5,7) : '—';
   const nights      = startDate && endDate ? Math.round((endDate - startDate) / 86400000) : 0;
   const pd          = window._propertyData;
-  const bailName    = window._hostName || 'Le bailleur';
+  const bailName    = window._hostName || pt('pdf_landlord_default');
 
   // ══════════════════════════════════════════
   // PAGE 1 — Logement + Identité + Séjour
@@ -3017,35 +3031,34 @@ async function _runPDFGeneration(btn, silent) {
   addHeader();
 
   // ── Logement & Bailleur ──
-  if (pd || bailName !== 'Le bailleur') {
-    sectionTitle('Logement & Bailleur');
-    const hostQuality = (pd && pd.host_quality) || 'Proprietaire';
+  if (pd || window._hostName) {
+    sectionTitle(pt('pdf_sec_property'));
+    const hostQuality = (pd && pd.host_quality) || pt('pdf_owner');
     const bailDisplay = bailName + ' (' + hostQuality + ')';
     const hostCin = window._hostCin || '';
-    infoRowDual('Bailleur', bailDisplay, 'Logement', (pd && pd.name) || window._propertyName || '—', false);
-    if (hostCin) infoRowDual('N° CNIE Bailleur', hostCin, 'Adresse', (pd && pd.address) || '—', true);
-    if (pd && pd.address) infoRowDual('Adresse', pd.address, 'Localisation', pd.city || '—', true);
+    infoRowDual(pt('pdf_landlord'), bailDisplay, pt('pdf_property'), (pd && pd.name) || window._propertyName || '—', false);
+    if (hostCin) infoRowDual(pt('pdf_host_cin'), hostCin, pt('pdf_address'), (pd && pd.address) || '—', true);
+    if (pd && pd.address) infoRowDual(pt('pdf_address'), pd.address, pt('pdf_location'), pd.city || '—', true);
     if (pd && pd.checkin_time) infoRowDual('Check-in', pd.checkin_time, 'Check-out', pd.checkout_time || '—', false);
-    if (pd && pd.wifi_name) infoRowDual('WiFi', pd.wifi_name, 'Mot de passe', pd.wifi_password || '—', true);
+    if (pd && pd.wifi_name) infoRowDual(pt('pdf_wifi'), pd.wifi_name, pt('pdf_wifi_pw'), pd.wifi_password || '—', true);
     y += 1;
   }
 
   // ── Identité ──
-  sectionTitle('Identité du locataire');
-  infoRowDual('Prénom', firstName, 'Nom de famille', lastName, false);
-  infoRowDual('N° document', docNumber, 'Type', docTypeLabel, true);
-  infoRowDual('Nationalité', nationality, 'Date de naissance', birthdate, false);
-  infoRow('E-mail', email, { full: true, shade: true });
-  infoRowDual('Téléphone', phone, 'Adresse personnelle', address, false);
+  sectionTitle(pt('pdf_sec_identity'));
+  infoRowDual(pt('pdf_firstname'), firstName, pt('pdf_lastname'), lastName, false);
+  infoRowDual(pt('pdf_docnum'), docNumber, pt('pdf_type'), docTypeLabel, true);
+  infoRowDual(pt('pdf_nationality'), nationality, pt('pdf_birthdate'), birthdate, false);
+  infoRow(pt('pdf_email'), email, { full: true, shade: true });
+  infoRowDual(pt('pdf_phone'), phone, pt('pdf_home_address'), address, false);
   y += 2;
 
   // ── Séjour ──
-  sectionTitle('Détails du séjour');
-  infoRowDual('Date d\'arrivée', fmtDate(startDate), 'Date de départ', fmtDate(endDate), false);
-  const guestSummary = adultsCount + ' adulte' + (adultsCount > 1 ? 's' : '') +
-    (childrenCount > 0 ? ', ' + childrenCount + ' enfant' + (childrenCount > 1 ? 's' : '') : '');
-  infoRowDual('Durée', nights + ' nuit' + (nights > 1 ? 's' : ''), 'Voyageurs', guestSummary, true);
-  infoRow('Heure d\'arrivée prévue', arrivalTime || '—', { full: true, shade: false });
+  sectionTitle(pt('pdf_sec_stay'));
+  infoRowDual(pt('pdf_arrival'), fmtDate(startDate), pt('pdf_departure'), fmtDate(endDate), false);
+  const guestSummary = ptn('adults', adultsCount) + (childrenCount > 0 ? ', ' + ptn('children', childrenCount) : '');
+  infoRowDual(pt('pdf_duration'), ptn('nights', nights), pt('pdf_guests'), guestSummary, true);
+  infoRow(pt('pdf_arrival_time'), arrivalTime || '—', { full: true, shade: false });
 
   // ── Code serrure ──
   if (lockCode) {
@@ -3056,13 +3069,13 @@ async function _runPDFGeneration(btn, silent) {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(7);
     doc.setTextColor(...DEEP);
-    doc.text('CODE D\'ACCES AU LOGEMENT', margin + 6, y + 5);
+    doc.text(pt('pdf_lock'), margin + 6, y + 5);
     doc.setFontSize(18);
     doc.setTextColor(...DEEP);
     doc.text(lockFmt, margin + 6, y + 12);
     doc.setFontSize(7);
     doc.setTextColor(...MID);
-    doc.text('Serrure numerique 7 chiffres', W - margin - 4, y + 9, { align: 'right' });
+    doc.text(pt('pdf_lock_sub'), W - margin - 4, y + 9, { align: 'right' });
     y += 20;
   }
 
@@ -3098,14 +3111,14 @@ async function _runPDFGeneration(btn, silent) {
   const companions = getCompanions();
   const childAges = getChildrenAges();
   if (companions.length > 0 || childrenCount > 0) {
-    sectionTitle('Occupants du logement');
+    sectionTitle(pt('pdf_sec_occupants'));
     if (companions.length > 0) {
       companions.forEach(function(c, i) {
         if (c.firstName || c.lastName || c.docNumber) {
           infoRowDual(
-            'Adulte ' + (i+2) + ' — ' + (c.docType === 'passport' ? 'Passeport' : 'CIN'),
+            pt('adult_n', { n: i + 2 }) + ' — ' + (c.docType === 'passport' ? pt('doc_passport') : pt('doc_cin')),
             c.docNumber || '—',
-            'Nom complet',
+            pt('pdf_full_name'),
             ((c.firstName || '') + ' ' + (c.lastName || '')).trim() || '—',
             i % 2 === 0
           );
@@ -3113,13 +3126,13 @@ async function _runPDFGeneration(btn, silent) {
       });
     }
     if (childrenCount > 0) {
-      const agesStr = childAges.length > 0 ? childAges.join(', ') + ' ans' : '—';
-      infoRow(childrenCount + ' enfant' + (childrenCount > 1 ? 's' : '') + ' — Ages', agesStr, { full: true, shade: true });
+      const agesStr = childAges.length > 0 ? pt('pdf_years', { list: childAges.join(', ') }) : '—';
+      infoRow(pt('pdf_children_ages', { children: ptn('children', childrenCount) }), agesStr, { full: true, shade: true });
     }
     y += 3;
   }
 
-  sectionTitle('Piece d\'identite & Photo du voyageur');
+  sectionTitle(pt('pdf_sec_docs'));
   checkY(75);
 
   // Largeurs : CIN 2/3, Selfie 1/3
@@ -3138,8 +3151,8 @@ async function _runPDFGeneration(btn, silent) {
 
   // Labels
   doc.setFontSize(6); doc.setFont('helvetica','bold'); doc.setTextColor(...LIGHT);
-  doc.text('PIECE D\'IDENTITE', margin + 2, y - 1.5);
-  doc.text('PHOTO DU VOYAGEUR', selX + 2, y - 1.5);
+  doc.text(pt('pdf_id_doc'), margin + 2, y - 1.5);
+  doc.text(pt('pdf_guest_photo'), selX + 2, y - 1.5);
 
   // Image CIN
   if (docImage1) {
@@ -3159,19 +3172,19 @@ async function _runPDFGeneration(btn, silent) {
       const cinCX = margin + cinW / 2;
       const cinCY = y + imgH / 2;
       // Rotation 30° via transform
-      doc.text('STAYFORM · CONFIDENTIEL', cinCX, cinCY - 6, { angle: 30, align: 'center' });
+      doc.text(pt('pdf_wm1'), cinCX, cinCY - 6, { angle: 30, align: 'center' });
       doc.setFontSize(7.5);
       doc.setGState(new doc.GState({ opacity: 0.12 }));
-      doc.text('USAGE UNIQUE · VÉRIFICATION IDENTITÉ', cinCX, cinCY + 6, { angle: 30, align: 'center' });
+      doc.text(pt('pdf_wm2'), cinCX, cinCY + 6, { angle: 30, align: 'center' });
       doc.restoreGraphicsState();
     } catch(e) {
       doc.setFontSize(7); doc.setTextColor(...LIGHT);
-      doc.text('Document fourni', margin + 4, y + imgH/2);
+      doc.text(pt('pdf_doc_provided'), margin + 4, y + imgH/2);
     }
   } else {
     doc.setFillColor(...CREAM); doc.rect(margin, y, cinW, imgH, 'F');
     doc.setFontSize(7); doc.setFont('helvetica','italic'); doc.setTextColor(...LIGHT);
-    doc.text('Non fourni', margin + cinW/2, y + imgH/2, { align: 'center' });
+    doc.text(pt('pdf_not_provided'), margin + cinW/2, y + imgH/2, { align: 'center' });
   }
 
   // Image Selfie
@@ -3182,28 +3195,27 @@ async function _runPDFGeneration(btn, silent) {
   } else {
     doc.setFillColor(...CREAM); doc.rect(selX, y, selW, imgH, 'F');
     doc.setFontSize(7); doc.setFont('helvetica','italic'); doc.setTextColor(...LIGHT);
-    doc.text('Non fourni', selX + selW/2, y + imgH/2, { align: 'center' });
+    doc.text(pt('pdf_not_provided'), selX + selW/2, y + imgH/2, { align: 'center' });
   }
 
   y += imgH + 8;
 
   // ── Contrat ──
-  sectionTitle('Contrat de location meublee touristique');
+  sectionTitle(pt('contract_title'));
   // Préambule
   checkY(14);
-  const hostQuality = (pd && pd.host_quality) || 'Proprietaire';
-  const bailDisplay = window._hostName || 'Le bailleur';
-  const hostCinPreamble = window._hostCin ? ', CIN : ' + window._hostCin : '';
-  doc.setFontSize(7.5); doc.setFont('helvetica','italic'); doc.setTextColor(...MID);
+  const hostQuality = (pd && pd.host_quality) || pt('pdf_owner');
+  const bailDisplay = bailName;
+  const hostCinPreamble = window._hostCin ? pt('pdf_cin_part', { cin: window._hostCin }) : '';
   const preamble = doc.splitTextToSize(
-    "Entre le soussigne " + bailDisplay + hostCinPreamble + ", " + hostQuality + ", ci-apres denomme « le Bailleur », et le(s) voyageur(s) mentionne(s) dans le present contrat, ci-apres denomme(s) « le(s) Locataire(s) ».",
+    pt('pdf_preamble', { host: bailDisplay, cin: hostCinPreamble, quality: hostQuality }),
     contentW - 4
   );
   doc.setFontSize(8); doc.setFont('helvetica','italic'); doc.setTextColor(...MID);
   preamble.forEach(line => { checkY(5); doc.text(line, margin + 2, y + 5); y += 5; });
   y += 3;
 
-  // Données dynamiques règlement
+  // Données dynamiques règlement (mêmes règles que le contrat affiché à l'écran)
   const noSmoking    = !pd || pd.no_smoking !== false;
   const petsOk       = pd && pd.pets_allowed;
   const partiesOk    = pd && pd.parties_allowed;
@@ -3215,44 +3227,37 @@ async function _runPDFGeneration(btn, silent) {
   const checkoutTime = (pd && pd.checkout_time) || '11:00';
 
   // Article 5 — règles d'occupation dynamiques
-  let art5 = "Le logement est loue a usage exclusivement touristique et residentiel temporaire. Il est expressement interdit : d'introduire plus de personnes que le nombre declare ; ";
-  if (!partiesOk) art5 += "d'organiser des fetes, soirees ou rassemblements ; ";
-  if (noSmoking)  art5 += "de fumer a l'interieur du logement ; ";
-  if (!petsOk)    art5 += "d'introduire des animaux de compagnie sans autorisation prealable ; ";
-  else            art5 += "les animaux de compagnie sont autorises sur accord prealable ; ";
-  if (acteMariage) art5 += "un acte de mariage est exige pour les couples de nationalite marocaine ; ";
-  art5 += "d'endommager les equipements et le mobilier.";
+  let art5 = pt('art5_base');
+  if (!partiesOk) art5 += pt('art5_parties');
+  if (noSmoking)  art5 += pt('art5_smoking');
+  if (!petsOk)    art5 += pt('art5_pets_no');
+  else            art5 += pt('art5_pets_ok');
+  if (acteMariage) art5 += pt('art5_marriage');
+  art5 += pt('art5_damage');
 
   // Article 6 — règlement intérieur dynamique
-  let art6 = "Le locataire s'engage a respecter le reglement interieur du logement. Le non-respect du reglement peut entrainer une resilitation immediate du contrat sans remboursement. ";
-  art6 += "Heures calmes : de " + quietStart + " a " + quietEnd + ". ";
-  if (parkingOk) art6 += "Un emplacement de parking est disponible. ";
+  let art6 = pt('art6_base') + ' ';
+  art6 += pt('art6_quiet', { a: quietStart, b: quietEnd }) + ' ';
+  if (parkingOk) art6 += pt('art6_parking') + ' ';
   if (specialInstr) art6 += specialInstr;
   art6 = art6.trim();
 
   const clauses = [
-    ["Article 1 — Objet du contrat",
-     "Le present contrat a pour objet la location meublee a titre touristique du logement decrit dans la reservation. Cette location est consentie et acceptee aux conditions stipulees ci-apres. La location ne peut en aucun cas beneficier a des tiers et ne peut faire l'objet d'une sous-location ou cession sans accord ecrit prealable du bailleur."],
-    ["Article 2 — Duree de la location",
-     `La location s'etend du ${fmtDate(startDate)} au ${fmtDate(endDate)}, soit ${nights} nuit${nights>1?'s':''}. Le locataire devra liberer les lieux au plus tard a ${checkoutTime} le jour du depart. Le bailleur se reserve le droit de facturer une nuit supplementaire en cas de depart tardif non convenu.`],
-    ["Article 3 — Prix et conditions de paiement",
-     "Le montant du loyer, les frais de menage, taxes de sejour et autres charges ont ete convenus entre les parties conformement aux conditions de la reservation."],
-    ["Article 4 — Depot de garantie",
-     "Un depot de garantie peut etre demande par le bailleur. En l'absence de dommages constates lors de l'etat des lieux de sortie, ce depot est integralement restitue dans un delai de 7 jours ouvres apres le depart."],
-    ["Article 5 — Occupation et regles de sejour", art5],
-    ["Article 6 — Reglement interieur", art6],
-    ["Article 7 — Responsabilite",
-     "Le locataire est responsable de tout dommage cause au logement, a son contenu et aux equipements durant son sejour. Le bailleur ne pourra etre tenu responsable des vols, pertes ou dommages affectant les biens personnels du locataire."],
-    ["Article 8 — Protection des donnees",
-     "Les donnees personnelles collectees dans ce formulaire sont traitees conformement au Reglement General sur la Protection des Donnees (RGPD - UE 2016/679). Elles sont utilisees uniquement aux fins de verification d'identite et de gestion de la location."],
-    ["Article 9 — Litiges",
-     "Tout litige relatif au present contrat sera soumis a la juridiction competente du lieu du logement loue, apres tentative de resolution amiable."],
+    [pt('art1_t'), pt('art1')],
+    [pt('art2_t'), pt('pdf_art2', { from: fmtDate(startDate), to: fmtDate(endDate), nights: ptn('nights', nights), time: checkoutTime })],
+    [pt('art3_t'), pt('art3')],
+    [pt('art4_t'), pt('art4')],
+    [pt('art5_t'), art5],
+    [pt('art6_t'), art6],
+    [pt('art7_t'), pt('art7')],
+    [pt('art8_t'), pt('art8')],
+    [pt('art9_t'), pt('art9')],
   ];
 
   // Article personnalisé (optionnel)
   if (pd && pd.custom_article_title && pd.custom_article_content) {
     const artNum = clauses.length + 1;
-    clauses.push(["Article " + artNum + " — " + pd.custom_article_title, pd.custom_article_content]);
+    clauses.push([pt('pdf_custom_art', { n: artNum, title: pd.custom_article_title }), pd.custom_article_content]);
   }
 
   clauses.forEach((clause, i) => {
@@ -3274,13 +3279,8 @@ async function _runPDFGeneration(btn, silent) {
   addHeader();
 
   // ── Checkboxes consentements ──
-  sectionTitle('Declarations et consentements');
-  const decls = [
-    'J\'ai lu et j\'accepte les conditions generales du contrat de location.',
-    'Je certifie que les informations fournies sont exactes et que les pieces d\'identite sont authentiques.',
-    'J\'accepte le traitement de mes donnees personnelles conformement au RGPD.',
-    'Je consens a l\'utilisation de ma piece d\'identite uniquement a des fins de verification — non stockee sur les serveurs de Stayform.',
-  ];
+  sectionTitle(pt('pdf_sec_decl'));
+  const decls = [pt('check1'), pt('check2'), pt('check3'), pt('check4')];
   decls.forEach(d => {
     checkY(8);
     doc.setFillColor(...SUCCESS);
@@ -3294,7 +3294,7 @@ async function _runPDFGeneration(btn, silent) {
   y += 6;
 
   // ── Signatures ──
-  sectionTitle('Signatures');
+  sectionTitle(pt('pdf_sec_sign'));
   y += 4;
 
   const halfW = (contentW - 8) / 2;
@@ -3306,11 +3306,11 @@ async function _runPDFGeneration(btn, silent) {
   doc.setDrawColor(...BORDER); doc.setLineWidth(0.3);
   doc.roundedRect(margin, y, halfW, 55, 2, 2, 'S');
   doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...GREEN);
-  doc.text('LE LOCATAIRE', margin + 4, y + 6);
+  doc.text(pt('pdf_tenant'), margin + 4, y + 6);
   doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...DEEP);
   doc.text(`${firstName} ${lastName}`, margin + 4, y + 13);
   doc.setFontSize(6.5); doc.setTextColor(...LIGHT);
-  doc.text(new Date().toLocaleDateString('fr-FR'), margin + 4, y + 19);
+  doc.text(new Date().toLocaleDateString(LOC), margin + 4, y + 19);
   // Signature image
   if (signatureDataURL) {
     try {
@@ -3318,7 +3318,7 @@ async function _runPDFGeneration(btn, silent) {
     } catch(e) {}
   }
   doc.setFontSize(6.5); doc.setTextColor(...LIGHT);
-  doc.text('Signature manuscrite electronique', margin + 4, y + 52);
+  doc.text(pt('pdf_esign'), margin + 4, y + 52);
 
   // Signature bailleur
   const x2 = margin + halfW + 8;
@@ -3327,13 +3327,13 @@ async function _runPDFGeneration(btn, silent) {
   doc.setDrawColor(...BORDER);
   doc.roundedRect(x2, y, halfW, 55, 2, 2, 'S');
   doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...GREEN);
-  doc.text('LE BAILLEUR', x2 + 4, y + 6);
+  doc.text(pt('pdf_landlord_up'), x2 + 4, y + 6);
   doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...DEEP);
   doc.text(bailName, x2 + 4, y + 13);
   doc.setFontSize(6.5); doc.setTextColor(...LIGHT);
-  doc.text(new Date().toLocaleDateString('fr-FR'), x2 + 4, y + 19);
+  doc.text(new Date().toLocaleDateString(LOC), x2 + 4, y + 19);
   doc.text('_________________________', x2 + 4, y + 45);
-  doc.text('Signature du bailleur', x2 + 4, y + 52);
+  doc.text(pt('pdf_host_sign'), x2 + 4, y + 52);
 
   y += 64;
 
@@ -3343,9 +3343,9 @@ async function _runPDFGeneration(btn, silent) {
   doc.setDrawColor(...GOLD); doc.setLineWidth(0.8);
   doc.roundedRect(margin, y, contentW, 18, 3, 3, 'S');
   doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...GREEN);
-  doc.text('Stayform — Document genere electroniquement', W/2, y + 7, { align: 'center' });
+  doc.text(pt('pdf_stamp1'), W/2, y + 7, { align: 'center' });
   doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...LIGHT);
-  doc.text('Ce document a valeur contractuelle. Conservez-le pour vos archives.', W/2, y + 13, { align: 'center' });
+  doc.text(pt('pdf_stamp2'), W/2, y + 13, { align: 'center' });
 
   // ── Footer derniere page ──
   addFooter();
