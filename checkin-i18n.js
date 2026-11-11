@@ -14,6 +14,7 @@
 // ══════════════════════════════════════════════════════════
 (function () {
   var LANGS = ['fr', 'en', 'es', 'ar'];
+  var PDF_LANGS = ['fr', 'en', 'es'];
   var LOCALES = { fr: 'fr-FR', en: 'en-GB', es: 'es-ES', ar: 'ar-MA' };
 
   var STR = {
@@ -108,7 +109,7 @@
     companions_title: { fr: "👥 Accompagnants adultes", en: "👥 Other adults", es: "👥 Otros adultos", ar: "👥 المرافقون البالغون" },
     adult_n: { fr: "Adulte {n}", en: "Adult {n}", es: "Adulto {n}", ar: "البالغ {n}" },
     err_docnum: { fr: "Veuillez saisir votre numéro de CIN ou passeport.", en: "Please enter your ID card or passport number.", es: "Introduce tu número de documento o pasaporte.", ar: "يرجى إدخال رقم بطاقتك الوطنية أو جواز سفرك." },
-    err_required: { fr: "Veuillez remplir au moins votre prénom, nom et e-mail.", en: "Please fill in at least your first name, last name and email.", es: "Rellena al menos tu nombre, apellidos y correo electrónico.", ar: "يرجى ملء الاسم الشخصي والاسم العائلي والبريد الإلكتروني على الأقل." },
+    err_required: { fr: "Veuillez remplir au moins votre prénom et votre nom.", en: "Please fill in at least your first name and last name.", es: "Rellena al menos tu nombre y apellidos.", ar: "يرجى ملء الاسم الشخصي والاسم العائلي على الأقل." },
 
     // ── Étape 3 : pièce d'identité ────────────────────────
     t_verify: { fr: "Vérification d'identité", en: "Identity check", es: "Verificación de identidad", ar: "التحقق من الهوية" },
@@ -165,7 +166,7 @@
     // ── Étape 4 : contrat ─────────────────────────────────
     t_contrat: { fr: "Contrat de location", en: "Rental contract", es: "Contrato de alquiler", ar: "عقد الكراء" },
     t_contrat_sub: { fr: "Veuillez lire attentivement et signer le contrat ci-dessous.", en: "Please read the contract below carefully and sign it.", es: "Lee atentamente el contrato y fírmalo.", ar: "يرجى قراءة العقد أدناه بعناية والتوقيع عليه." },
-    contract_translation_note: { fr: "", en: "This translation is provided for your understanding. The signed PDF contract is written in French, and the French version prevails.", es: "Esta traducción se ofrece para tu comprensión. El contrato PDF firmado está redactado en francés y prevalece la versión francesa.", ar: "هذه الترجمة مقدَّمة لتسهيل الفهم. عقد PDF الموقَّع محرَّر بالفرنسية، والنسخة الفرنسية هي المعتمدة." },
+    contract_translation_note: { fr: "", en: "", es: "", ar: "هذه الترجمة مقدَّمة لتسهيل الفهم. عقد PDF الموقَّع محرَّر بالفرنسية، والنسخة الفرنسية هي المعتمدة." },
     sum_tenant: { fr: "Locataire", en: "Guest", es: "Huésped", ar: "المكتري" },
     sum_guests: { fr: "Voyageurs", en: "Guests", es: "Viajeros", ar: "المسافرون" },
     sum_duration: { fr: "Durée", en: "Length of stay", es: "Duración", ar: "المدة" },
@@ -274,9 +275,97 @@
     success_title: { fr: "Check-in validé !", en: "Check-in complete!", es: "¡Check-in completado!", ar: "تم تسجيل الوصول!" },
     success_sub: { fr: "Votre dossier a bien été enregistré. Téléchargez le contrat signé ci-dessous.", en: "Your details have been saved. Download your signed contract below.", es: "Tus datos se han guardado. Descarga el contrato firmado a continuación.", ar: "تم حفظ ملفك بنجاح. حمّل العقد الموقَّع أدناه." },
     success_email: { fr: "Un email de confirmation a été envoyé à votre adresse. L'hôte a également été notifié. Bon séjour !", en: "A confirmation email has been sent to you and your host has been notified. Enjoy your stay!", es: "Te hemos enviado un correo de confirmación y tu anfitrión ha sido avisado. ¡Feliz estancia!", ar: "تم إرسال رسالة تأكيد إلى بريدك وإشعار مضيفك. إقامة سعيدة!" },
+    // ── Contrat PDF (FR / EN / ES ; l'arabe utilise le français) ──
+    pdf_file: { fr: "DOSSIER DE CHECK-IN", en: "CHECK-IN FILE", es: "EXPEDIENTE DE CHECK-IN" },
+    pdf_footer: { fr: "{name} — Contrat de location", en: "{name} — Rental contract", es: "{name} — Contrato de alquiler" },
+    pdf_page: { fr: "Page {n}", en: "Page {n}", es: "Página {n}" },
+    pdf_sec_property: { fr: "Logement & Bailleur", en: "Accommodation & Landlord", es: "Alojamiento y arrendador" },
+    pdf_landlord: { fr: "Bailleur", en: "Landlord", es: "Arrendador" },
+    pdf_landlord_default: { fr: "Le bailleur", en: "The landlord", es: "El arrendador" },
+    pdf_owner: { fr: "Propriétaire", en: "Owner", es: "Propietario" },
+    pdf_property: { fr: "Logement", en: "Accommodation", es: "Alojamiento" },
+    pdf_host_cin: { fr: "N° CNIE Bailleur", en: "Landlord ID no.", es: "N.º de documento del arrendador" },
+    pdf_address: { fr: "Adresse", en: "Address", es: "Dirección" },
+    pdf_location: { fr: "Localisation", en: "Location", es: "Localidad" },
+    pdf_wifi: { fr: "WiFi", en: "Wi-Fi", es: "Wi-Fi" },
+    pdf_wifi_pw: { fr: "Mot de passe", en: "Password", es: "Contraseña" },
+    pdf_sec_identity: { fr: "Identité du locataire", en: "Tenant identity", es: "Identidad del arrendatario" },
+    pdf_firstname: { fr: "Prénom", en: "First name", es: "Nombre" },
+    pdf_lastname: { fr: "Nom de famille", en: "Last name", es: "Apellidos" },
+    pdf_docnum: { fr: "N° document", en: "Document no.", es: "N.º de documento" },
+    pdf_type: { fr: "Type", en: "Type", es: "Tipo" },
+    pdf_nationality: { fr: "Nationalité", en: "Nationality", es: "Nacionalidad" },
+    pdf_birthdate: { fr: "Date de naissance", en: "Date of birth", es: "Fecha de nacimiento" },
+    pdf_email: { fr: "E-mail", en: "Email", es: "Correo electrónico" },
+    pdf_phone: { fr: "Téléphone", en: "Phone", es: "Teléfono" },
+    pdf_home_address: { fr: "Adresse personnelle", en: "Home address", es: "Domicilio" },
+    pdf_sec_stay: { fr: "Détails du séjour", en: "Stay details", es: "Detalles de la estancia" },
+    pdf_arrival: { fr: "Date d'arrivée", en: "Arrival date", es: "Fecha de llegada" },
+    pdf_departure: { fr: "Date de départ", en: "Departure date", es: "Fecha de salida" },
+    pdf_duration: { fr: "Durée", en: "Length of stay", es: "Duración" },
+    pdf_guests: { fr: "Voyageurs", en: "Guests", es: "Viajeros" },
+    pdf_arrival_time: { fr: "Heure d'arrivée prévue", en: "Expected arrival time", es: "Hora de llegada prevista" },
+    pdf_lock: { fr: "CODE D'ACCÈS AU LOGEMENT", en: "ACCOMMODATION ACCESS CODE", es: "CÓDIGO DE ACCESO AL ALOJAMIENTO" },
+    pdf_lock_sub: { fr: "Serrure numérique 7 chiffres", en: "7-digit digital lock", es: "Cerradura digital de 7 cifras" },
+    pdf_sec_occupants: { fr: "Occupants du logement", en: "Occupants", es: "Ocupantes del alojamiento" },
+    pdf_full_name: { fr: "Nom complet", en: "Full name", es: "Nombre completo" },
+    pdf_children_ages: { fr: "{children} — Âges", en: "{children} — Ages", es: "{children} — Edades" },
+    pdf_years: { fr: "{list} ans", en: "{list} years old", es: "{list} años" },
+    pdf_sec_docs: { fr: "Pièce d'identité & photo du voyageur", en: "ID document & guest photo", es: "Documento de identidad y foto del viajero" },
+    pdf_id_doc: { fr: "PIÈCE D'IDENTITÉ", en: "ID DOCUMENT", es: "DOCUMENTO DE IDENTIDAD" },
+    pdf_guest_photo: { fr: "PHOTO DU VOYAGEUR", en: "GUEST PHOTO", es: "FOTO DEL VIAJERO" },
+    pdf_wm1: { fr: "STAYFORM · CONFIDENTIEL", en: "STAYFORM · CONFIDENTIAL", es: "STAYFORM · CONFIDENCIAL" },
+    pdf_wm2: { fr: "USAGE UNIQUE · VÉRIFICATION IDENTITÉ", en: "SINGLE USE · IDENTITY CHECK", es: "USO ÚNICO · VERIFICACIÓN DE IDENTIDAD" },
+    pdf_doc_provided: { fr: "Document fourni", en: "Document provided", es: "Documento aportado" },
+    pdf_not_provided: { fr: "Non fourni", en: "Not provided", es: "No aportado" },
+    pdf_preamble: {
+      fr: "Entre le soussigné {host}{cin}, {quality}, ci-après dénommé « le Bailleur », et le(s) voyageur(s) mentionné(s) dans le présent contrat, ci-après dénommé(s) « le(s) Locataire(s) ».",
+      en: "Between the undersigned {host}{cin}, {quality}, hereinafter “the Landlord”, and the traveller(s) named in this contract, hereinafter “the Tenant(s)”.",
+      es: "Entre el abajo firmante {host}{cin}, {quality}, en adelante «el Arrendador», y el/los viajero(s) mencionado(s) en el presente contrato, en adelante «el/los Arrendatario(s)»."
+    },
+    pdf_cin_part: { fr: ", CIN : {cin}", en: ", ID no. {cin}", es: ", documento n.º {cin}" },
+    pdf_art2: {
+      fr: "La location s'étend du {from} au {to}, soit {nights}. Le locataire devra libérer les lieux au plus tard à {time} le jour du départ. Le bailleur se réserve le droit de facturer une nuit supplémentaire en cas de départ tardif non convenu.",
+      en: "The rental runs from {from} to {to}, i.e. {nights}. The tenant must vacate the premises by {time} at the latest on the day of departure. The landlord may charge an extra night for a late departure that was not agreed.",
+      es: "El alquiler va del {from} al {to}, es decir, {nights}. El arrendatario deberá dejar el alojamiento a más tardar a las {time} del día de salida. El arrendador se reserva el derecho de cobrar una noche adicional en caso de salida tardía no acordada."
+    },
+    pdf_custom_art: { fr: "Article {n} — {title}", en: "Article {n} — {title}", es: "Artículo {n} — {title}" },
+    pdf_sec_decl: { fr: "Déclarations et consentements", en: "Declarations and consent", es: "Declaraciones y consentimientos" },
+    pdf_sec_sign: { fr: "Signatures", en: "Signatures", es: "Firmas" },
+    pdf_tenant: { fr: "LE LOCATAIRE", en: "THE TENANT", es: "EL ARRENDATARIO" },
+    pdf_landlord_up: { fr: "LE BAILLEUR", en: "THE LANDLORD", es: "EL ARRENDADOR" },
+    pdf_esign: { fr: "Signature manuscrite électronique", en: "Electronic handwritten signature", es: "Firma manuscrita electrónica" },
+    pdf_host_sign: { fr: "Signature du bailleur", en: "Landlord's signature", es: "Firma del arrendador" },
+    pdf_stamp1: { fr: "Stayform — Document généré électroniquement", en: "Stayform — Electronically generated document", es: "Stayform — Documento generado electrónicamente" },
+    pdf_stamp2: { fr: "Ce document a valeur contractuelle. Conservez-le pour vos archives.", en: "This document is contractually binding. Keep it for your records.", es: "Este documento tiene valor contractual. Consérvelo para sus archivos." },
+    pdf_made_on: { fr: "Établi le {date}", en: "Drawn up on {date}", es: "Redactado el {date}" },
+    pdf_between: { fr: "ENTRE LES SOUSSIGNÉS", en: "BETWEEN THE UNDERSIGNED", es: "ENTRE LOS ABAJO FIRMANTES" },
+    pdf_agreed: { fr: "IL A ÉTÉ CONVENU CE QUI SUIT", en: "IT HAS BEEN AGREED AS FOLLOWS", es: "SE HA CONVENIDO LO SIGUIENTE" },
+    pdf_host_lead: { fr: "Le bailleur :", en: "The landlord:", es: "El arrendador:" },
+    pdf_guest_lead: { fr: "Et le locataire :", en: "And the tenant:", es: "Y el arrendatario:" },
+    pdf_host_cin2: { fr: "titulaire de la CIN n° {v}", en: "holder of ID card no. {v}", es: "titular del documento n.º {v}" },
+    pdf_host_tail: { fr: "ci-après « le Bailleur »,", en: "hereinafter “the Landlord”,", es: "en adelante «el Arrendador»," },
+    pdf_g_nat: { fr: "de nationalité {v}", en: "nationality {v}", es: "de nacionalidad {v}" },
+    pdf_g_birth: { fr: "né(e) le {v}", en: "born on {v}", es: "nacido/a el {v}" },
+    pdf_g_doc: { fr: "titulaire du document {type} n° {v}", en: "holder of {type} no. {v}", es: "titular del documento {type} n.º {v}" },
+    pdf_g_addr: { fr: "demeurant {v}", en: "residing at {v}", es: "con domicilio en {v}" },
+    pdf_g_phone: { fr: "téléphone {v}", en: "phone {v}", es: "teléfono {v}" },
+    pdf_g_email: { fr: "e-mail {v}", en: "email {v}", es: "correo {v}" },
+    pdf_guest_tail: { fr: "ci-après « le Locataire ».", en: "hereinafter “the Tenant”.", es: "en adelante «el Arrendatario»." },
+    pdf_period: { fr: "Période", en: "Period", es: "Periodo" },
+    pdf_period_v: { fr: "Du {from} au {to} ({nights})", en: "From {from} to {to} ({nights})", es: "Del {from} al {to} ({nights})" },
+    pdf_arrival_v: { fr: "arrivée prévue vers {v}", en: "expected arrival around {v}", es: "llegada prevista hacia las {v}" },
+    pdf_hours: { fr: "Horaires", en: "Times", es: "Horarios" },
+    pdf_hours_v: { fr: "Arrivée à partir de {a} — départ avant {b}", en: "Check-in from {a} — check-out by {b}", es: "Entrada desde las {a} — salida antes de las {b}" },
+    pdf_lock_short: { fr: "Code d'accès", en: "Access code", es: "Código de acceso" },
+    pdf_made_at: { fr: "Fait à {city}, le {date}, en deux exemplaires.", en: "Done in {city} on {date}, in two copies.", es: "Hecho en {city}, el {date}, por duplicado." },
+    pdf_made_at_nocity: { fr: "Fait le {date}, en deux exemplaires.", en: "Done on {date}, in two copies.", es: "Hecho el {date}, por duplicado." },
+    pdf_read_approved: { fr: "« Lu et approuvé »", en: "“Read and approved”", es: "«Leído y conforme»" },
+    pdf_annex: { fr: "ANNEXE — PIÈCES JUSTIFICATIVES", en: "APPENDIX — SUPPORTING DOCUMENTS", es: "ANEXO — DOCUMENTOS JUSTIFICATIVOS" },
+    pdf_initials: { fr: "Paraphe du locataire : ______", en: "Tenant's initials: ______", es: "Rúbrica del arrendatario: ______" },
     pdf_intro: { fr: "📋 Générez le dossier complet pour vos archives ou les autorités", en: "📋 Download the full file for your records or the authorities", es: "📋 Descarga el expediente completo para tus archivos o las autoridades", ar: "📋 حمّل الملف الكامل لأرشيفك أو للسلطات" },
     btn_pdf: { fr: "⬇ Télécharger le contrat PDF", en: "⬇ Download the PDF contract", es: "⬇ Descargar el contrato PDF", ar: "⬇ تحميل العقد PDF" },
-    pdf_contains: { fr: "Contient : identité, dates, contrat complet et signature", en: "Includes: identity, dates, full contract and signature. The PDF is in French.", es: "Incluye: identidad, fechas, contrato completo y firma. El PDF está en francés.", ar: "يتضمن: الهوية والتواريخ والعقد الكامل والتوقيع. ملف PDF باللغة الفرنسية." },
+    pdf_contains: { fr: "Contient : identité, dates, contrat complet et signature", en: "Includes: identity, dates, full contract and signature", es: "Incluye: identidad, fechas, contrato completo y firma", ar: "يتضمن: الهوية والتواريخ والعقد الكامل والتوقيع. ملف PDF باللغة الفرنسية." },
     pdf_generating: { fr: "⏳ Génération en cours...", en: "⏳ Generating...", es: "⏳ Generando...", ar: "⏳ جارٍ الإنشاء..." },
     pdf_done: { fr: "✓ Téléchargé !", en: "✓ Downloaded!", es: "✓ ¡Descargado!", ar: "✓ تم التحميل!" },
 
@@ -323,21 +412,26 @@
     return pick([saved]) || pick(navigator.languages || [navigator.language]) || 'fr';
   }
 
-  function t(key, vars) {
+  function t(key, vars) { return tl(window._lang, key, vars); }
+
+  // Traduction dans une langue donnée (utilisé par le contrat PDF).
+  function tl(lang, key, vars) {
     var entry = STR[key];
-    var s = entry ? (entry[window._lang] != null ? entry[window._lang] : entry.fr) : key;
+    var s = entry ? (entry[lang] != null ? entry[lang] : entry.fr) : key;
     if (s == null) s = key;
     if (vars) s = s.replace(/\{(\w+)\}/g, function (m, k) { return vars[k] != null ? vars[k] : m; });
     return s;
   }
 
   // Pluriel : cherche clé_one / clé_two / clé_few / clé_other selon la langue.
-  function tn(key, n) {
+  function tn(key, n) { return tnl(window._lang, key, n); }
+
+  function tnl(lang, key, n) {
     var cat = 'other';
-    try { cat = new Intl.PluralRules(window._lang).select(n); } catch (e) { cat = n === 1 ? 'one' : 'other'; }
+    try { cat = new Intl.PluralRules(lang).select(n); } catch (e) { cat = n === 1 ? 'one' : 'other'; }
     var k = key + '_' + cat;
-    if (!STR[k] || STR[k][window._lang] == null) k = key + '_' + (n === 1 ? 'one' : 'other');
-    return t(k, { n: n });
+    if (!STR[k] || STR[k][lang] == null) k = key + '_' + (n === 1 ? 'one' : 'other');
+    return tl(lang, k, { n: n });
   }
 
   function applyI18n(root) {
@@ -378,6 +472,12 @@
   window.SF_LANGS = LANGS;
   window.t = t;
   window.tn = tn;
+  window.tl = tl;
+  window.tnl = tnl;
+  // Langue du contrat PDF : celle du voyageur. L'arabe reste en français, car la
+  // police du PDF (jsPDF / Helvetica) ne sait pas afficher l'écriture arabe.
+  window.sfPdfLang = function () { return PDF_LANGS.indexOf(window._lang) === -1 ? 'fr' : window._lang; };
+  window.sfPdfLocale = function () { return LOCALES[window.sfPdfLang()]; };
   window.applyI18n = applyI18n;
   window.setLang = setLang;
   window.sfLocale = function () { return LOCALES[window._lang] || 'fr-FR'; };
