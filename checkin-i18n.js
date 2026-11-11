@@ -83,10 +83,10 @@
     t_coords: { fr: "Vos coordonnées", en: "Your details", es: "Tus datos", ar: "بياناتك الشخصية" },
     t_coords_sub: { fr: "Informations du voyageur principal de la réservation.", en: "Details of the main guest on the booking.", es: "Datos del viajero principal de la reserva.", ar: "معلومات المسافر الرئيسي في الحجز." },
     identity_notice: {
-      fr: "<strong>Scannez votre pièce d'identité ci-dessous</strong> pour remplir vos informations automatiquement, ou saisissez-les exactement comme sur votre CIN ou passeport.",
-      en: "<strong>Scan your ID below</strong> to fill in your details automatically, or type them exactly as they appear on your ID card or passport.",
-      es: "<strong>Escanea tu documento abajo</strong> para rellenar tus datos automáticamente, o escríbelos tal como aparecen en tu documento de identidad o pasaporte.",
-      ar: "<strong>امسح وثيقة هويتك أدناه</strong> لملء بياناتك تلقائياً، أو أدخلها تماماً كما تظهر في بطاقتك الوطنية أو جواز سفرك."
+      fr: "<strong>Saisissez vos informations exactement comme sur votre CIN ou passeport.</strong> Ces données seront vérifiées à l'étape suivante par scan de votre document.",
+      en: "<strong>Enter your details exactly as they appear on your ID card or passport.</strong> They will be checked at the next step when you scan your document.",
+      es: "<strong>Introduce tus datos tal como aparecen en tu documento de identidad o pasaporte.</strong> Se comprobarán en el siguiente paso al escanear tu documento.",
+      ar: "<strong>أدخل معلوماتك تماماً كما تظهر في بطاقتك الوطنية أو جواز سفرك.</strong> سيتم التحقق منها في الخطوة التالية عند مسح وثيقتك."
     },
     lbl_docnum: { fr: "N° CIN / Passeport", en: "ID card / Passport number", es: "N.º de documento / Pasaporte", ar: "رقم البطاقة الوطنية / جواز السفر" },
     lbl_doctype: { fr: "Type de document", en: "Document type", es: "Tipo de documento", ar: "نوع الوثيقة" },
@@ -132,15 +132,6 @@
     scan_unreadable: { fr: "📷 Document illisible — prenez une photo plus nette et bien éclairée", en: "📷 Document unreadable — take a sharper, well-lit photo", es: "📷 Documento ilegible — haz una foto más nítida y con buena luz", ar: "📷 الوثيقة غير مقروءة — التقط صورة أوضح وبإضاءة جيدة" },
     scan_not_recognized: { fr: "⚠️ Document non reconnu — repositionnez votre carte et réessayez", en: "⚠️ Document not recognised — reposition your card and try again", es: "⚠️ Documento no reconocido — vuelve a colocarlo e inténtalo de nuevo", ar: "⚠️ لم يتم التعرف على الوثيقة — أعد وضع البطاقة وحاول مجدداً" },
     scan_network: { fr: "⚠️ Erreur réseau — réessayez", en: "⚠️ Network error — please try again", es: "⚠️ Error de red — inténtalo de nuevo", ar: "⚠️ خطأ في الشبكة — حاول مجدداً" },
-    // ── Scan de la pièce d'identité à l'étape 2 (id-scan.js) ──
-    idscan_title: { fr: "Remplir automatiquement avec votre pièce d'identité", en: "Fill in automatically with your ID", es: "Rellenar automáticamente con tu documento", ar: "املأ بياناتك تلقائياً من وثيقة هويتك" },
-    idscan_sub: { fr: "Scannez le recto de votre CIN ou la page photo de votre passeport : vos informations se remplissent et votre identité est vérifiée. Pas besoin de scanner à nouveau à l'étape suivante.", en: "Scan the front of your ID card or the photo page of your passport: your details are filled in and your identity is verified, so there is no need to scan again at the next step.", es: "Escanea el anverso de tu documento de identidad o la página con foto de tu pasaporte: tus datos se rellenan y tu identidad queda verificada. No hace falta escanear de nuevo en el siguiente paso.", ar: "امسح الوجه الأمامي لبطاقتك أو صفحة الصورة في جواز سفرك: تُملأ بياناتك ويتم التحقق من هويتك، فلا حاجة للمسح مجدداً في الخطوة التالية." },
-    idscan_ok: { fr: "✅ Identité vérifiée. Vérifiez les champs surlignés et corrigez-les si besoin.", en: "✅ Identity verified. Please check the highlighted fields and correct them if needed.", es: "✅ Identidad verificada. Revisa los campos resaltados y corrígelos si hace falta.", ar: "✅ تم التحقق من الهوية. راجع الحقول المظللة وصححها عند الحاجة." },
-    idscan_ok_cin: { fr: "Complétez la date de naissance et la nationalité si elles sont vides.", en: "Add your birth date and nationality if they are empty.", es: "Completa la fecha de nacimiento y la nacionalidad si están vacías.", ar: "أكمل تاريخ الميلاد والجنسية إذا كانا فارغين." },
-    idscan_expiry: { fr: "Valide jusqu'au {d}", en: "Valid until {d}", es: "Válido hasta el {d}", ar: "صالحة حتى {d}" },
-    idscan_expired: { fr: "⚠️ Ce document semble expiré (date d'expiration : {d}).", en: "⚠️ This document looks expired (expiry date: {d}).", es: "⚠️ Este documento parece caducado (fecha de caducidad: {d}).", ar: "⚠️ يبدو أن هذه الوثيقة منتهية الصلاحية (تاريخ الانتهاء: {d})." },
-    idscan_changed: { fr: "Vous avez modifié le numéro du document : il sera vérifié par un scan à l'étape suivante.", en: "You changed the document number: it will be checked with a scan at the next step.", es: "Has cambiado el número del documento: se verificará con un escaneo en el siguiente paso.", ar: "لقد غيّرت رقم الوثيقة: سيتم التحقق منه بالمسح في الخطوة التالية." },
-    idscan_step3: { fr: "Vérifiée à l'étape précédente", en: "Verified at the previous step", es: "Verificado en el paso anterior", ar: "تم التحقق في الخطوة السابقة" },
     scan_valid_cin: { fr: "Carte valide — Identité vérifiée", en: "Valid card — Identity verified", es: "Documento válido — Identidad verificada", ar: "بطاقة صالحة — تم التحقق من الهوية" },
     scan_valid_passport: { fr: "Passeport valide — Identité vérifiée", en: "Valid passport — Identity verified", es: "Pasaporte válido — Identidad verificada", ar: "جواز سفر صالح — تم التحقق من الهوية" },
     scan_valid_doc: { fr: "Document valide — Identité vérifiée", en: "Valid document — Identity verified", es: "Documento válido — Identidad verificada", ar: "وثيقة صالحة — تم التحقق من الهوية" },
