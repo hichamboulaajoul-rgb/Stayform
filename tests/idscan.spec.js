@@ -1,6 +1,6 @@
-// Scan de la pièce d'identité à l'étape 2 du check-in : la photo passe par la
-// fonction verify-identity (simulée ici), le formulaire est pré-rempli et
-// l'étape 3 est déjà marquée comme vérifiée. Supabase est simulé.
+// Scan de la pièce d'identité à l'étape 2 du check-in : c'est le scanner de
+// l'étape 3 (caméra / galerie + verify-identity, simulée ici) qui est affiché à
+// l'étape 2. Le formulaire est pré-rempli et l'étape 3 est déjà vérifiée.
 const path = require('path');
 const { test, expect } = require('@playwright/test');
 
@@ -42,18 +42,25 @@ async function setup(page, visionResponse) {
   });
   await page.goto('/checkin.html?host=l1');
   await page.evaluate(() => { currentStep = 2; updateUI(); });
-  await expect(page.locator('#idScanBtn')).toBeVisible();
+  await expect(page.locator('#page2 #scannerSection')).toBeVisible();
+  await expect(page.locator('#page2 #scanReady')).toBeVisible();
   return calls;
+}
+
+// Pas de caméra dans le navigateur de test : on passe par « photo depuis la galerie ».
+async function scan(page) {
+  await page.evaluate(() => showGalleryFallback());
+  await page.setInputFiles('#file1', photo);
 }
 
 test('passeport : champs pré-remplis, étape 3 déjà vérifiée', async ({ page }) => {
   const calls = await setup(page, PASSPORT);
-  await page.setInputFiles('#idScanInput', photo);
+  await scan(page);
   await expect(page.locator('#idScanStatus')).toContainText('Identité vérifiée');
   await expect(page.locator('#idScanStatus')).toContainText('expiré');
   expect(calls).toHaveLength(1);
-  expect(calls[0].mediaType).toBe('image/jpeg');
   expect(calls[0].imageBase64.length).toBeGreaterThan(100);
+  await expect(page.locator('#page2 #scanSuccess')).toBeVisible();
   await expect(page.locator('#docNumber')).toHaveValue('L898902C3');
   await expect(page.locator('#firstName')).toHaveValue('Anna Maria');
   await expect(page.locator('#lastName')).toHaveValue('Eriksson');
@@ -62,9 +69,11 @@ test('passeport : champs pré-remplis, étape 3 déjà vérifiée', async ({ pag
   await expect(page.locator('#docTypeIdentity')).toHaveValue('passport');
   await expect(page.locator('#firstName')).toHaveClass(/id-scan-filled/);
 
-  await page.fill('#email', 'anna@example.com');
+  // E-mail facultatif : on passe à l'étape 3 sans le remplir.
   await page.evaluate(() => nextStep(2));
+  await expect(page.locator('#page3 #scannerSection')).toBeVisible();
   await expect(page.locator('#scanSuccess')).toBeVisible();
+  await expect(page.locator('#scanSuccessDetails')).toContainText('étape précédente');
   await expect(page.locator('#scanReady')).toBeHidden();
   await expect(page.locator('#cinCaptured')).toBeVisible();
   // Seul le consentement reste à cocher : pas de second scan.
@@ -76,7 +85,7 @@ test('passeport : champs pré-remplis, étape 3 déjà vérifiée', async ({ pag
 
 test('recto de CIN : numéro et nom remplis, le reste à compléter', async ({ page }) => {
   await setup(page, CIN_FRONT);
-  await page.setInputFiles('#idScanInput', photo);
+  await scan(page);
   await expect(page.locator('#idScanStatus')).toContainText('date de naissance');
   await expect(page.locator('#docNumber')).toHaveValue('BE123456');
   await expect(page.locator('#firstName')).toHaveValue('Youssef');
@@ -86,7 +95,7 @@ test('recto de CIN : numéro et nom remplis, le reste à compléter', async ({ p
 
 test('numéro modifié après le scan : l\'étape 3 redemande un scan', async ({ page }) => {
   await setup(page, CIN_FRONT);
-  await page.setInputFiles('#idScanInput', photo);
+  await scan(page);
   await expect(page.locator('#docNumber')).toHaveValue('BE123456');
   await page.fill('#docNumber', 'XY999999');
   await expect(page.locator('#idScanStatus')).toContainText('modifié le numéro');
@@ -98,15 +107,18 @@ test('numéro modifié après le scan : l\'étape 3 redemande un scan', async ({
 test('document non reconnu : message clair, formulaire manuel intact', async ({ page }) => {
   await setup(page, { success: true, readable: true, verified: false, detectedNum: '' });
   await page.fill('#firstName', 'Karim');
-  await page.setInputFiles('#idScanInput', photo);
-  await expect(page.locator('#idScanStatus')).toContainText('non reconnu');
+  await scan(page);
+  await expect(page.locator('#ocrStatus')).toContainText('non reconnu');
   await expect(page.locator('#firstName')).toHaveValue('Karim');
-  await expect(page.locator('#idScanBtn')).toBeEnabled();
   expect(await page.evaluate(() => cinVerified)).toBe(false);
 });
 
-test('trop d\'essais : on propose la saisie manuelle', async ({ page }) => {
-  await setup(page, { status: 429, body: { error: 'Too Many Requests' } });
-  await page.setInputFiles('#idScanInput', photo);
-  await expect(page.locator('#idScanStatus')).toContainText('Trop d\'essais');
+test('sans scan à l\'étape 2 : le scanner revient à l\'étape 3', async ({ page }) => {
+  await setup(page, PASSPORT);
+  await page.fill('#docNumber', 'AB123456');
+  await page.fill('#firstName', 'Karim');
+  await page.fill('#lastName', 'Benali');
+  await page.evaluate(() => nextStep(2));
+  await expect(page.locator('#page3 #scanReady')).toBeVisible();
+  expect(await page.evaluate(() => cinVerified)).toBe(false);
 });
