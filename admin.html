@@ -95,8 +95,9 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-h
 .toast{position:fixed;bottom:2rem;right:2rem;background:var(--green);color:#fff;padding:0.8rem 1.2rem;border-radius:10px;font-size:0.88rem;font-weight:500;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;}
 .toast.show{opacity:1;}
 /* Onglets + activité */
-.view-tabs{display:flex;gap:0.4rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);}
-.view-tab{background:none;border:none;border-bottom:2px solid transparent;padding:0.6rem 1rem;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text3);cursor:pointer;margin-bottom:-1px;}
+.view-tabs{display:flex;gap:0.4rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.view-tabs::-webkit-scrollbar{display:none;}
+.view-tab{background:none;border:none;flex-shrink:0;white-space:nowrap;border-bottom:2px solid transparent;padding:0.6rem 1rem;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text3);cursor:pointer;margin-bottom:-1px;}
 .view-tab.active{color:var(--green);border-bottom-color:var(--green);}
 .relance-intro{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem;}
 .relance-intro p{font-size:0.85rem;color:var(--text2);line-height:1.6;margin-top:0.4rem;}
@@ -148,6 +149,7 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-h
 
     <div class="view-tabs">
       <button class="view-tab active" id="tab-users" onclick="showView('users')">👥 Utilisateurs</button>
+      <button class="view-tab" id="tab-properties" onclick="showView('properties')">🏠 Propriétés</button>
       <button class="view-tab" id="tab-activity" onclick="showView('activity')">📈 Activité</button>
       <button class="view-tab" id="tab-relances" onclick="showView('relances')">✉️ Relances</button>
     </div>
@@ -215,6 +217,52 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-h
     </table>
     </div>
     </div><!-- /view-users -->
+
+    <!-- ── PROPRIÉTÉS DE TOUS LES HÔTES ── -->
+    <div id="view-properties" style="display:none;">
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-label">Propriétés</div>
+          <div class="stat-val" id="propStatTotal">—</div>
+          <div class="stat-sub">sur la plateforme</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avec lien Airbnb</div>
+          <div class="stat-val" id="propStatAirbnb" style="color:#FF385C;">—</div>
+          <div class="stat-sub" id="propStatAirbnbSub">&nbsp;</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Hôtes avec propriété</div>
+          <div class="stat-val" id="propStatHosts" style="color:var(--green);">—</div>
+          <div class="stat-sub" id="propStatHostsSub">&nbsp;</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input class="search-input" id="propSearch" placeholder="Rechercher par logement, ville, hôte ou email..." oninput="renderProperties()">
+        <button class="filter-btn active" id="propfilter-all" onclick="setPropFilter('all')">Toutes</button>
+        <button class="filter-btn" id="propfilter-airbnb" onclick="setPropFilter('airbnb')">Avec Airbnb</button>
+        <button class="filter-btn" id="propfilter-noairbnb" onclick="setPropFilter('noairbnb')">Sans Airbnb</button>
+        <button onclick="loadProperties()" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:0.6rem 1rem;font-size:0.82rem;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;">↻ Actualiser</button>
+      </div>
+
+      <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Logement</th>
+            <th>Ville / adresse</th>
+            <th>Hôte</th>
+            <th>Lien Airbnb</th>
+            <th>Ajouté le</th>
+          </tr>
+        </thead>
+        <tbody id="propertiesBody">
+          <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text3);">Chargement...</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div><!-- /view-properties -->
 
     <!-- ── ACTIVITÉ DES HÔTES ── -->
     <div id="view-activity" style="display:none;">
@@ -517,7 +565,7 @@ function updateStats() {
 
 function setFilter(f) {
   currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#view-users .filter-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('filter-' + f).classList.add('active');
   renderUsers();
 }
@@ -779,14 +827,92 @@ function deviceLabel(ua) {
 function userById(id) { return allUsers.find(u => u.id === id) || null; }
 
 function showView(v) {
-  document.getElementById('view-users').style.display = v === 'users' ? 'block' : 'none';
-  document.getElementById('view-activity').style.display = v === 'activity' ? 'block' : 'none';
-  document.getElementById('view-relances').style.display = v === 'relances' ? 'block' : 'none';
-  document.getElementById('tab-users').classList.toggle('active', v === 'users');
-  document.getElementById('tab-activity').classList.toggle('active', v === 'activity');
-  document.getElementById('tab-relances').classList.toggle('active', v === 'relances');
+  ['users', 'properties', 'activity', 'relances'].forEach(name => {
+    document.getElementById('view-' + name).style.display = v === name ? 'block' : 'none';
+    document.getElementById('tab-' + name).classList.toggle('active', v === name);
+  });
+  if (v === 'properties' && !propertiesLoaded) loadProperties();
   if (v === 'activity' && !activityLoaded) loadActivity();
   if (v === 'relances' && !relanceData) loadRelances();
+}
+
+// ── PROPRIÉTÉS (tous les hôtes) ──
+let allProperties = [];
+let propertiesLoaded = false;
+let propFilter = 'all';
+
+// N'accepte que les vrais liens http(s) (pas de javascript:...).
+function safeUrl(u) {
+  const v = String(u || '').trim();
+  if (!v) return '';
+  const withProto = /^https?:\/\//i.test(v) ? v : (/^(www\.)?airbnb\./i.test(v) ? 'https://' + v : '');
+  try { const url = new URL(withProto); return /^https?:$/.test(url.protocol) ? url.href : ''; } catch (e) { return ''; }
+}
+
+function setPropFilter(f) {
+  propFilter = f;
+  ['all', 'airbnb', 'noairbnb'].forEach(k => document.getElementById('propfilter-' + k).classList.toggle('active', k === f));
+  renderProperties();
+}
+
+async function loadProperties() {
+  const tbody = document.getElementById('propertiesBody');
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text3);">Chargement...</td></tr>';
+  if (!allUsers.length) await loadUsers();
+  const { data, error } = await sb.from('properties').select('*').limit(5000);
+  if (error) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--danger);">Erreur : ' + esc(error.message) + '</td></tr>';
+    return;
+  }
+  allProperties = (data || []).slice().sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+  propertiesLoaded = true;
+  renderProperties();
+}
+
+function renderProperties() {
+  const tbody = document.getElementById('propertiesBody');
+  const withAirbnb = allProperties.filter(p => safeUrl(p.airbnb_url));
+  const hostIds = new Set(allProperties.map(p => p.host_id));
+  document.getElementById('propStatTotal').textContent = allProperties.length;
+  document.getElementById('propStatAirbnb').textContent = withAirbnb.length;
+  document.getElementById('propStatAirbnbSub').textContent = allProperties.length
+    ? Math.round(withAirbnb.length * 100 / allProperties.length) + ' % des propriétés' : ' ';
+  document.getElementById('propStatHosts').textContent = hostIds.size;
+  document.getElementById('propStatHostsSub').textContent = 'sur ' + (allUsers.length || '—') + ' inscrits';
+
+  const search = (document.getElementById('propSearch').value || '').toLowerCase();
+  const list = allProperties.filter(p => {
+    const hasAirbnb = !!safeUrl(p.airbnb_url);
+    if (propFilter === 'airbnb' && !hasAirbnb) return false;
+    if (propFilter === 'noairbnb' && hasAirbnb) return false;
+    if (!search) return true;
+    const u = userById(p.host_id);
+    return [p.name, p.city, p.address, p.host_name_airbnb, u && u.name, u && u.email]
+      .some(v => String(v || '').toLowerCase().includes(search));
+  });
+
+  if (!allProperties.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text3);">Aucune propriété visible. Si des hôtes en ont créé, exécutez le fichier SQL <code>20261112000000_admin_read_properties.sql</code> dans le SQL Editor de Supabase.</td></tr>';
+    return;
+  }
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text3);">Aucune propriété trouvée.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(p => {
+    const u = userById(p.host_id);
+    const link = safeUrl(p.airbnb_url);
+    const place = [p.city, p.address].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i);
+    return '<tr>' +
+      '<td><div class="user-name">' + esc(p.cover_emoji || '🏠') + ' ' + esc(p.name || 'Sans nom') + '</div></td>' +
+      '<td style="color:var(--text3);">' + (place.length ? esc(place.join(' · ')) : '—') + '</td>' +
+      '<td><div class="user-name">' + esc(u ? (u.name || '—') : 'Compte supprimé') + '</div><div class="user-email">' + esc(u ? (u.email || '') : String(p.host_id || '').slice(0, 8)) + '</div></td>' +
+      '<td>' + (link
+        ? '<a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer" style="color:#FF385C;font-weight:600;text-decoration:none;font-size:0.82rem;">🔗 Voir sur Airbnb</a>'
+        : '<span style="color:var(--text3);font-size:0.78rem;">—</span>') + '</td>' +
+      '<td style="color:var(--text3);font-size:0.78rem;">' + (p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'}) : '—') + '</td>' +
+      '</tr>';
+  }).join('');
 }
 
 // ── RELANCES (hôtes sans contrat) ──
