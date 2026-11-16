@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="app-i18n-dict.js"></script>
-<script src="app-i18n.js"></script>
+<script src="app-i18n-dict.js?v=20261116"></script>
+<script src="app-i18n.js?v=20261116"></script>
 <title>Stayform — Tarifs</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -507,9 +507,9 @@ footer p {
   <div class="plan-card popular">
     <div class="popular-badge">⭐ LE PLUS POPULAIRE</div>
     <div class="plan-name">Pro</div>
-    <div class="plan-price">1 200<sub> DH/an</sub></div>
-    <div class="plan-desc">Pour tous les hôtes, du plus petit au plus grand<br><span style="font-size:0.72rem;color:var(--text3);">soit 100 DH/mois</span></div>
-    <button class="plan-btn primary" onclick="payYouCan('pro', 1200)">
+    <div class="plan-price">1 500<sub> DH/an</sub></div>
+    <div class="plan-desc">Pour tous les hôtes, du plus petit au plus grand<br><span style="font-size:0.72rem;color:var(--text3);">soit 125 DH/mois</span></div>
+    <button class="plan-btn primary" onclick="payYouCan('pro', PRO_PRICE_YEAR)">
       📱 Commander via WhatsApp →
     </button>
     <div class="features">
@@ -713,110 +713,15 @@ footer p {
   <p style="color:rgba(255,255,255,0.4);font-size:0.75rem;">billing [at] stayform.ma</p>
 </footer>
 
-<!-- UPGRADE MODAL (simplifié) -->
-<div id="upgradeOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:1.5rem;">
-  <div style="background:#fff;border-radius:16px;padding:2rem;max-width:420px;width:100%;position:relative;">
-    <button onclick="closeUpgrade()" style="position:absolute;top:1rem;right:1rem;background:#F5F0EB;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem;">✕</button>
-    <div style="text-align:center;margin-bottom:1.5rem;">
-      <div style="font-size:2rem;margin-bottom:0.5rem;">🏡</div>
-      <div id="modalPlanTitle" style="font-family:'Inter',sans-serif;font-size:1.2rem;font-weight:800;color:var(--riad-green);">Passer en Pro</div>
-      <div id="modalPriceDisplay" style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:800;color:var(--text);margin:0.5rem 0;">99 <span style="font-size:1rem;color:var(--text3);">DH/mois</span></div>
-      <div id="modalPriceSub" style="font-size:0.78rem;color:var(--text3);">Facturé mensuellement · Résiliable à tout moment</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.2rem;">
-      <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text2);"><span style="color:var(--riad-green);font-weight:700;">✓</span> Check-ins illimités</div>
-      <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text2);"><span style="color:var(--riad-green);font-weight:700;">✓</span> Vérification CIN automatique</div>
-      <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text2);"><span style="color:var(--riad-green);font-weight:700;">✓</span> 5 logements · PDF premium</div>
-    </div>
-    <div style="display:flex;gap:0.5rem;margin-bottom:0.8rem;">
-      <button id="mTogM" onclick="setModal('monthly',window._selectedPlan)" style="flex:1;background:var(--riad-green);color:#fff;border:none;border-radius:8px;padding:0.5rem;font-family:'Inter',sans-serif;font-weight:700;font-size:0.72rem;cursor:pointer;"><span id="mBtnM">Pro · 99 DH/mois</span></button>
-      <button id="mTogA" onclick="setModal('yearly',window._selectedPlan)" style="flex:1;background:var(--surface2);color:var(--riad-green);border:none;border-radius:8px;padding:0.5rem;font-family:'Inter',sans-serif;font-weight:700;font-size:0.72rem;cursor:pointer;"><span id="mBtnA">Pro · 799 DH/an −33%</span></button>
-    </div>
-    <button onclick="proceedPayment()" style="width:100%;background:var(--riad-green);color:#fff;border:none;border-radius:10px;padding:0.85rem;font-family:'Inter',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;">S'abonner maintenant →</button>
-    <div style="text-align:center;margin-top:0.7rem;font-size:0.72rem;color:var(--text3);">🔒 Paiement sécurisé · Activation immédiate</div>
-  </div>
-</div>
-
 <script>
-var period = 'monthly';
-var modalPeriod = 'monthly';
-
-function setPeriod(p) {
-  period = p;
-  document.getElementById('togM').className = p === 'monthly' ? 'tog active' : 'tog inactive';
-  document.getElementById('togA').className = p === 'yearly'  ? 'tog active' : 'tog inactive';
-
-  var plans = {
-    starter: { monthly: { price: '59',   sub: ' DH/mois', desc: 'Hôte occasionnel<br>1-2 logements' },
-               yearly:  { price: '479',  sub: ' DH/an',   desc: 'Soit 40 DH/mois<br><span style="color:var(--success);font-weight:600;">Économisez 229 DH</span>' } },
-    pro:     { monthly: { price: '99',   sub: ' DH/mois', desc: 'Hôte actif<br>Jusqu\'à 5 logements' },
-               yearly:  { price: '799',  sub: ' DH/an',   desc: 'Soit 66 DH/mois<br><span style="color:var(--success);font-weight:600;">Économisez 389 DH</span>' } },
-    biz:     { monthly: { price: '199',  sub: ' DH/mois', desc: 'Agences &amp; conciergeries<br>Tout illimité' },
-               yearly:  { price: '1 590', sub: ' DH/an',  desc: 'Soit 132 DH/mois<br><span style="color:var(--success);font-weight:600;">Économisez 798 DH</span>' } },
-  };
-
-  ['starter','pro','biz'].forEach(function(key) {
-    var data = plans[key][p];
-    var el = document.getElementById(key + 'Price');
-    if (el) el.innerHTML = data.price + '<sub>' + data.sub + '</sub>';
-    var desc = document.getElementById(key + 'Desc');
-    if (desc) desc.innerHTML = data.desc;
-  });
-}
-
 function toggleFaq(el) {
   el.classList.toggle('open');
 }
 
-function openUpgrade_legacy(plan) {
-  window._selectedPlan = plan || 'pro';
-  var overlay = document.getElementById('upgradeOverlay');
-  overlay.style.display = 'flex';
-  setModal(period, plan || 'pro');
-}
-
-function closeUpgrade() {
-  document.getElementById('upgradeOverlay').style.display = 'none';
-}
-
-function setModal(p, plan) {
-  modalPeriod = p;
-  plan = plan || window._selectedPlan || 'pro';
-  var prices = {
-    starter: { monthly: '59 DH/mois',   yearly: '479 DH/an',   mSub: 'Facturé mensuellement',             ySub: 'Soit 40 DH/mois — économisez 229 DH' },
-    pro:     { monthly: '99 DH/mois',   yearly: '799 DH/an',   mSub: 'Facturé mensuellement',             ySub: 'Soit 66 DH/mois — économisez 389 DH' },
-    biz:     { monthly: '199 DH/mois',  yearly: '1 590 DH/an', mSub: 'Facturé mensuellement',             ySub: 'Soit 132 DH/mois — économisez 798 DH' },
-  };
-  var names = { starter: 'Starter', pro: 'Pro', biz: 'Business' };
-  var info = prices[plan] || prices.pro;
-
-  var mTogM = document.getElementById('mTogM');
-  var mTogA = document.getElementById('mTogA');
-  var disp  = document.getElementById('modalPriceDisplay');
-  var sub   = document.getElementById('modalPriceSub');
-  var title = document.getElementById('modalPlanTitle');
-  var mBtnM = document.getElementById('mBtnM');
-  var mBtnA = document.getElementById('mBtnA');
-
-  if (title) title.textContent = 'Passer en ' + names[plan];
-  if (mBtnM) mBtnM.textContent = names[plan] + ' · ' + info.monthly;
-  if (mBtnA) mBtnA.textContent = names[plan] + ' · ' + info.yearly + ' −33%';
-
-  if (p === 'monthly') {
-    if (mTogM) { mTogM.style.background = 'var(--riad-green)'; mTogM.style.color = '#fff'; }
-    if (mTogA) { mTogA.style.background = 'var(--surface2)';   mTogA.style.color = 'var(--riad-green)'; }
-    if (disp)  disp.innerHTML = info.monthly.replace(' ', ' <span style="font-size:1rem;font-weight:400;color:var(--text3);">') + '</span>';
-    if (sub)   sub.textContent = info.mSub + ' · Résiliable à tout moment';
-  } else {
-    if (mTogA) { mTogA.style.background = 'var(--riad-green)'; mTogA.style.color = '#fff'; }
-    if (mTogM) { mTogM.style.background = 'var(--surface2)';   mTogM.style.color = 'var(--riad-green)'; }
-    if (disp)  disp.innerHTML = info.yearly.replace(' ', ' <span style="font-size:1rem;font-weight:400;color:var(--text3);">') + '</span>';
-    if (sub)   sub.textContent = info.ySub;
-  }
-}
-
 var WHATSAPP_NUM = '212694962765';
-var PLAN_PRICES_P = { pro: 1200 };
+// Seul plan payant : Pro, facturé à l'année. Garder aligné avec le prix
+// affiché plus haut et avec PRO_PRICE_YEAR dans index.html.
+var PRO_PRICE_YEAR = 1500;
 var PLAN_LABELS_P = { pro: 'Pro' };
 
 function payYouCan(plan, amount) {
@@ -842,19 +747,10 @@ function contactReseller(pack, amount) {
 }
 
 function contactAgency() {
-  var msg = "Bonjour, je suis intéressé par le plan Business Stayform (1 990 DH/an) pour gérer plusieurs logements.";
+  var msg = "Bonjour, j'ai une question sur Stayform et le plan Pro.";
   window.open('https://wa.me/' + WHATSAPP_NUM + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
-function proceedPayment() {
-  var plan = window._selectedPlan || 'pro';
-  payYouCan(plan, PLAN_PRICES_P[plan] || 1200);
-}
-
-// Fermer modal en cliquant sur overlay
-document.getElementById('upgradeOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeUpgrade();
-});
 </script>
 
 </body>

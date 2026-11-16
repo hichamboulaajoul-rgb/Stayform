@@ -170,7 +170,7 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-h
       <div class="stat-card">
         <div class="stat-label">Abonnés payants</div>
         <div class="stat-val" id="statPaid" style="color:var(--green);">—</div>
-        <div class="stat-sub">plan Pro ou Business</div>
+        <div class="stat-sub">plan Pro</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Contrats générés</div>
@@ -444,9 +444,7 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-h
     <div class="form-group">
       <label class="form-label">Plan</label>
       <select class="form-select" id="activatePlanName">
-        <option value="starter">Starter — 590 DH/an · 30 contrats/mois · 2 logements</option>
-        <option value="pro" selected>Pro — 990 DH/an · illimité · 5 logements</option>
-        <option value="business">Business — 1 990 DH/an · illimité · logements illimités</option>
+        <option value="pro" selected>Pro — 1 500 DH/an · contrats et logements illimités</option>
       </select>
     </div>
     <div class="form-group">
@@ -559,7 +557,7 @@ async function loadUsers() {
 function updateStats() {
   document.getElementById('statTotal').textContent = allUsers.length;
   document.getElementById('statResellers').textContent = allUsers.filter(u => u.reseller_active).length;
-  document.getElementById('statPaid').textContent = allUsers.filter(u => u.plan === 'paid').length;
+  document.getElementById('statPaid').textContent = allUsers.filter(u => isPaidPlan(u.plan)).length;
   document.getElementById('statContracts').textContent = allUsers.reduce((s, u) => s + (u.guest_count || 0), 0);
 }
 
@@ -582,8 +580,8 @@ function renderUsers() {
     const matchFilter =
       currentFilter === 'all' ? true :
       currentFilter === 'resellers' ? u.reseller_active :
-      currentFilter === 'paid' ? u.plan === 'paid' :
-      currentFilter === 'free' ? u.plan !== 'paid' : true;
+      currentFilter === 'paid' ? isPaidPlan(u.plan) :
+      currentFilter === 'free' ? !isPaidPlan(u.plan) : true;
     return matchSearch && matchFilter;
   });
 
@@ -612,7 +610,7 @@ function renderUsers() {
     const resellerBadge = u.reseller_active
       ? '<span class="badge badge-active">✓ Actif</span>'
       : '<span class="badge badge-inactive">Inactif</span>';
-    const planBadge = u.plan === 'paid'
+    const planBadge = isPaidPlan(u.plan)
       ? '<span class="badge badge-paid">Pro</span>'
       : '<span class="badge badge-free">Gratuit</span>';
     const creditsHtml = u.reseller_active
@@ -734,6 +732,10 @@ function openActivatePlan(userId, name, email) {
   document.getElementById('activatePlanSub').textContent = (name || email || userId);
   document.getElementById('activatePlanModal').classList.add('open');
 }
+
+// Tout plan autre que 'free' est payant : 'pro' aujourd'hui, et les anciennes
+// valeurs ('paid', 'starter', 'business') encore présentes sur certains comptes.
+function isPaidPlan(plan) { return !!plan && plan !== 'free'; }
 
 async function confirmActivatePlan() {
   const userId = document.getElementById('activatePlanUserId').value;
