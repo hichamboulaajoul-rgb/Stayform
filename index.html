@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="app-i18n-dict.js"></script>
-<script src="app-i18n.js"></script>
+<script src="app-i18n-dict.js?v=20261116"></script>
+<script src="app-i18n.js?v=20261116"></script>
 <title>Stayform — Check-in digital pour hôtes au Maroc</title>
 <meta name="description" content="Envoyez un lien à vos guests. Ils signent le contrat et uploadent leur CIN depuis leur téléphone. Zéro papier, zéro galère.">
 
@@ -796,27 +796,6 @@ function closeUpgradeModal() {
   var m = document.getElementById('upgradeModal');
   if (m) m.classList.remove('open');
 }
-function selectPayment(type) {
-  ['online','transfer','whatsapp'].forEach(function(t) {
-    var pm = document.getElementById('pm-' + t);
-    var info = document.getElementById('pay-' + t + '-info');
-    if (pm) pm.classList.toggle('selected', t === type);
-    if (info) info.style.display = t === type ? 'block' : 'none';
-  });
-}
-function handlePayment() {
-  if (typeof activatePremium === 'function') activatePremium();
-}
-function simulatePayment(result) {
-  var overlay = document.getElementById('paySimOverlay');
-  if (overlay) overlay.remove();
-  if (result === 'success' && typeof activatePremium === 'function') {
-    activatePremium();
-    showToast('Paiement simulé réussi !', '#FF385C');
-  } else {
-    showToast('Paiement échoué (simulé).', '#C13515');
-  }
-}
 
 // ── LINKS / CONTRATS ──
 function generateNewLink() {
@@ -1558,7 +1537,7 @@ function showToast(msg, color) {
         <div class="limit-banner" id="limitBanner" style="display:none">
           <div style="flex:1;">
             <p class="limit-msg" style="margin-bottom:0.3rem;">Votre prochain guest <strong>ne peut pas faire son check-in.</strong></p>
-            <p style="font-size:0.75rem;color:var(--text3);">Passez en Pro — 1 200 DH/an · soit 100 DH/mois</p>
+            <p style="font-size:0.75rem;color:var(--text3);">Passez en Pro — 1 500 DH/an · soit 125 DH/mois</p>
           </div>
           <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
             <button onclick="openUpgradeModal('pro', 'Votre prochain guest attend ce lien.')" style="background:var(--riad-green);color:#fff;border:none;border-radius:8px;padding:0.5rem 1rem;font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;">Passer en Pro →</button>
@@ -2367,9 +2346,9 @@ function showToast(msg, color) {
       <div style="border:2px solid var(--riad-green);border-radius:12px;padding:1.2rem;position:relative;background:rgba(22,36,30,0.04);margin-bottom:1.2rem;">
         <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--riad-green);color:var(--riad-gold);font-size:0.6rem;font-weight:800;padding:2px 10px;border-radius:20px;white-space:nowrap;letter-spacing:0.04em;">SEUL PLAN PAYANT</div>
         <div style="font-size:0.75rem;color:var(--riad-green);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;font-weight:700;">Pro ⭐</div>
-        <div style="font-family:'Inter',sans-serif;font-size:1.8rem;font-weight:800;color:var(--riad-green);">1 200<span style="font-size:0.78rem;font-weight:400;color:var(--text3);"> DH/an</span></div>
+        <div style="font-family:'Inter',sans-serif;font-size:1.8rem;font-weight:800;color:var(--riad-green);">1 500<span style="font-size:0.78rem;font-weight:400;color:var(--text3);"> DH/an</span></div>
         <div style="font-size:0.78rem;color:var(--text2);margin-top:6px;line-height:1.5;">Contrats illimités · Logements illimités · Vérification CIN</div>
-        <div style="font-size:0.7rem;color:var(--riad-green);margin-top:6px;font-weight:600;">= 100 DH/mois</div>
+        <div style="font-size:0.7rem;color:var(--riad-green);margin-top:6px;font-weight:600;">= 125 DH/mois</div>
       </div>
 
       <!-- Résumé commande -->
@@ -2377,7 +2356,7 @@ function showToast(msg, color) {
         <div style="font-size:0.75rem;color:var(--text3);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Récapitulatif</div>
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div style="font-size:0.88rem;color:var(--text2);">Plan <strong id="orderPlanLabel" style="color:var(--text);">Pro</strong></div>
-          <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--riad-green);font-size:1rem;"><span id="orderPrice">1200</span> DH/an</div>
+          <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--riad-green);font-size:1rem;"><span id="orderPrice">1 500</span> DH/an</div>
         </div>
         <div style="font-size:0.75rem;color:var(--text3);margin-top:0.4rem;">Activation manuelle sous 2h après confirmation du paiement</div>
       </div>
@@ -2419,8 +2398,10 @@ const PLAN_LIMITS = {
 };
 
 function getPlanLimits() {
+  // Seul plan payant : Pro. Les anciennes valeurs ('paid', 'starter', 'business',
+  // 'reseller') encore présentes sur certains comptes donnent les mêmes limites.
   var plan = (currentProfile && currentProfile.plan) || 'free';
-  if (plan === 'pro' || plan === 'starter' || plan === 'business' || plan === 'reseller') {
+  if (plan !== 'free') {
     return PLAN_LIMITS['pro'];
   }
   return PLAN_LIMITS['free'];
@@ -2431,7 +2412,6 @@ function getPropertyLimit() { return getPlanLimits().properties; }
 function isUnlimited()      { return false; }
 let currentUser = null;
 let currentProfile = null;
-let selectedPayment = 'online';
 
 // ══════════════════════════════
 // AUTH
@@ -3488,46 +3468,15 @@ function printFichePolice(guestId, signatureDataUrl) {
   var url = URL.createObjectURL(blob);
   window.open(url, '_blank');
 }
-
-// ══════════════════════════════
-// PAYDUNYA CONFIG
-// ══════════════════════════════
-const PAYDUNYA = {
-  MODE: 'test', // 'test' ou 'live'
-  // ⚠️ Remplacez par vos vraies clés PayDunya
-  TEST: {
-    MASTER_KEY:  'PAYDUNYA_TEST_MASTER_KEY',
-    PRIVATE_KEY: 'PAYDUNYA_TEST_PRIVATE_KEY',
-    TOKEN:       'PAYDUNYA_TEST_TOKEN',
-    PUBLIC_KEY:  'PAYDUNYA_TEST_PUBLIC_KEY',
-  },
-  LIVE: {
-    MASTER_KEY:  'PAYDUNYA_LIVE_MASTER_KEY',
-    PRIVATE_KEY: 'PAYDUNYA_LIVE_PRIVATE_KEY',
-    TOKEN:       'PAYDUNYA_LIVE_TOKEN',
-    PUBLIC_KEY:  'PAYDUNYA_LIVE_PUBLIC_KEY',
-  },
-  get keys() { return this.MODE === 'test' ? this.TEST : this.LIVE; },
-  BASE_URL: 'https://app.paydunya.com',
-  get API_URL() { return this.MODE === 'test' ? 'https://app.paydunya.com/sandbox-api/v1' : 'https://app.paydunya.com/api/v1'; }
-};
-
 // ══════════════════════════════
 // UPGRADE & PAYMENT
 // ══════════════════════════════
-// ── YOUCAN PAY LINKS — remplacez par vos vrais liens ──
-var YOUCAN_LINKS = {
-  starter:  'https://pay.youcanpay.com/stayform-starter',
-  pro:      'https://pay.youcanpay.com/stayform-pro',
-  business: 'https://pay.youcanpay.com/stayform-business'
-};
-var PLAN_PRICES  = { pro: 1200 };
-var PLAN_LABELS  = { pro: 'Pro' };
-var _upgradePlan = 'pro';
+// Seul plan payant : Pro, facturé à l'année. Le prix affiché dans le HTML
+// (bannière, modale) doit rester aligné sur cette valeur et sur pricing.html.
+var PRO_PRICE_YEAR = 1500;
 
 function openUpgradeModal(plan, urgencyMsg) {
   document.getElementById('upgradeModal').classList.add('open');
-  selectUpgradePlan(plan || 'pro');
   // Barre urgence
   var bar = document.getElementById('upgradeUrgencyBar');
   var umsg = document.getElementById('upgradeUrgencyMsg');
@@ -3558,35 +3507,9 @@ function closeUpgradeModal() {
   document.getElementById('upgradeModal').classList.remove('open');
 }
 
-function selectUpgradePlan(plan) {
-  _upgradePlan = plan || 'pro';
-  var prices = PLAN_PRICES;
-  var labels = PLAN_LABELS;
-
-  // Mettre à jour résumé commande
-  var orderLabel = document.getElementById('orderPlanLabel');
-  var orderPrice = document.getElementById('orderPrice');
-  if (orderLabel) orderLabel.textContent = labels[_upgradePlan];
-  if (orderPrice) orderPrice.textContent = prices[_upgradePlan];
-
-  // Highlight plan sélectionné
-  ['pro'].forEach(function(p) {
-    var card = document.getElementById('planCard' + p.charAt(0).toUpperCase() + p.slice(1));
-    if (!card) return;
-    if (p === _upgradePlan) {
-      card.style.border = '2px solid var(--riad-green)';
-      card.style.opacity = '1';
-    } else {
-      card.style.border = '1px solid var(--border)';
-      card.style.opacity = p === 'starter' ? '0.7' : '1';
-    }
-  });
-}
-
 function proceedPayment() {
-  var plan   = _upgradePlan || 'pro';
-  var amount = PLAN_PRICES[plan];
-  var label  = PLAN_LABELS[plan];
+  var amount = PRO_PRICE_YEAR;
+  var label  = 'Pro';
   var email  = currentUser ? currentUser.email : '—';
   var ref    = currentUser ? 'SF-' + currentUser.id.slice(0,8).toUpperCase() : 'SF-XXXXX';
 
@@ -3603,160 +3526,6 @@ function proceedPayment() {
   window.open('https://wa.me/212694962765?text=' + encodeURIComponent(msg), '_blank');
 }
 
-async function handlePayment() {
-  if (selectedPayment === 'online') {
-    await initPaydunyaPayment();
-  } else if (selectedPayment === 'transfer') {
-    closeUpgradeModal();
-    showToast('📋 Envoyez le reçu à pay@stayform.ma après le virement.', '#E8A87C');
-  } else if (selectedPayment === 'whatsapp') {
-    const msg = encodeURIComponent(`Bonjour, je souhaite passer en plan illimité Stayform.\nCompte : ${currentUser.email}\nRéférence : SF-${(currentProfile.link_id||'').toUpperCase()}`);
-    window.open(`https://wa.me/212600000000?text=${msg}`, '_blank');
-    closeUpgradeModal();
-  }
-}
-
-async function initPaydunyaPayment() {
-  const btn = document.getElementById('btnPay');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Redirection...'; }
-
-  // Si clés pas encore configurées → simuler en mode démo
-  if (PAYDUNYA.keys.MASTER_KEY.startsWith('PAYDUNYA_')) {
-    closeUpgradeModal();
-    showPaymentSimulator();
-    return;
-  }
-
-  try {
-    // 1. Créer la facture PayDunya
-    const invoiceRes = await fetch(`${PAYDUNYA.API_URL}/checkout-invoice/create`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'PAYDUNYA-MASTER-KEY':  PAYDUNYA.keys.MASTER_KEY,
-        'PAYDUNYA-PRIVATE-KEY': PAYDUNYA.keys.PRIVATE_KEY,
-        'PAYDUNYA-TOKEN':       PAYDUNYA.keys.TOKEN,
-      },
-      body: JSON.stringify({
-        invoice: {
-          total_amount: 150,
-          description: 'Stayform — Plan Illimité (paiement unique)',
-        },
-        store: {
-          name: 'Stayform',
-          tagline: 'Votre accueil, zéro papier',
-          postal_address: 'Maroc',
-          logo_url: 'https://hichamboulaajoul-rgb.github.io/Stayform/logo.png',
-        },
-        actions: {
-          cancel_url:  `https://hichamboulaajoul-rgb.github.io/Stayform/?payment=cancelled`,
-          return_url:  `https://hichamboulaajoul-rgb.github.io/Stayform/?payment=success&host=${currentProfile.link_id}`,
-          callback_url:`https://hichamboulaajoul-rgb.github.io/Stayform/webhook`,
-        },
-        custom_data: {
-          host_id:   currentUser.id,
-          host_email: currentUser.email,
-          link_id:   currentProfile.link_id,
-        }
-      })
-    });
-
-    const invoice = await invoiceRes.json();
-
-    if (invoice.response_code === '00') {
-      // 2. Sauvegarder le token en attente dans Supabase
-      await sb.from('profiles').update({
-        pending_payment_token: invoice.token
-      }).eq('id', currentUser.id);
-
-      // 3. Rediriger vers la page de paiement PayDunya
-      window.location.href = invoice.response_text;
-    } else {
-      throw new Error(invoice.response_text || 'Erreur PayDunya');
-    }
-  } catch(e) {
-    console.error('PayDunya error:', e);
-    showToast('❌ Erreur paiement. Réessayez.', '#C05050');
-    if (btn) { btn.disabled = false; btn.textContent = 'Procéder au paiement — 150 DH →'; }
-  }
-}
-
-// ── Simulateur de paiement (mode TEST sans clés) ──
-function showPaymentSimulator() {
-  const overlay = document.createElement('div');
-  overlay.id = 'paySimOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:flex;align-items:center;justify-content:center;padding:2rem;backdrop-filter:blur(4px)';
-  overlay.innerHTML = `
-    <div style="background:#1A1A1A;border:1px solid #333;border-radius:20px;padding:2rem;max-width:400px;width:100%;text-align:center">
-      <div style="font-size:2.5rem;margin-bottom:1rem">💳</div>
-      <h2 style="font-family:'Inter',sans-serif;font-size:1.3rem;color:#F0EDE8;margin-bottom:0.5rem">Simulateur PayDunya</h2>
-      <p style="font-size:0.82rem;color:#A09890;margin-bottom:1.5rem">Mode TEST — aucun vrai paiement effectué</p>
-      <div style="background:#111;border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;text-align:left">
-        <div style="font-size:0.72rem;color:#5A5450;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">Montant</div>
-        <div style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:800;color:#E8A87C">150 <span style="font-size:1rem;color:#A09890">MAD</span></div>
-        <div style="font-size:0.78rem;color:#5A9A6A;margin-top:0.5rem">✓ Accès illimité à vie</div>
-      </div>
-      <div style="display:flex;gap:0.7rem">
-        <button onclick="simulatePayment('success')" style="flex:1;background:linear-gradient(135deg,#B5573D,#E8A87C);color:#1A0E0A;border:none;border-radius:10px;padding:0.85rem;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer">
-          ✓ Paiement réussi
-        </button>
-        <button onclick="simulatePayment('fail')" style="flex:1;background:#1E1E1E;color:#A09890;border:1px solid #333;border-radius:10px;padding:0.85rem;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer">
-          ✕ Échec
-        </button>
-      </div>
-      <p style="font-size:0.68rem;color:#5A5450;margin-top:1rem">Ajoutez vos clés PayDunya pour activer les vrais paiements</p>
-    </div>`;
-  document.body.appendChild(overlay);
-}
-
-async function simulatePayment(result) {
-  const overlay = document.getElementById('paySimOverlay');
-  if (overlay) overlay.remove();
-  if (result === 'success') {
-    await activatePremium();
-    showToast('🎉 Paiement simulé réussi ! Plan illimité activé.', '#E8A87C');
-  } else {
-    showToast('❌ Paiement échoué (simulé).', '#C05050');
-  }
-}
-
-// ── Vérifier paiement au retour de PayDunya ──
-async function checkPaymentReturn() {
-  const params = new URLSearchParams(window.location.search);
-  const payment = params.get('payment');
-  const hostParam = params.get('host');
-  if (!payment) return;
-
-  // Nettoyer l'URL
-  window.history.replaceState({}, '', '/');
-
-  if (payment === 'success') {
-    // Vérifier via Supabase que le paiement est bien enregistré
-    const { data: profile } = await sb.from('profiles').select('plan').eq('id', currentUser && currentUser.id).single();
-    if (profile && profile.plan === 'paid') {
-      showToast('🎉 Paiement confirmé ! Plan illimité activé.', '#E8A87C');
-    } else {
-      // Le webhook n'a pas encore activé — activer manuellement
-      await activatePremium();
-    }
-  } else if (payment === 'cancelled') {
-    showToast('Paiement annulé.', '#A09890');
-  }
-}
-
-// Plans are activated server-side only (admin panel or a payment webhook using the
-// service role). The browser just re-reads the profile to pick up the new plan.
-async function activatePremium() {
-  closeUpgradeModal();
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-  if (profile && profile.plan && profile.plan !== 'free') {
-    currentProfile = profile;
-    updatePlanUI();
-    showToast('⚡ Plan activé !', '#E8A87C');
-  } else {
-    showToast('⏳ Paiement reçu, activation en cours de vérification.', '#E8A87C');
-  }
-}
 
 // ══════════════════════════════
 // UTILITIES

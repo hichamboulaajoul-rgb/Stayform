@@ -177,7 +177,7 @@ Object.assign(window.SF_APP_DICT, {
   "Voici votre tableau de bord Stayform": ["Here is your Stayform dashboard", "Este es tu panel de Stayform", "هذه لوحة تحكم Stayform الخاصة بك"],
   "Votre prochain guest": ["Your next guest", "Tu próximo huésped", "ضيفك القادم"],
   "ne peut pas faire son check-in.": ["cannot check in.", "no puede hacer el check-in.", "لا يمكنه تسجيل الوصول."],
-  "Passez en Pro — 1 200 DH/an · soit 100 DH/mois": ["Go Pro — 1,200 DH/year · i.e. 100 DH/month", "Pásate a Pro — 1 200 DH/año · es decir, 100 DH/mes", "انتقل إلى Pro — 1200 درهم/سنة · أي 100 درهم/شهر"],
+  "Passez en Pro — 1 500 DH/an · soit 125 DH/mois": ["Go Pro — 1,500 DH/year · i.e. 125 DH/month", "Pásate a Pro — 1 500 DH/año · es decir, 125 DH/mes", "انتقل إلى Pro — 1500 درهم/سنة · أي 125 درهم/شهر"],
   "Passer en Pro →": ["Go Pro →", "Pasar a Pro →", "الانتقال إلى Pro ←"],
   "Passer en Pro": ["Go Pro", "Pasar a Pro", "الانتقال إلى Pro"],
   "Voir les plans": ["See plans", "Ver los planes", "عرض الخطط"],
@@ -445,7 +445,7 @@ Object.assign(window.SF_APP_DICT, {
   "SEUL PLAN PAYANT": ["ONLY PAID PLAN", "ÚNICO PLAN DE PAGO", "الخطة المدفوعة الوحيدة"],
   "Pro ⭐": ["Pro ⭐", "Pro ⭐", "Pro ⭐"],
   "Contrats illimités · Logements illimités · Vérification CIN": ["Unlimited contracts · Unlimited properties · ID check", "Contratos ilimitados · Alojamientos ilimitados · Verificación de documento", "عقود غير محدودة · مساكن غير محدودة · التحقق من البطاقة"],
-  "= 100 DH/mois": ["= 100 DH/month", "= 100 DH/mes", "= 100 درهم/شهر"],
+  "= 125 DH/mois": ["= 125 DH/month", "= 125 DH/mes", "= 125 درهم/شهر"],
   "Récapitulatif": ["Summary", "Resumen", "الملخص"],
   "Plan": ["Plan", "Plan", "الخطة"],
   "Activation manuelle sous 2h après confirmation du paiement": ["Activated manually within 2 hours of payment confirmation", "Activación manual en menos de 2 h tras confirmar el pago", "تفعيل يدوي خلال ساعتين بعد تأكيد الدفع"],
@@ -705,24 +705,7 @@ Object.assign(window.SF_APP_DICT, {
   "Parler à l'équipe": ["Talk to the team", "Hablar con el equipo", "تحدث إلى الفريق"],
   "© 2026 Stayform · Votre accueil, zéro papier": ["© 2026 Stayform · Your welcome, zero paper", "© 2026 Stayform · Tu bienvenida, cero papel", "© 2026 Stayform · استقبالك، بلا ورق"],
   "DH/mois": ["DH/month", "DH/mes", "درهم/شهر"],
-  "Facturé mensuellement · Résiliable à tout moment": ["Billed monthly · Cancel any time", "Facturado mensualmente · Cancelable en cualquier momento", "فوترة شهرية · قابل للإلغاء في أي وقت"],
-  "Check-ins illimités": ["Unlimited check-ins", "Check-ins ilimitados", "تسجيلات وصول غير محدودة"],
-  "Vérification CIN automatique": ["Automatic ID check", "Verificación automática de documento", "تحقق تلقائي من البطاقة"],
-  "{n} logements · PDF premium": ["{n} properties · Premium PDF", "{n} alojamientos · PDF premium", "{n} مساكن · PDF مميز"],
-  "S'abonner maintenant →": ["Subscribe now →", "Suscribirse ahora →", "اشترك الآن ←"],
-  "🔒 Paiement sécurisé · Activation immédiate": ["🔒 Secure payment · Instant activation", "🔒 Pago seguro · Activación inmediata", "🔒 دفع آمن · تفعيل فوري"],
-  "Hôte occasionnel": ["Occasional host", "Anfitrión ocasional", "مضيف عرضي"],
-  "{n}-{n} logements": ["{n}–{n} properties", "{n}-{n} alojamientos", "{n}-{n} مساكن"],
-  "Soit {n} DH/mois": ["I.e. {n} DH/month", "Es decir, {n} DH/mes", "أي {n} درهم/شهر"],
-  "Économisez {n} DH": ["Save {n} DH", "Ahorra {n} DH", "وفّر {n} درهم"],
-  "Hôte actif": ["Active host", "Anfitrión activo", "مضيف نشط"],
-  "Jusqu'à {n} logements": ["Up to {n} properties", "Hasta {n} alojamientos", "حتى {n} مساكن"],
-  "Agences & conciergeries": ["Agencies & concierge services", "Agencias y conserjerías", "الوكالات وخدمات الكونسيرج"],
-  "Tout illimité": ["Everything unlimited", "Todo ilimitado", "كل شيء غير محدود"],
-  "{n} DH/mois": ["{n} DH/month", "{n} DH/mes", "{n} درهم/شهر"],
-  "Facturé mensuellement": ["Billed monthly", "Facturado mensualmente", "فوترة شهرية"],
-  "Soit {n} DH/mois — économisez {n} DH": ["I.e. {n} DH/month — save {n} DH", "Es decir, {n} DH/mes — ahorra {n} DH", "أي {n} درهم/شهر — وفّر {n} درهم"],
-  "· Résiliable à tout moment": ["· Cancel any time", "· Cancelable en cualquier momento", "· قابل للإلغاء في أي وقت"]
+  "{n} DH/mois": ["{n} DH/month", "{n} DH/mes", "{n} درهم/شهر"]
 });
 
 // ── Textes repérés en vérifiant les pages rendues ───────
