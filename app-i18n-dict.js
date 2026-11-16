@@ -705,6 +705,8 @@ Object.assign(window.SF_APP_DICT, {
   "Parler à l'équipe": ["Talk to the team", "Hablar con el equipo", "تحدث إلى الفريق"],
   "© 2026 Stayform · Votre accueil, zéro papier": ["© 2026 Stayform · Your welcome, zero paper", "© 2026 Stayform · Tu bienvenida, cero papel", "© 2026 Stayform · استقبالك، بلا ورق"],
   "DH/mois": ["DH/month", "DH/mes", "درهم/شهر"],
+  "DH/an": ["DH/year", "DH/año", "درهم/سنة"],
+  "DH": ["DH", "DH", "درهم"],
   "{n} DH/mois": ["{n} DH/month", "{n} DH/mes", "{n} درهم/شهر"]
 });
 
