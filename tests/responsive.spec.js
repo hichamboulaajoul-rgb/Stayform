@@ -24,7 +24,9 @@ async function stub(page) {
     const url = route.request().url();
     const wantsOne = (route.request().headers()['accept'] || '').includes('vnd.pgrst.object');
     let body = [];
-    if (url.includes('/rest/v1/profiles')) body = [profile];
+    if (url.includes('/rest/v1/rpc/checkin_host')) body = [profile];
+    else if (url.includes('/rest/v1/rpc/checkin_propert')) body = [property];
+    else if (url.includes('/rest/v1/profiles')) body = [profile];
     else if (url.includes('/rest/v1/properties')) body = [property];
     else if (url.includes('/rest/v1/guests')) body = guests;
     else if (url.includes('/rest/v1/rpc/is_plan_active')) body = true;
