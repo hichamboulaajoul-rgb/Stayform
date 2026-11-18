@@ -1,0 +1,5 @@
+-- 18/11/2026 — Le check-in lit l'hôte et ses logements via des fonctions ciblées
+-- (checkin_host, checkin_properties, checkin_property_by_name, welcome_data)
+-- au lieu de lire librement profiles_public / properties_public (CIN, téléphone, Wi-Fi de tous les hôtes).
+-- RLS activée sur rate_limits, taxi_drivers, taxi_rides ; increment_rate_limit passe en SECURITY DEFINER.
+-- Appliqué en prod via MCP le 18/11/2026.

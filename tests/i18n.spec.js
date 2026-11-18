@@ -9,7 +9,9 @@ async function stub(page) {
   await page.route(/\.supabase\.co\//, async (route) => {
     const url = route.request().url();
     let body = [];
-    if (url.includes('/rest/v1/profiles')) body = [profile];
+    if (url.includes('/rest/v1/rpc/checkin_host')) body = [profile];
+    else if (url.includes('/rest/v1/rpc/checkin_propert')) body = [property];
+    else if (url.includes('/rest/v1/profiles')) body = [profile];
     else if (url.includes('/rest/v1/properties')) body = [property];
     else if (url.includes('/rest/v1/rpc/is_plan_active')) body = true;
     else if (url.includes('/rest/v1/rpc/')) body = null;

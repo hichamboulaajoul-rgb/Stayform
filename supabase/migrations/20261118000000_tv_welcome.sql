@@ -1,0 +1,2 @@
+-- Écran d'accueil TV (tv.html?p=<property_id>) : infos du logement + prénom du guest en cours
+-- Appliqué en prod le 18/11/2026. Voir la définition en base (public.tv_welcome, public.sf_parse_fr_date).

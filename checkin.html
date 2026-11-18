@@ -2284,8 +2284,10 @@ async function findHostByLinkId(linkId) {
   if (!linkId) return null;
   try {
     // Utilise la vue publique sécurisée (pas de données sensibles)
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles_public?link_id=eq.${linkId}&select=id,name,link_id,phone,cin`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/checkin_host`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_link: linkId })
     });
     const data = await res.json();
     return data && data.length > 0 ? data[0] : null;
@@ -2444,8 +2446,8 @@ async function fetchPropertyAndHost() {
     // ── 1. Fetch l'hôte via link_id + vérification immédiate ──
     if (hostLinkId) {
       const hostRes = await fetch(
-        SUPABASE_URL + '/rest/v1/profiles_public?link_id=eq.' + hostLinkId + '&select=id,name,link_id,phone,cin&limit=1',
-        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+        SUPABASE_URL + '/rest/v1/rpc/checkin_host',
+        { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_link: hostLinkId }) }
       );
       const hosts = await hostRes.json();
 
@@ -2483,8 +2485,8 @@ async function fetchPropertyAndHost() {
       // shortPropId = premiers 8 chars de l'UUID sans tirets
       // On cherche dans les propriétés de cet hôte
       const propRes = await fetch(
-        SUPABASE_URL + '/rest/v1/properties_public?host_id=eq.' + window._hostId + '&select=*',
-        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+        SUPABASE_URL + '/rest/v1/rpc/checkin_properties',
+        { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_host: window._hostId }) }
       );
       const props = await propRes.json();
       if (props && props.length > 0) {
@@ -2503,11 +2505,10 @@ async function fetchPropertyAndHost() {
     }
 
     // ── 3. Fallback: fetch par nom si shortPropId échoue ──
-    if (!window._propertyData && window._propertyName) {
-      const encodedName = encodeURIComponent(window._propertyName);
+    if (!window._propertyData && window._propertyName && window._hostId) {
       const propRes2 = await fetch(
-        SUPABASE_URL + '/rest/v1/properties_public?name=eq.' + encodedName + '&select=*&limit=1',
-        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+        SUPABASE_URL + '/rest/v1/rpc/checkin_property_by_name',
+        { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_host: window._hostId, p_name: window._propertyName }) }
       );
       const props2 = await propRes2.json();
       if (props2 && props2[0]) window._propertyData = props2[0];
