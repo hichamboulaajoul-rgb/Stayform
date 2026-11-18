@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Stayform TV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+  :root{--ink:#14201c;--pine:#1f4a3d;--brass:#c49a4a;--sand:#f3ead8;--terra:#c4643f;--mist:#dfe7e2}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--sand);font-family:Inter,system-ui,sans-serif;cursor:none}
+  body{background:
+      radial-gradient(1200px 700px at 85% 110%,rgba(196,154,74,.18),transparent 60%),
+      radial-gradient(900px 600px at 0% -10%,rgba(31,74,61,.55),transparent 60%),var(--ink)}
+  .zellige{position:fixed;inset:0;opacity:.06;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23c49a4a' stroke-width='2'%3E%3Cpath d='M60 6 74 46 114 60 74 74 60 114 46 74 6 60 46 46Z'/%3E%3Crect x='38' y='38' width='44' height='44' transform='rotate(45 60 60)'/%3E%3C/g%3E%3C/svg%3E");background-size:160px}
+  header{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:48px 96px;z-index:2}
+  .brand{font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:.2em;text-transform:uppercase;color:var(--brass)}
+  .clock{text-align:right}
+  .clock .t{font-family:Fraunces,serif;font-size:64px;line-height:1}
+  .clock .d{font-size:22px;opacity:.7;margin-top:6px;text-transform:capitalize}
+  .slide{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 96px;opacity:0;transform:translateY(24px);transition:opacity 1s ease,transform 1s ease}
+  .slide.on{opacity:1;transform:none}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:26px;letter-spacing:.18em;text-transform:uppercase;color:var(--brass);margin-bottom:28px}
+  h1{font-family:Fraunces,serif;font-weight:600;font-size:150px;line-height:1.02;letter-spacing:-.02em}
+  h1 em{font-style:normal;color:var(--brass)}
+  h2{font-family:Fraunces,serif;font-weight:600;font-size:96px;line-height:1.05;margin-bottom:48px}
+  .lead{font-size:40px;opacity:.85;margin-top:36px;max-width:1400px;line-height:1.35}
+  .chips{display:flex;gap:24px;margin-top:56px;flex-wrap:wrap}
+  .chip{background:rgba(243,234,216,.08);border:1px solid rgba(243,234,216,.16);border-radius:999px;padding:18px 34px;font-size:30px}
+  .chip b{color:var(--brass);font-weight:600}
+  .wifi{display:flex;gap:96px;align-items:center}
+  .wifi .row{margin-bottom:40px}
+  .wifi .lbl{font-size:26px;opacity:.6;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px}
+  .wifi .val{font-family:'JetBrains Mono',monospace;font-size:72px;color:var(--sand);word-break:break-all}
+  .qr{background:var(--sand);padding:28px;border-radius:28px;flex:0 0 auto}
+  .qr img,.qr svg{display:block;width:380px;height:380px}
+  .qr p{color:var(--ink);text-align:center;font-size:24px;margin-top:14px;font-weight:600}
+  .rules{display:grid;grid-template-columns:1fr 1fr;gap:28px 64px;max-width:1700px}
+  .rule{display:flex;align-items:center;gap:28px;font-size:40px}
+  .rule i{font-style:normal;font-size:52px;width:72px;text-align:center}
+  .note{font-size:32px;opacity:.8;margin-top:48px;max-width:1600px;line-height:1.4;white-space:pre-line}
+  .checkout h1{color:var(--sand)}
+  .checkout .big{font-family:Fraunces,serif;font-size:220px;color:var(--terra);line-height:1;margin:16px 0 24px}
+  .list{font-size:36px;line-height:1.7;opacity:.9}
+  .dots{position:fixed;bottom:56px;left:96px;display:flex;gap:14px}
+  .dots span{width:44px;height:6px;border-radius:3px;background:rgba(243,234,216,.2)}
+  .dots span.on{background:var(--brass)}
+  .foot{position:fixed;bottom:48px;right:96px;font-size:22px;opacity:.5}
+  .err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;font-size:36px;opacity:.7}
+</style>
+</head>
+<body>
+<div class="zellige"></div>
+<header>
+  <div class="brand" id="brand">Stayform</div>
+  <div class="clock"><div class="t" id="time">--:--</div><div class="d" id="date"></div></div>
+</header>
+<main id="slides"></main>
+<div class="dots" id="dots"></div>
+<div class="foot" id="foot"></div>
+<div class="err" id="err"></div>
+
+<script>
+(function(){
+  var SUPABASE_URL = 'https://syvpyvkgauyfqghwiqsl.supabase.co';
+  var ANON_KEY = 'sb_publishable_BpH_IOJtLM6ST6VnsLl1xQ_DlA9_hV9';
+  var SLIDE_MS = 12000;          // durée de chaque écran
+  var REFRESH_MS = 10 * 60000;   // rechargement des données
+
+  var params = new URLSearchParams(location.search);
+  var PROPERTY = params.get('p');
+  var forceLang = params.get('lang'); // fr | en | ar (optionnel)
+
+  var T = {
+    fr:{welcome:'Bienvenue', welcomeNo:'Bienvenue chez vous', stay:'Nous vous souhaitons un excellent séjour.',
+        nights:'nuits', night:'nuit', until:'Départ le', checkout:'Check-out', wifiK:'Connexion', wifiT:'Wi-Fi',
+        network:'Réseau', password:'Mot de passe', scan:'Scannez pour vous connecter', rulesK:'Bon à savoir', rulesT:'La maison',
+        noSmoke:'Non-fumeur', smokeOk:'Fumeurs acceptés', noPets:'Animaux non admis', petsOk:'Animaux bienvenus',
+        noParty:'Pas de fêtes', parking:'Parking disponible', quiet:'Silence de', to:'à',
+        coK:'Aujourd’hui', coT:'Jour du départ', coLead:'Merci d’avoir séjourné chez nous !',
+        coList:['Laissez les clés à l’endroit convenu','Éteignez lumières et climatisation','Fermez portes et fenêtres','Déconnectez vos comptes (Netflix, YouTube…)'],
+        tomorrow:'Départ demain à', host:'Votre hôte', locale:'fr-FR'},
+    en:{welcome:'Welcome', welcomeNo:'Welcome home', stay:'We wish you a wonderful stay.',
+        nights:'nights', night:'night', until:'Departure on', checkout:'Check-out', wifiK:'Connect', wifiT:'Wi-Fi',
+        network:'Network', password:'Password', scan:'Scan to connect', rulesK:'Good to know', rulesT:'House rules',
+        noSmoke:'No smoking', smokeOk:'Smoking allowed', noPets:'No pets', petsOk:'Pets welcome',
+        noParty:'No parties', parking:'Parking available', quiet:'Quiet hours', to:'to',
+        coK:'Today', coT:'Check-out day', coLead:'Thank you for staying with us!',
+        coList:['Leave the keys at the agreed place','Switch off lights and A/C','Close doors and windows','Sign out of your accounts (Netflix, YouTube…)'],
+        tomorrow:'Check-out tomorrow at', host:'Your host', locale:'en-GB'},
+    ar:{welcome:'مرحبا', welcomeNo:'مرحبا بكم', stay:'نتمنى لكم إقامة سعيدة.',
+        nights:'ليالٍ', night:'ليلة', until:'المغادرة يوم', checkout:'المغادرة', wifiK:'الاتصال', wifiT:'Wi-Fi',
+        network:'الشبكة', password:'كلمة السر', scan:'امسح للاتصال', rulesK:'معلومات مهمة', rulesT:'قواعد المنزل',
+        noSmoke:'ممنوع التدخين', smokeOk:'التدخين مسموح', noPets:'الحيوانات غير مسموحة', petsOk:'الحيوانات مرحب بها',
+        noParty:'ممنوع الحفلات', parking:'موقف سيارات متاح', quiet:'الهدوء من', to:'إلى',
+        coK:'اليوم', coT:'يوم المغادرة', coLead:'شكرا لإقامتكم معنا!',
+        coList:['اتركوا المفاتيح في المكان المتفق عليه','أطفئوا الأضواء والمكيف','أغلقوا الأبواب والنوافذ','سجلوا الخروج من حساباتكم (Netflix، YouTube…)'],
+        tomorrow:'المغادرة غدا على الساعة', host:'مضيفكم', locale:'ar-MA'}
+  };
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function pickLang(g){
+    if (forceLang && T[forceLang]) return forceLang;
+    var n = (g && g.nationality || '').toLowerCase();
+    if (!n || /maroc|moroc|fran|belg|suisse|alg|tunis|sénég|senegal|canad|ivoir/.test(n)) return 'fr';
+    return 'en';
+  }
+  function fmtDate(iso, L){ var d=new Date(iso+'T12:00:00'); return d.toLocaleDateString(T[L].locale,{weekday:'long',day:'numeric',month:'long'}); }
+  function wifiString(ssid, pwd){
+    var e=function(s){return String(s||'').replace(/([\\;,:"])/g,'\\$1');};
+    return 'WIFI:T:WPA;S:'+e(ssid)+';P:'+e(pwd)+';;';
+  }
+  function qrSvg(text){
+    if (typeof qrcode !== 'function') return '';
+    var q=qrcode(0,'M'); q.addData(text); q.make();
+    return q.createSvgTag({cellSize:8, margin:0, scalable:true});
+  }
+
+  var slides=[], idx=0, timer=null;
+
+  function build(data){
+    var p=data.property, g=data.guest, L=pickLang(g), t=T[L];
+    document.documentElement.lang=L; document.documentElement.dir=(L==='ar'?'rtl':'ltr');
+    document.getElementById('brand').textContent=(p.emoji||'🏠')+'  '+(p.name||'Stayform');
+    var today=data.today, html=[];
+
+    // 1. Bienvenue
+    if (g){
+      var n = g.arrival && g.departure ? Math.round((new Date(g.departure)-new Date(g.arrival))/864e5) : null;
+      var tomorrow = g.departure && (new Date(g.departure)-new Date(today))/864e5===1;
+      html.push('<section class="slide"><div class="kicker">'+esc(p.name)+'</div>'+
+        '<h1>'+t.welcome+(L==='ar'?' ':', ')+'<em>'+esc(g.first_name)+'</em></h1>'+
+        '<p class="lead">'+t.stay+'</p><div class="chips">'+
+        (n?'<div class="chip"><b>'+n+'</b> '+(n>1?t.nights:t.night)+'</div>':'')+
+        (g.departure?'<div class="chip">'+t.until+' <b>'+esc(fmtDate(g.departure,L))+'</b></div>':'')+
+        '<div class="chip">'+t.checkout+' <b>'+esc(p.checkout_time||'11:00')+'</b></div>'+
+        (tomorrow?'<div class="chip" style="border-color:var(--terra)">⏰ '+t.tomorrow+' <b>'+esc(p.checkout_time||'11:00')+'</b></div>':'')+
+        '</div></section>');
+    } else {
+      html.push('<section class="slide"><div class="kicker">'+esc(p.name)+'</div><h1>'+t.welcomeNo+'</h1><p class="lead">'+t.stay+'</p></section>');
+    }
+
+    // 2. Wi-Fi
+    if (p.wifi_name){
+      html.push('<section class="slide"><div class="kicker">'+t.wifiK+'</div><h2>'+t.wifiT+'</h2><div class="wifi"><div>'+
+        '<div class="row"><div class="lbl">'+t.network+'</div><div class="val">'+esc(p.wifi_name)+'</div></div>'+
+        (p.wifi_password?'<div class="row"><div class="lbl">'+t.password+'</div><div class="val">'+esc(p.wifi_password)+'</div></div>':'')+
+        '</div>'+(qrSvg(wifiString(p.wifi_name,p.wifi_password))?'<div class="qr">'+qrSvg(wifiString(p.wifi_name,p.wifi_password))+'<p>'+t.scan+'</p></div>':'')+
+        '</div></section>');
+    }
+
+    // 3. Règles
+    var r=[];
+    r.push(p.no_smoking===false?['🚬',t.smokeOk]:['🚭',t.noSmoke]);
+    r.push(p.pets_allowed?['🐾',t.petsOk]:['🐾',t.noPets]);
+    if (p.parties_allowed===false || p.parties_allowed==null) r.push(['🎉',t.noParty]);
+    if (p.parking) r.push(['🅿️',t.parking]);
+    if (p.quiet_hours_start) r.push(['🌙',t.quiet+' '+esc(p.quiet_hours_start)+' '+t.to+' '+esc(p.quiet_hours_end||'08:00')]);
+    r.push(['🔑',t.checkout+' : '+esc(p.checkout_time||'11:00')]);
+    var extra=[p.rules,p.special_instructions].filter(function(x){return x&&String(x).trim();}).join('\n');
+    html.push('<section class="slide"><div class="kicker">'+t.rulesK+'</div><h2>'+t.rulesT+'</h2><div class="rules">'+
+      r.map(function(x){return '<div class="rule"><i>'+x[0]+'</i><span>'+x[1]+'</span></div>';}).join('')+'</div>'+
+      (extra?'<p class="note">'+esc(extra).slice(0,400)+'</p>':'')+'</section>');
+
+    // 4. Jour du départ
+    if (g && g.departure===today){
+      html.push('<section class="slide checkout"><div class="kicker">'+t.coK+'</div><h1>'+t.coT+'</h1>'+
+        '<div class="big">'+esc(p.checkout_time||'11:00')+'</div><p class="lead" style="margin:0 0 32px">'+t.coLead+'</p>'+
+        '<div class="list">'+t.coList.map(function(x){return '✓ '+x;}).join('<br>')+'</div></section>');
+      // le jour du départ, on commence par cet écran
+      var last=html.pop(); html.unshift(last);
+    }
+
+    document.getElementById('slides').innerHTML=html.join('');
+    document.getElementById('foot').textContent=(p.host_name?t.host+' · '+p.host_name+'  ·  ':'')+'stayform.link';
+    slides=[].slice.call(document.querySelectorAll('.slide'));
+    document.getElementById('dots').innerHTML=slides.map(function(){return '<span></span>';}).join('');
+    idx=-1; next(); clearInterval(timer); timer=setInterval(next,SLIDE_MS);
+    updateClock(L);
+  }
+
+  function next(){
+    if(!slides.length) return;
+    idx=(idx+1)%slides.length;
+    var dots=document.querySelectorAll('.dots span');
+    slides.forEach(function(s,i){s.classList.toggle('on',i===idx); if(dots[i]) dots[i].classList.toggle('on',i===idx);});
+  }
+
+  var curLang='fr';
+  function updateClock(L){
+    if(L) curLang=L;
+    var now=new Date();
+    document.getElementById('time').textContent=now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Africa/Casablanca'});
+    document.getElementById('date').textContent=now.toLocaleDateString(T[curLang].locale,{weekday:'long',day:'numeric',month:'long',timeZone:'Africa/Casablanca'});
+  }
+  setInterval(function(){updateClock();},15000);
+
+  function load(){
+    if(!PROPERTY){ showErr('Ajoutez ?p=ID_DU_LOGEMENT à l’adresse'); return; }
+    fetch(SUPABASE_URL+'/rest/v1/rpc/tv_welcome',{method:'POST',
+      headers:{'apikey':ANON_KEY,'Authorization':'Bearer '+ANON_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({p_property:PROPERTY})})
+    .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(d){ if(!d){ showErr('Logement introuvable'); return; } document.getElementById('err').style.display='none'; build(d); })
+    .catch(function(){ if(!slides.length) showErr('Connexion en cours…'); });
+  }
+  function showErr(m){ var e=document.getElementById('err'); e.textContent=m; e.style.display='flex'; }
+
+  updateClock(); load(); setInterval(load,REFRESH_MS);
+  // rechargement complet chaque nuit à 3h pour repartir propre
+  setInterval(function(){ var h=new Date().getHours(); if(h===3 && new Date().getMinutes()<1) location.reload(); },60000);
+})();
+</script>
+</body>
+</html>

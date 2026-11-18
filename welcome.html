@@ -214,14 +214,14 @@ async function loadWelcome() {
   }
 
   // Charger les données
-  const [propRes, hostRes, guestRes] = await Promise.all([
-    sb.from('properties_public').select('*').eq('id', propId).single(),
-    sb.from('profiles_public').select('name').eq('id', hostId).single(),
+  const [welcomeRes, guestRes] = await Promise.all([
+    sb.rpc('welcome_data', { p_prop: propId, p_host: hostId }),
     guestId ? sb.from('guests').select('name,dates,nights,arrival_time,guest_count').eq('id', guestId).single() : Promise.resolve({ data: null })
   ]);
 
-  const prop  = propRes.data;
-  const host  = hostRes.data;
+  const wd    = welcomeRes.data || {};
+  const prop  = wd.property || null;
+  const host  = wd.host_name ? { name: wd.host_name } : null;
   const guest = guestRes.data;
 
   if (!prop) {

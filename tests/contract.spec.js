@@ -22,8 +22,9 @@ async function setup(page) {
     if (url.includes('/rest/v1/guests')) calls.push('save');
     const wantsOne = (route.request().headers()['accept'] || '').includes('vnd.pgrst.object');
     let body = [];
-    if (url.includes('/rest/v1/profiles_public')) body = [fakeHost];
-    else if (url.includes('/rest/v1/properties_public')) body = [fakeProperty];
+    if (url.includes('/rest/v1/rpc/checkin_host')) body = [fakeHost];
+    else if (url.includes('/rest/v1/rpc/checkin_properties') || url.includes('/rest/v1/rpc/checkin_property_by_name')) body = [fakeProperty];
+    else if (url.includes('/rest/v1/rpc/welcome_data')) body = { property: fakeProperty, host_name: fakeHost.name };
     else if (url.includes('/rest/v1/rpc/is_plan_active')) body = true;
     else if (url.includes('/rest/v1/guests')) body = [{ id: 'g1' }];
     else if (url.includes('/functions/v1/')) body = { success: true };
